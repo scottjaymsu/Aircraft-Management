@@ -1,0 +1,26 @@
+services:
+  message-consumer:
+    image: message-consumer:latest
+    build:
+      context: ./FAA-message-consumer
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - FAA-messages
+
+  flight-plan-tracking:
+    image: flight-plan-tracking:latest
+    build:
+      context: ./flight_plan_tracking
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - message-consumer
+    networks:
+      - FAA-messages
+
+networks:
+  FAA-messages:
+    driver: bridge
