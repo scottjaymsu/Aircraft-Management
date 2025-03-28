@@ -77,7 +77,7 @@ const SimulatorHeader = ({
                 <label htmlFor="dropdown">Tail Number</label>
                 <input 
                     type="text" 
-                    className="dropdown" 
+                    className="dropdown top-dropdown" 
                     name="dropdown" 
                     value={searchTerm} 
                     onChange={handleTailNumberChange} 

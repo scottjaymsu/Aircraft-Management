@@ -123,6 +123,9 @@ header div */
 }
 /* HEADER LEGEND BLOCK */
 
+.top-dropdown {
+    max-width: 180px;
+}
 .dropdown {
     background-color: white; /* White background */
     color: #444240;
@@ -230,12 +233,12 @@ select option {
 
 /* SimulatorAllPlanes width*/
 #main-wrapper > div:first-child {
-    flex: 0 0 60%; /* Take 65% of the width */
+    flex: 0 0 62%; /* Take 65% of the width */
 }
 
 /* Alerts width */
 #main-wrapper > div:last-child {
-    flex: 0 0 38%; /* Take 35% of the width */
+    flex: 0 0 36%; /* Take 35% of the width */
 }
 
 /* Table Window */
