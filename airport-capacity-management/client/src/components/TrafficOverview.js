@@ -57,6 +57,16 @@ const getChartArrivalTime = (flight) => {
     return roundDownHour(date).toISOString();
 };
 
+// Add up all planes
+const getTotalPlanes = (arrivingFlights, departingFlights, maintenancePlanes, parkedPlanes) => {
+    const totalArriving = arrivingFlights.length;
+    const totalDeparting = departingFlights.length;
+    const totalMaintenance = maintenancePlanes.length;
+    const totalParked = parkedPlanes.length;
+
+    return totalArriving + totalDeparting + totalMaintenance + totalParked;
+}
+
 /**
  * Component to display traffic information in a graph
  * x-axis displays time intervals
@@ -316,9 +326,8 @@ export default function TrafficOverview({ id }) {
     // Title: "Today" if current day, otherwise show the date string
     const title = dayOffset === 0 ? "Today" : selectedDate.toDateString();
 
-    // Round the capacity limit to the nearest 10 for better readability
-    // This is used to set the upper limit of the Y-axis
-    const roundedCapacityLimit = Math.round((capacityLimit + 5) / 10) * 10;
+    // Upper limit of the Y-axis
+    const roundedCapacityLimit = Math.round((parkedPlanes.length + 5) / 10) * 10;
 
     // Render the chart with navigation buttons and title
     return (
