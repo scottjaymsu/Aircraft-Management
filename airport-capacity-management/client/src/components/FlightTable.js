@@ -23,8 +23,12 @@ function FlightTable({ id, flightType }) {
         axios.get(url)
             .then((response) => {
                 console.log(`Fetched ${flightType} flights:`, response.data);
+
+                // Filter out flights with null or 0 parkingArea
+                const filteredFlights = response.data.filter(flight => flight.parkingArea !== null && flight.parkingArea > 0);
+
                 // Format the date and time of the flights 
-                const sortedFlights = response.data.sort((a, b) => new Date(a[flightType === 'arriving' ? 'eta' : 'etd']) - new Date(b[flightType === 'arriving' ? 'eta' : 'etd']));
+                const sortedFlights = filteredFlights.sort((a, b) => new Date(a[flightType === 'arriving' ? 'eta' : 'etd']) - new Date(b[flightType === 'arriving' ? 'eta' : 'etd']));
                 setFlights(sortedFlights);
             })
             .catch((err) => {
