@@ -100,10 +100,11 @@ const SimulatorHeader = ({
 
             </div>
             <div className='header-segment-small'>
-                <label htmlFor="datetime">Arrival Time</label>
-                <input type="datetime-local" id="time" name="time"></input>
+                {/* <label htmlFor="datetime">Arrival Time</label>
+                <input type="datetime-local" id="time" name="time"></input> */}
                 <label htmlFor="local-datetime">Local Time</label>
                 <input type="text" id="local-datetime" readOnly value={localTime || "Loading..."}></input>
+            
             </div>
             <div className='header-segment-large'>
                 <div id="plane-info-wrapper">

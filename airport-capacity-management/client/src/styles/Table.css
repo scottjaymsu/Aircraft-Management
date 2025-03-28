@@ -7,10 +7,13 @@ table {
     overflow: hidden;
     width: 100%;
     table-layout: fixed;
+    border-color: #010F31;
 }
 
 .table-container {
+    height: auto;
     width: 100%;
+    overflow: visible;
     overflow-x: auto;
 }
 
@@ -60,4 +63,7 @@ td, th {
     white-space: normal;
     overflow-wrap: break-word;
     padding: 12px;
+  }
+  td {
+    /* font-weight: lighter; */
   }

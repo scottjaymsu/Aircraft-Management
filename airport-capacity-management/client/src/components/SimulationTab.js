@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from "axios";
+// import "../styles/SummaryPage.css";
 import "../styles/Simulator.css";
 import Table from '../components/Table';
 
@@ -146,6 +147,7 @@ const SimulationTab = ({ fbo, id }) => {
                     type="time"
                     value={time}
                     onChange={(e) => handleTimeChange(plane.acid, e.target.value)}
+                    className='time-input'
                 />,
                 fboName
             ];
@@ -173,33 +175,37 @@ const SimulationTab = ({ fbo, id }) => {
         }
 
     return (
-        <div id="alerts-center">
+        <div id="alerts-center" className="add-bottom">
             <div id="alerts-title">SIMULATION</div>
-            <div className='header-segment-small'>
-                <label htmlFor="dropdown">Tail Numbers (Select Multiple)</label>
-                <select
-                    multiple
-                    className="dropdown"
-                    name="dropdown"
-                    onChange={handleTailNumberChange}
-                    value={selectedPlanes}
-                    size={10}>
-                    {filteredFleetData.map((data, index) => (
-                        <option key={index} value={data.acid}>{data.acid}</option>
-                    ))}
-                </select>
+            <div className=" alerts-simulator">
+                     <div className='header-segment-small'>
+                     <label htmlFor="dropdown">Tail Numbers (Select Multiple)</label>
+                
+                     <select
+                         multiple
+                         className="dropdown"
+                         name="dropdown"
+                        onChange={handleTailNumberChange}
+                        value={selectedPlanes}
+                        size={10}>
+                        {filteredFleetData.map((data, index) => (
+                            <option key={index} value={data.acid}>{data.acid}</option>
+                        ))}
+                    </select>
+                    <Table
+                        headers={tableHeaders}
+                        rows={tableRows}
+                        title="Selected Planes"
+                        className="planes-table sim-table"
+                    />
+                    {simulationStatus && <p>{simulationStatus}</p>}
+                    <button className="run-simulation-button" onClick={runSimulation}>Run Simulation</button>
+               
+                </div>
+                
             </div>
-            <Table
-                headers={tableHeaders}
-                rows={tableRows}
-                title="Selected Planes"
-                className="planes-table"
-            />
-        {simulationStatus && <p>{simulationStatus}</p>}
-            <button className="run-simulation-button" onClick={runSimulation}>Run Simulation</button>
-        </div>
 
-        
+        </div>
     );
 };
 

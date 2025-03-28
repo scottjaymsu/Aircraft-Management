@@ -29,7 +29,6 @@
     flex-direction: column;
     padding: 10px;
     font-weight: bold;
-    /* border: .5px solid #444240; */
 }
 
 /* For center divs of header */
@@ -40,9 +39,8 @@
     flex-direction: column;
     padding: 10px;
     font-weight: bold;
-    justify-content: center;
+    /* justify-content: center; */
     gap: 10px;
-    /* border: .5px solid #444240; */
 }
 @media (max-width: 768px) {
     #head-dashboard {
@@ -134,10 +132,12 @@ header div */
     border: 2px solid #444240;
     -webkit-appearance: none;
     -moz-appearance: none;
+    appearance: none;
+    max-height: 100px;
+    background-image: none;
 }
 
 select::after {
-    content: '\25BC'; /* Unicode character for downward triangle */
     position: absolute;
     right: 10px; /* Position the arrow on the right */
     top: 50%; /* Center the arrow vertically */
@@ -145,6 +145,7 @@ select::after {
     font-size: 14px; /* Adjust size of the arrow */
     color: #444240; /* Color of the arrow */
     pointer-events: none; 
+    
 
 }
 
@@ -229,12 +230,12 @@ select option {
 
 /* SimulatorAllPlanes width*/
 #main-wrapper > div:first-child {
-    flex: 0 0 65%; /* Take 65% of the width */
+    flex: 0 0 60%; /* Take 65% of the width */
 }
 
 /* Alerts width */
 #main-wrapper > div:last-child {
-    flex: 0 0 33%; /* Take 35% of the width */
+    flex: 0 0 38%; /* Take 35% of the width */
 }
 
 /* Table Window */
@@ -342,16 +343,43 @@ select option {
     background-color: #d7d5d3;
     border-radius: 5px;
     width: 100%;
-    height: 100%;
+    height: 97%;
     overflow: hidden;
     border-top: 2px solid #444240;
     border-left: 2px solid #444240;
     border-right: 2px solid #444240;
+
 }
 
+/* 
+    For making the simulator section scrollable
+    when switching to the simulator page
+ */
+.alerts-simulator {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    overflow-y: scroll;
+    width: 100%;
+    box-sizing: border-box;
+
+}
+
+/* Add bottom border when the styling is 
+    changed to simulator page */
+.add-bottom {
+    border-bottom: 2px solid #444240;
+}
+
+/* Change the font weight only for the sim table */
+.sim-table td{
+    font-weight: lighter;
+}
 #alerts-title {
-    padding: 12.5px;
-    font-size: x-large;
+    position: sticky;
+    padding: 10px;
+    font-size: xx-large;
     font-weight: bold;
     text-align: center;
 }
@@ -507,6 +535,41 @@ select option {
     
 }
 
+.time-input{
+    width: 85px;
+    height: 20px;
+    font-size: 14px;
+    padding: 2px;
+    box-sizing: border-box;
+}
+
+.left-padding { 
+    padding-left: 30px;
+}
+
+.sim-cntrl {
+    margin: 10px;
+    
+}
+
+.run-simulation-button {
+    background-color: #3b536c;
+    border: none;
+    padding: 10px;
+    border-radius: 3px;
+    font-size: 16px;
+    width: 100%;
+    color: white;
+    font-weight: bold;
+} 
+/* .run-simulation-button:hover {
+    background-color: white; 
+}
+
+.table-container {
+    height: auto;
+    overflow: visible;
+}
 
 
 /* Classes for colors */
