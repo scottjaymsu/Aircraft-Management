@@ -14,7 +14,6 @@ exports.getParkingCoordinates = (req, res) => {
             parked_at pa ON pa.fbo_id = ap.id
         WHERE 
             ap.Airport_Code = ?
-            AND ap.coordinates IS NOT NULL
         GROUP BY 
             ap.id;
     `;

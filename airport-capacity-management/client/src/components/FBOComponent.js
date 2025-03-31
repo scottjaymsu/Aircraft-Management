@@ -19,7 +19,6 @@ export default function FBOSection({id}) {
         const fboData = data.map((lot) =>({
           id: lot.id,
           name: lot.FBO_Name,
-          // Ensure parking_taken is capped at Total_Space
           parking_taken: Math.min(lot.spots_taken, lot.Total_Space),
           total_parking: lot.Total_Space,
           status: "Open",

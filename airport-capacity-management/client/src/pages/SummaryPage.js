@@ -154,19 +154,22 @@ export default function SummaryPage() {
         );
         const data = await response.json();
         console.log("Parking Coordinates:", data);
-        const parkingLots = data.map((lot) => {
-          const coordinates = lot.coordinates[0].map((coord) => ({
-            lat: coord.x,
-            lng: coord.y,
-          }));
-          
+        
+        const parkingLots = data
+          .filter(lot => lot.coordinates && lot.coordinates.length > 0)
+          .map((lot) => {
+            const coordinates = lot.coordinates[0].map((coord) => ({
+              lat: coord.x,
+              lng: coord.y,
+            }));
           return {
             name: lot.FBO_Name,
             coordinates: coordinates,
-            color: getStatusColor(lot.spots_taken,lot.Total_Space),
+            color: getStatusColor(lot.spots_taken, lot.Total_Space),
             labelPosition: coordinates[0],
           };
         });
+        
         const FBOs = data.map((lot) => {
           return {
             name: lot.FBO_Name,
