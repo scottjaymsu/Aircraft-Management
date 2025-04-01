@@ -406,34 +406,30 @@ public class DatabaseOutput extends Output {
                     // Make sure the jet is pointing to this flight plan as its active flight plan
                     UpdateFleetDatabase(flightRef, acid, model);
     
-                    // For now, just assign the plane a random FBO
-                    String sql_fbo = "SELECT FBO_Name, id FROM airport_parking WHERE Airport_Code = ?";
-                    List<String> fboList = new ArrayList<>();
-                    
+                    // Grab the highest priority FBO with open space
+                    String sql_fbo = "SELECT parked_at.fbo_id FROM parked_at JOIN airport_parking ON parked_at.fbo_id = airport_parking.id WHERE airport_parking.Airport_Code = ? GROUP BY parked_at.fbo_id, airport_parking.Total_Space, airport_parking.Priority HAVING COUNT(*) < airport_parking.Total_Space ORDER BY airport_parking.Priority LIMIT 1;";
+                    Integer fboId = null;
                     try (PreparedStatement pstmt = connection.prepareStatement(sql_fbo)) {
                         pstmt.setString(1, arrArpt);
                         
                         try (ResultSet rs = pstmt.executeQuery()) {
-                            while (rs.next()) {
-                                String fboName = rs.getString("FBO_Name");
-                                fboList.add(fboName);
+                            if (rs.next()) {
+                                // Get the fboId, if there is one available
+                                fboId = rs.getInt("fbo_id");
                             }
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
     
-                    // Select a random element if the list is not empty
-                    if (!fboList.isEmpty()) {
-                        Random random = new Random();
-                        String randomFbo = fboList.get(random.nextInt(fboList.size()));
-                        
+                    // Assign plane to said FBO, if one was found
+                    if (fboId != null) {
                         // Insert fbo into parked at database
                         String sql_fbo2 = "INSERT INTO parked_at VALUES(?, ?) ON DUPLICATE KEY UPDATE fbo_id = VALUES(fbo_id);";
     
                         try (PreparedStatement pstmt = connection.prepareStatement(sql_fbo2)) {
                             pstmt.setString(1, acid);
-                            pstmt.setString(2, randomFbo);
+                            pstmt.setInt(2, fboId);
                             
                             pstmt.executeUpdate();
     
@@ -477,6 +473,17 @@ public class DatabaseOutput extends Output {
                     // We know this is an active flight plan
                     // Make sure the jet is pointing to this flight plan as its active flight plan
                     UpdateFleetDatabase(flightRef, acid, model);
+
+                    // Remove plane from the FBO it was parked at
+                    String sql_remove = "DELETE FROM parked_at WHERE acid = ?";
+                    try (PreparedStatement pstmt = connection.prepareStatement(sql_remove)) {
+                        pstmt.setString(1, acid);
+                        
+                        pstmt.executeUpdate();
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 break;
@@ -712,23 +719,25 @@ public class DatabaseOutput extends Output {
                 updates.append("arrival_airport = VALUES(arrival_airport), ");
                 params.add(arrArpt);
             }
-            if (etd != null) {
+            String etd_string = convertZuluToMySQLDateTime(etd);
+            if (etd_string != null) {
                 sql.append(", etd");
                 values.append(", ?");
                 updates.append("etd = VALUES(etd), ");
-                params.add(convertZuluToMySQLDateTime(etd));
+                params.add(etd_string);
             }
-            if (eta != null) {
+            String eta_string = convertZuluToMySQLDateTime(eta);
+            if (eta_string != null){
                 sql.append(", eta");
                 values.append(", ?");
                 updates.append("eta = VALUES(eta), ");
-                params.add(convertZuluToMySQLDateTime(eta));
+                params.add(eta_string);
             }
             if (status != null) {
                 sql.append(", status");
                 values.append(", ?");
                 updates.append("status = VALUES(status), ");
-                params.add(status);
+                params.add(status.name());
             }
 
             // Close the SQL parts
