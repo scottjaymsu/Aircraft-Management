@@ -249,7 +249,7 @@ export default function SummaryPage() {
 
   // This function handles the navigation back to the home page when the back button is clicked
   const handleBack = () => {
-    navigate("/");
+    navigate("/map");
   }
 
 

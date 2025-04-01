@@ -11,7 +11,7 @@ function LoginPage() {
   }
 
   const login = async () => {
-    await oktaAuth.signInWithRedirect({ originalUri: "/protected" });
+    await oktaAuth.signInWithRedirect({ originalUri: "/map" });
   };
 
   return (
