@@ -1,6 +1,7 @@
 import React from "react";
 import "../styles/Modal.css";
 
+//Generic modal used in Airport Batch File Upload.
 const Modal = ({ title, message }) => {
   return (
     <div className="modal">

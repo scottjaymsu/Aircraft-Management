@@ -28,7 +28,7 @@ exports.getParkingCoordinates = (req, res) => {
     });
 }
 
-
+//Gets all the metadata related to a single airport in the database
 exports.getAirportData = (req, res) => {
     const {airport_code} = req.params;
 
@@ -38,38 +38,6 @@ exports.getAirportData = (req, res) => {
         if (err) {
             console.error("Error fetching airport data...", err);
             res.status(500).json({error: "Error fetching airport data..."});
-        }
-        else {
-            res.json(results);
-        }
-    });
-}
-
-exports.getArrivingPlanes = (req, res) => {
-    const {airport_code} = req.params;
-
-    const query = "SELECT * FROM flight_plans WHERE arrival_airport = ?;";
-    
-    db.query(query, [airport_code], (err, results) => {
-        if (err) {
-            console.error("Error fetching arriving planes...", err);
-            res.status(500).json({error: "Error fetching arriving planes..."});
-        }
-        else {
-            res.json(results);
-        }
-    });
-}
-  
-exports.getDepartingPlanes = (req, res) => {
-    const {airport_code} = req.params;
-
-    const query = "SELECT * FROM flight_plans WHERE departing_airport = ?;";
-    
-    db.query(query, [airport_code], (err, results) => {
-        if (err) {
-            console.error("Error fetching arriving planes...", err);
-            res.status(500).json({error: "Error fetching arriving planes..."});
         }
         else {
             res.json(results);

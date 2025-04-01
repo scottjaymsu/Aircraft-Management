@@ -84,6 +84,7 @@ exports.getAirportMarkers = async (req, res) => {
     });
 };
 
+/* This grabs all airports that DO NOT EXIST in the airport_parking table (ie they do not have any fbos associated with them) */
 exports.getSmallAirportMarkers = async (req, res) => {
     const query = `SELECT ad.ident, ad.latitude_deg, ad.longitude_deg, ad.type
     FROM airport_data ad 

@@ -37,6 +37,7 @@ const SimulatorComponent = () => {
     const [recs, setRecs] = useState([]);
     const [showSimulationTab, setShowSimulationTab] = useState(false);
 
+    // When the user clicks the "Show Simulation Tab" button, it will open the SimulationTab component
     const handleSimulationTabClick = () => {
         setShowSimulationTab((prevState) => !prevState);
     }

@@ -27,24 +27,22 @@ exports.insertAirport = (req, res) => {
   const insertedAirports = [];
   const queries = batchData.map((airport) => {
       return new Promise((resolve, reject) => {
-        const { ident, iata_code, name, latitude_deg, longitude_deg, iso_country, iso_region, municipality } = airport;
+        const { ident, iata_code, name, latitude_deg, longitude_deg, type } = airport;
         const lat = parseFloat(latitude_deg);
         const long = parseFloat(longitude_deg);
 
         console.log(lat);
         console.log(long);
-        const query = `INSERT INTO airport_data (ident, iata_code, name, latitude_deg, longitude_deg, iso_country, iso_region, municipality)
+        const query = `INSERT INTO airport_data (ident, iata_code, name, latitude_deg, longitude_deg, type)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE 
           iata_code = VALUES(iata_code),
           name = VALUES(name),
           latitude_deg = VALUES(latitude_deg),
           longitude_deg = VALUES(longitude_deg),
-          iso_country = VALUES(iso_country),
-          iso_region = VALUES(iso_region),
-          municipality = VALUES(municipality)`;
+          type = VALUES(type)`;
 
-        db.query(query, [ ident, iata_code, name, lat, long, iso_country, iso_region, municipality], (err, results) => {
+        db.query(query, [ ident, iata_code, name, lat, long, type], (err, results) => {
           if (err) {
               console.error("Error fetching arriving planes...", err);
               reject(err);

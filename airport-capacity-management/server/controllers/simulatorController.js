@@ -489,6 +489,7 @@ exports.removeMaintenance = (req, res) => {
     
 };
 
+/* The actual functionality for determining when a plane has space at an FBO. */
 function runSimulationRequest(selectedPlanes, airportCode, db, res) {
     /*const fboQuery = `
         SELECT 

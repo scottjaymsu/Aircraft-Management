@@ -13,7 +13,7 @@ function BatchFile() {
   const [insertedAirports, setInsertedAirports] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
-  const headers = ["IDENT", "Name", "Latitude", "Longitude", "Country", "Region", "Municipality", "IATA", "Remove Airport"]
+  const headers = ["IDENT", "Name", "Latitude", "Longitude", "Airport Size", "IATA", "Remove Airport"]
 
   const navigate = useNavigate();
 
@@ -99,7 +99,6 @@ function BatchFile() {
 
       const identInvalid = !ident || ident.length !== 4 || ident[0] !== 'K' || !latitude || !Number.isFinite(parseFloat(latitude));
       const latlongInvalid = !latitude || !Number.isFinite(parseFloat(latitude)) || parseFloat(latitude) < -90 || parseFloat(latitude) > 90 || !longitude || !Number.isFinite(parseFloat(longitude)) || parseFloat(longitude) > 180 || parseFloat(longitude) < -180;
-      const iataInvalid = !iata || iata.length !== 3;
 
       let title = '';
       if (identInvalid) {
@@ -108,14 +107,11 @@ function BatchFile() {
       if (latlongInvalid) {
         title += "Invalid Latitude or Longitude. (Must be a number between -90 and 90).\n"
       }
-      if (iataInvalid) {
-        title += "Invalid IATA (Should be three characters).\n"
-      }
       if (isExisting) {
         title += "CAUTION: Airport already exists in the database. Any data uploaded through this csv will update the current data."
       }
       return {
-        style: (identInvalid || latlongInvalid || iataInvalid) ? { backgroundColor: 'rgb(239 181 181)' } : isExisting ? { backgroundColor: '#efd092' } : {},
+        style: (identInvalid || latlongInvalid) ? { backgroundColor: 'rgb(239 181 181)' } : isExisting ? { backgroundColor: '#efd092' } : {},
         title: title.trim()
       };
     };
