@@ -1,4 +1,4 @@
-body {
+.login-page {
   background-color: #3b536c;
   display: flex;
   justify-content: center;
@@ -26,7 +26,7 @@ body {
   margin: 50px 100px;
 }
 
-button {
+button.login-button {
   background-color: #1c3949;
   color: white;
   border: none;
@@ -39,11 +39,11 @@ button {
   width: 200px;
 }
 
-button:hover {
+button.login-button:hover {
   background-color: #005bb5;
   transform: scale(1.05);
 }
 
-button:active {
+button.login-button:active {
   transform: scale(0.95);
 }

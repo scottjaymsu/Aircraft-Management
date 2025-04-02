@@ -15,9 +15,11 @@ function LoginPage() {
   };
 
   return (
-    <div className="login-container">
-      <img src={logo} alt="NetJets Logo" className="logo" />
-      <button onClick={login}>Login with Okta</button>
+    <div className="login-page">
+      <div className="login-container">
+        <img src={logo} alt="NetJets Logo" className="logo" />
+        <button className="login-button" onClick={login}>Login with Okta</button>
+      </div>
     </div>
   );
 }
