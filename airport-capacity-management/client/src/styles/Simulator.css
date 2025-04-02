@@ -42,6 +42,18 @@
     /* justify-content: center; */
     gap: 10px;
 }
+.header-segment-right {
+    flex: 1; 
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    font-weight: bold;
+    /* justify-content: center; */
+    gap: 10px;
+    /* margin-left: 50px; */
+}
+
 @media (max-width: 768px) {
     #head-dashboard {
         flex-direction: column;
@@ -138,6 +150,10 @@ header div */
     appearance: none;
     max-height: 100px;
     background-image: none;
+}
+
+.right-drop {
+    max-width: 80%;
 }
 
 select::after {
@@ -400,6 +416,11 @@ select option {
 
 #sort-by button {
     width: 125px;
+}
+
+.switch-alerts {
+    outline: none;
+    box-shadow: none;
 }
 
 /* Table wrapper */

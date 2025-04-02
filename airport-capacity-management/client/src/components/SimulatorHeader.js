@@ -13,13 +13,15 @@ const SimulatorHeader = ({
     searchTerm, 
     handleTailNumberChange, 
     handleFBOChange, 
-    filteredFleetData, 
     fboData,
     localTime, 
-    selectedSpots, 
-    selectedPlaneType, 
-    selectedPlaneSize, 
-    selectedPlaneLocation
+    planeTypes,
+    selectedPlaneTypeFilter,
+    handlePlaneTypeFilterChange,
+    planeSizes,
+    selectedPlaneSizeFilter,
+    handlePlaneSizeFilterChange,
+    tailNumberOptions
 }) => {
     // Back button navigation
     const navigate = useNavigate();
@@ -73,22 +75,11 @@ const SimulatorHeader = ({
             </div>
 
             {/* make into another component */}
-            <div className='header-segment-small'>
-                <label htmlFor="dropdown">Tail Number</label>
-                <input 
-                    type="text" 
-                    className="dropdown top-dropdown" 
-                    name="dropdown" 
-                    value={searchTerm} 
-                    onChange={handleTailNumberChange} 
-                    placeholder="Search Tail Number"
-                    list="tailNumbers"
-                />
-                <datalist id="tailNumbers">
-                    {filteredFleetData.map((data, index) => (
-                        <option key={data.acid || index} value={data.acid}>{data.acid}</option>
-                    ))}
-                </datalist>
+            <div className='header-segment-small  right-drop'>
+                
+
+                <label htmlFor="local-datetime">Local Time</label>
+                <input type="text" id="local-datetime" readOnly value={localTime || "Loading..."}></input>
 
                 <label htmlFor="dropdown">FBO</label>
                 <select className="dropdown" name="dropdown" onChange={handleFBOChange} value={selectedFBO ? selectedFBO.FBO_Name : ''}>
@@ -96,35 +87,52 @@ const SimulatorHeader = ({
                         <option key={index}>{data.FBO_Name}</option>
                     ))}
                 </select>
-           
+            </div>
 
+            <div className="header-segment-small">
+            <label htmlFor="dropdown">Tail Number</label>
+                <input 
+                        type="text" 
+                        className="dropdown top-dropdown" 
+                        name="dropdown" 
+                        value={searchTerm} 
+                        onChange={handleTailNumberChange} 
+                        placeholder="Search Tail Number"
+                        list="tailNumbers"
+                    />
+                    <datalist id="tailNumbers">
+                    {tailNumberOptions && tailNumberOptions.map((data, index) => (
+                        <option key={data.acid || index} value={data.acid}>{data.acid}</option>
+                    ))}
+                    </datalist>
             </div>
-            <div className='header-segment-small'>
-                {/* <label htmlFor="datetime">Arrival Time</label>
-                <input type="datetime-local" id="time" name="time"></input> */}
-                <label htmlFor="local-datetime">Local Time</label>
-                <input type="text" id="local-datetime" readOnly value={localTime || "Loading..."}></input>
-            
-            </div>
-            <div className='header-segment-large'>
-                <div id="plane-info-wrapper">
-                    <div className="plane-info-section">
-                        <div className="plane-section-title">Spots Required</div>
-                        <div className="plane-section-status">{selectedSpots || "N/A"}</div>
-                    </div>
-                    <div className="plane-info-section">
-                        <div className="plane-section-title">Type Name</div>
-                        <div className="plane-section-status">{selectedPlaneType || "Unknown"}</div>
-                    </div>
-                    <div className="plane-info-section">
-                        <div className="plane-section-title">Cabin Size</div>
-                        <div className="plane-section-status">{selectedPlaneSize|| "Unknown"}</div>
-                    </div>
-                    <div className="plane-info-section">
-                        <div className="plane-section-title">Current Location</div>
-                        <div className="plane-section-status">{selectedPlaneLocation || "Unknown"}</div>
-                    </div>
-                </div>
+
+            <div className='header-segment-right'>
+                <label htmlFor="plane-type-select">Plane Type</label>
+                <select
+                    id="plane-type-select"
+                    className="dropdown"
+                    value={selectedPlaneTypeFilter}
+                    onChange={handlePlaneTypeFilterChange}
+                >
+                    <option value="All Types">All Types</option>
+                    {planeTypes.map((obj, index) => (
+                    <option key={index} value={obj.type}>{obj.type}</option>
+                    ))}
+                </select>
+                <label htmlFor="plane-size-select">Plane Size</label>
+                <select
+                    id="plane-size-select"
+                    className="dropdown"
+                    value={selectedPlaneSizeFilter}
+                    onChange={handlePlaneSizeFilterChange}
+                >
+                    <option value="All Sizes">All Sizes</option>
+                    {planeSizes.map((obj, index) => (
+                    <option key={index} value={obj.size}>{obj.size}</option>
+                    ))}
+                </select>
+
             </div>
         </div>
 
@@ -132,3 +140,4 @@ const SimulatorHeader = ({
 };
 
 export default SimulatorHeader; 
+

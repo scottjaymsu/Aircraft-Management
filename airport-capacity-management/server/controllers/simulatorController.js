@@ -47,6 +47,41 @@ exports.getAirportFBOs = (req, res) => {
     });
   };
 
+// Get all info for sizes of planes
+exports.getPlaneTypes = (req, res) => {
+    const query = `
+        SELECT type
+        FROM aircraft_types
+        WHERE size IS NOT NULL AND size <> ''`;
+    
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error('Error fetching plane types:', err);
+            res.status(500).send('Error fetching plane types');
+            return;
+        }
+        res.json(results);
+    });
+};
+
+// Get all info for sizes of planes
+exports.getPlaneSizes = (req, res) => {
+    const query = `
+        SELECT DISTINCT size
+        FROM aircraft_types
+        WHERE size IS NOT NULL AND size <> ''`;
+    
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error('Error fetching plane sizes:', err);
+            res.status(500).send('Error fetching plane sizes');
+            return;
+        }
+        res.json(results);
+    });
+};
+
+
 // Get NetJets fleet from netjets_fleet table
 // Map the plane type to the size of the plane
 // Map the plane type to the number of spots required

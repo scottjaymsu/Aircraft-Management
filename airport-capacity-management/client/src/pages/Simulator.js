@@ -8,12 +8,15 @@ import SimulatorAllPlanes from '../components/SimulatorAllPlanes';
 import SimulatorAlerts from '../components/SimulatorAlerts';
 import SimulationTab from '../components/SimulationTab';
 
+
 const SimulatorComponent = () => {
     // INT for refresh
     const timeInterval = 30000000; // 5 minutes 
     const { airportCode } = useParams();
     const [expandedRow, setExpandedRow] = useState(null);
     const [fboData, setFboData] = useState([]);
+    const [planeTypes, setPlaneTypes] = useState([]);
+    const [planeSizes, setPlaneSizes] = useState([]);
     const [fleetData, setFleetData] = useState([]);
     const [selectedPlaneType, setSelectedPlaneType] = useState('');
     const [selectedPlaneLocation, setSelectedPlaneLocation] = useState('');
@@ -25,10 +28,18 @@ const SimulatorComponent = () => {
     // Data for all flight plans this airport 
     const [allPlanes, setAllPlanes] = useState([]);
 
-    //
+
     const [totalSpace, setTotalSpace] = useState(0);
     const [takenSpace, setTakenSpace] = useState(0);
+    // Filter based on selected FBO
     const [selectedFBO, setSelectedFBO] = useState("All FBOs");
+    // Filter based on selected plane type
+    const [selectedPlaneTypeFilter, setSelectedPlaneTypeFilter] = useState("All Types");
+    // Filter based on selected plane size
+    const [selectedPlaneSizeFilter, setSelectedPlaneSizeFilter] = useState("All Sizes");
+
+    const [selectedTailNumber, setSelectedTailNumber] = useState('');
+
     const [selectedAirport, setSelectedAirport] = useState(null);
     const [localTime, setLocalTime] = useState(new Date().toLocaleString());
 
@@ -85,6 +96,25 @@ const SimulatorComponent = () => {
             }
         };
 
+        // Get all plane types
+        const getPlaneTypes = async () => {
+            try {
+                const response = await axios.get('http://localhost:5001/simulator/getPlaneTypes');
+                setPlaneTypes(response.data);
+            } catch (error) {
+                console.error('Error fetching plane types:', error);
+            }
+        };
+        // Get all plane sizes
+        const getPlaneSizes = async () => {
+            try {
+                const response = await axios.get('http://localhost:5001/simulator/getPlaneSizes');
+                setPlaneSizes(response.data);
+            } catch (error) {
+                console.error('Error fetching plane sizes:', error);
+            }
+        };
+
         //Get ALL NetJets tail numbers, current location, cabin size, spots required 
         const getNetjetsFleet = async () => {
             try {
@@ -107,6 +137,8 @@ const SimulatorComponent = () => {
             }
         };
 
+        getPlaneTypes();
+        getPlaneSizes();
         getNetjetsFleet();
         getAirportFBOs();
         fetchAllPlanes();
@@ -151,29 +183,44 @@ const SimulatorComponent = () => {
             setSelectedFBO(selectedFBO ? selectedFBO.FBO_Name : "All FBOs"); 
         }
     };
-    // Filter planes based on selected FBO
-    const filteredPlanes = selectedFBO === "All FBOs" 
-        ? allPlanes 
-        : allPlanes.filter(plane => plane.FBO_name === selectedFBO);
 
-    // When a plane from NetJets fleet is selected from dropdown
+    // Filter planes based on selected plane type
+    const handlePlaneTypeFilterChange = (event) => {
+        setSelectedPlaneTypeFilter(event.target.value);
+
+    };
+
+    // Filter planes based on selected plane size
+    const handlePlaneSizeFilterChange = (event) => {
+        setSelectedPlaneSizeFilter(event.target.value);
+    };
+    
+    const filteredPlanes = allPlanes.filter(plane => {
+        const matchesFBO = selectedFBO === "All FBOs" || plane.FBO_name === selectedFBO;
+        const matchesType = selectedPlaneTypeFilter === "All Types" || plane.plane_type === selectedPlaneTypeFilter;
+        const matchesSize = selectedPlaneSizeFilter === "All Sizes" || plane.size === selectedPlaneSizeFilter;
+        const matchesTail = selectedTailNumber === '' || plane.acid === selectedTailNumber;
+        return matchesFBO && matchesType && matchesSize && matchesTail;
+    });
+    
+
     const handleTailNumberChange = (event) => {
         const selectedTailNumber = event.target.value;
         setSearchTerm(selectedTailNumber);
-        const selectedPlane = fleetData.find(plane => plane.acid === selectedTailNumber);
-        setSelectedPlaneType(selectedPlane && selectedPlane.plane_type ? selectedPlane.plane_type: 'Unavailable');
-        setSelectedPlaneLocation(selectedPlane && selectedPlane.current_location ? selectedPlane.current_location: 'N/A');
-        setSelectedPlaneSize(selectedPlane && selectedPlane.size ? selectedPlane.size: 'Unavailable');
-        setSelecteedSpots(selectedPlane && selectedPlane.numberSpots ? selectedPlane.numberSpots: '1'); 
-        // For autofilling dropdown
-        setSearchTerm(event.target.value); 
-    };
-
-    // Filtered fleet data for dropdown 
-    const filteredFleetData = fleetData.filter(plane =>
-        plane.acid.toLowerCase().includes(searchTerm.toLowerCase())
-    );
     
+        const selectedPlane = allPlanes.find(plane => plane.acid === selectedTailNumber);
+    
+        setSelectedTailNumber(selectedTailNumber); // for filtering
+        setSelectedPlaneType(selectedPlane?.plane_type || 'Unavailable');
+        setSelectedPlaneLocation(selectedPlane?.FBO_name || 'N/A');
+        setSelectedPlaneSize(selectedPlane?.size || 'Unavailable');
+        setSelecteedSpots(selectedPlane?.numberSpots || '1');
+    };
+    
+    
+    const filteredTailNumbers = allPlanes.filter(plane =>
+        plane.acid.toLowerCase().includes(searchTerm.toLowerCase())
+      );
 
     return (
         <div>
@@ -190,13 +237,17 @@ const SimulatorComponent = () => {
                     searchTerm={searchTerm}
                     handleTailNumberChange={handleTailNumberChange}
                     handleFBOChange={handleFBOChange}
-                    filteredFleetData={filteredFleetData}
                     fboData={fboData}
                     localTime={localTime}
-                    selectedSpots={selectedSpots}
-                    selectedPlaneType={selectedPlaneType}
-                    selectedPlaneSize={selectedPlaneSize}
-                    selectedPlaneLocation={selectedPlaneLocation}
+                    planeTypes={planeTypes}
+                    selectedPlaneTypeFilter={selectedPlaneTypeFilter}
+                    handlePlaneTypeFilterChange={handlePlaneTypeFilterChange}
+                    planeSizes={planeSizes}
+                    selectedPlaneSizeFilter={selectedPlaneSizeFilter}
+                    handlePlaneSizeFilterChange={handlePlaneSizeFilterChange}
+                    tailNumberOptions={filteredTailNumbers}
+        
+
                 />
     
                 <div id="main-wrapper">
@@ -213,7 +264,7 @@ const SimulatorComponent = () => {
                         and Capacity Movement 
                      */}
                      <div>
-                     <button onClick={handleSimulationTabClick} id="simulation-tab-button">
+                     <button className="swich-alerts" onClick={handleSimulationTabClick} id="simulation-tab-button">
                         {showSimulationTab ? "Hide Simulation Tab": "Show Simulation Tab"}
                     </button>
                     {showSimulationTab ? (
