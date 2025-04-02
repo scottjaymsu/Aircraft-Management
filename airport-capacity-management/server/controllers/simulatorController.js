@@ -490,7 +490,35 @@ exports.removeMaintenance = (req, res) => {
 };
 
 /* The actual functionality for determining when a plane has space at an FBO. */
-function runSimulationRequest(selectedPlanes, airportCode, db, res) {
+function runSimulationRequest(selectedPlanes, planeTime, airportCode, db, res) {
+
+    const today = new Date();
+    const dateString = today.toISOString().split('T')[0];
+    const formattedTime = `${dateString} ${planeTime}:00`;
+
+    //Commented out for now because until the database has time to fully add to the tables all the planes coming in with FBOs, we can't determine it with this query
+    /*
+    What this query does is grab all the arrived planes currently sitting at an airport, and also grabs the arriving and departing planes
+    within the table to add and subtract them accordingly in the plane counts subtable. It then grabs the metadata of all the FBOs that exist at that airport
+    and matches it to what the planes are flying in and out of to determine where there is space. 
+    */
+
+    const fboQuery = `
+        WITH arrived_planes AS (SELECT flight_plans.fbo_id, netjets_fleet.acid FROM netjets_fleet
+        JOIN flight_plans ON netjets_fleet.flightRef = flight_plans.flightRef WHERE flight_plans.arrival_airport = ?),
+        scheduled_arrivals AS (SELECT fbo_id FROM flight_plans WHERE arrival_airport = ? AND status = "SCHEDULED" AND eta <= ?),
+        scheduled_departures AS (SELECT fbo_id FROM flight_plans WHERE departing_airport = ? AND status = "SCHEDULED" AND eta > ?),
+        plane_counts AS (
+            SELECT fbo_id, COUNT(acid) AS arrived_count, 0 AS scheduled_arrival_count, 0 AS scheduled_departure_count 
+            FROM arrived_planes GROUP BY fbo_id
+            UNION ALL SELECT fbo_id, 0, COUNT(fbo_id), 0 
+            FROM scheduled_arrivals GROUP BY fbo_id
+            UNION ALL SELECT fbo_id, 0, 0, COUNT(fbo_id) 
+            FROM scheduled_departures GROUP BY fbo_id
+        )
+        SELECT ap.*, ap.Total_Space, COALESCE(SUM(plane_counts.arrived_count), 0) + COALESCE(SUM(plane_counts.scheduled_arrival_count), 0) - COALESCE(SUM(plane_counts.scheduled_departure_count), 0) AS spots_taken
+        FROM airport_parking ap LEFT JOIN plane_counts ON plane_counts.fbo_id = ap.id WHERE ap.Airport_Code = ? GROUP BY ap.id ORDER BY ap.Priority;`;
+
     /*const fboQuery = `
         SELECT 
             ap.*,
@@ -507,23 +535,8 @@ function runSimulationRequest(selectedPlanes, airportCode, db, res) {
             ap.id;
     `;*/
 
-    const fboQuery = `
-        SELECT 
-            ap.*,
-            ap.Total_Space,
-            FLOOR(Parking_Space_Taken / 3) AS spots_taken
-        FROM 
-            airport_parking ap
-        LEFT JOIN 
-            parked_at pa ON pa.fbo_id = ap.id
-        WHERE 
-            ap.Airport_Code = ?
-            AND ap.coordinates IS NOT NULL
-        GROUP BY 
-            ap.id;
-    `;
 
-    db.query(fboQuery, [airportCode], (err, fboData) => {
+    db.query(fboQuery, [airportCode, airportCode, formattedTime, airportCode, formattedTime, airportCode], (err, fboData) => {
         if (err) {
             console.error('Error fetching FBO data:', err);
             res.status(500).json({ error: 'Error fetching FBO data' });
@@ -557,8 +570,9 @@ function runSimulationRequest(selectedPlanes, airportCode, db, res) {
 
 exports.runSimulation = (req, res) => {
     try {
-        const { selectedPlanes, airportCode } = req.body;
-        runSimulationRequest(selectedPlanes, airportCode, db, res);
+        const { selectedPlanes, time, airportCode } = req.body;
+        console.log(time)
+        runSimulationRequest(selectedPlanes, time, airportCode, db, res);
     } catch (error) {
         console.error('Error running simulation:', error);
         res.status(500).json({ success: false, message: 'Error running simulation' });
