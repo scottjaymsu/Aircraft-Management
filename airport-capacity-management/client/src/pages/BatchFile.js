@@ -26,7 +26,7 @@ function BatchFile() {
   const headers = ["IDENT", "Name", "Latitude", "Longitude", "Airport Size", "Country", "Region", "Municipality", "IATA", "Remove Airport"]
 
   // For inserting FBO data
-  const fboHeaders = ["Airport Code", "FBO_Name", "Total Space", "IATA", "Priority", "Coordinates"];
+  const fboHeaders = ["Airport Code", "FBO_Name", "Total Space", "IATA", "Priority", "Coordinates", "Parking_Space_Taken", "Area_ft2"];
 
 
   const navigate = useNavigate();

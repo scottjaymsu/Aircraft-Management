@@ -83,7 +83,7 @@ exports.insertFBO = (req, res) => {
 
   const queries = batchData.map((fbo) => {
     return new Promise((resolve, reject) => {
-      const { Airport_Code, FBO_Name, Total_Space, iata_code, priority, coordinates } = fbo;
+      const { Airport_Code, FBO_Name, Total_Space, iata_code, priority, coordinates, Parking_Space_Taken = 0, Area_ft2 = 0 } = fbo;
       
       // Default to empty polygon if invalid or missing
       const coordinatesValue = coordinates && coordinates.startsWith('POLYGON')
@@ -91,21 +91,25 @@ exports.insertFBO = (req, res) => {
         : null;
 
         const query = `
-        INSERT INTO airport_parking 
-          (Airport_Code, FBO_Name, Total_Space, iata_code, priority, coordinates)
-        VALUES (?, ?, ?, ?, ?, ${coordinatesValue ? 'ST_GeomFromText(?)' : 'NULL'})
-        ON DUPLICATE KEY UPDATE 
-          Airport_Code = VALUES(Airport_Code),
-          FBO_Name = VALUES(FBO_Name),
-          Total_Space = VALUES(Total_Space),
-          iata_code = VALUES(iata_code),
-          priority = VALUES(priority),
-          coordinates = ${coordinatesValue ? 'ST_GeomFromText(VALUES(coordinates))' : 'NULL'}
-      `;
+          INSERT INTO airport_parking 
+            (Airport_Code, FBO_Name, Total_Space, iata_code, priority, coordinates, Parking_Space_Taken, Area_ft2)
+          VALUES (?, ?, ?, ?, ?, ${coordinatesValue ? 'ST_GeomFromText(?)' : 'NULL'}, ?, ?)
+          ON DUPLICATE KEY UPDATE 
+            Airport_Code = VALUES(Airport_Code),
+            FBO_Name = VALUES(FBO_Name),
+            Total_Space = VALUES(Total_Space),
+            iata_code = VALUES(iata_code),
+            priority = VALUES(priority),
+            coordinates = ${coordinatesValue ? 'ST_GeomFromText(VALUES(coordinates))' : 'NULL'},
+            Parking_Space_Taken = VALUES(Parking_Space_Taken),
+            Area_ft2 = VALUES(Area_ft2)
+        `;
 
-      const values = coordinatesValue 
-      ? [Airport_Code, FBO_Name, Total_Space, iata_code, priority, coordinatesValue]
-      : [Airport_Code, FBO_Name, Total_Space, iata_code, priority];
+
+        const values = coordinatesValue 
+        ? [Airport_Code, FBO_Name, Total_Space, iata_code, priority, coordinatesValue, Parking_Space_Taken, Area_ft2]
+        : [Airport_Code, FBO_Name, Total_Space, iata_code, priority, Parking_Space_Taken, Area_ft2];
+      
 
 
       db.query(query, values, (err, results) => {
