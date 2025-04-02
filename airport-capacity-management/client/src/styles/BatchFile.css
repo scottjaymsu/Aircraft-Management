@@ -1,9 +1,15 @@
+/*  */
+
 .batch_container {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
   }
+
+.batch_container h1 {
+  text-decoration: none;
+}
   
 .upload-button {
   padding: 20px 30px;
