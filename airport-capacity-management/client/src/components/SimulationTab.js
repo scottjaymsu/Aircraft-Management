@@ -51,10 +51,13 @@ const SimulationTab = ({ fbo, id }) => {
                 [tailNumber]: time
             }));
         };*/
-        const handleTimeChange = (e) => {
-            console.log("Time: ", time);
-            setTime(e.target.value);
-        }
+        const handleTimeChange = (tailNumber, time) => {
+            setPlaneTimes(prevState => ({
+                ...prevState,
+                [tailNumber]: time
+            }));
+        };
+
 
         const filteredFleetData = fleetData.filter(plane =>
             plane.acid.toLowerCase().includes(searchQuery.toLowerCase())
@@ -62,25 +65,28 @@ const SimulationTab = ({ fbo, id }) => {
 
         /* Population of the table. It will filter through the entire fleetData, and if the list of selected Planes is included, it will
         populate the metadata of that plane on the table. This also sets up the user input for the time selection and the column to display the FBO */
-        const tableRows = fleetData.filter(plane => selectedPlanes.includes(plane.acid)).map(plane => {
+        const tableRows = selectedPlanes.map(tailNumber => {
+            const plane = fleetData.find(plane => plane.acid === tailNumber);
+            if (!plane) return null;
+
             const fboName = simulationResult[plane.acid] ? simulationResult[plane.acid].fbo_name : '';
             const time = planeTimes[plane.acid] || '';
             return [
                 plane.acid,
-                plane.plane_type,
+                plane.plane_type, 
                 plane.size,
-                /*<input
+                <input
                     key={plane.acid}
                     type="time"
                     value={time}
                     onChange={(e) => handleTimeChange(plane.acid, e.target.value)}
                     className='time-input'
-                />,*/
+                />,
                 fboName
             ];
-        });
+        }).filter(row => row !== null);
 
-        const tableHeaders = ["Tail Number", "Plane Type", "Size", "FBO Name"];
+        const tableHeaders = ["Tail Number", "Plane Type", "Size", "Time", "FBO Name"];
 
         /* When the user clicks the RUN SIMULATION button (tbh, the button is just for show since it can do this without user input).
         Sends request to backend which is where we're doing all the calculations for determining if there is space. The responses depend on what's
@@ -90,7 +96,7 @@ const SimulationTab = ({ fbo, id }) => {
             try {
                 const simulationData = {
                     selectedPlanes,
-                    time,
+                    planeTimes,
                     airportCode
                 };
                 const response = await axios.post('http://localhost:5001/simulator/runSimulation', simulationData);
@@ -106,6 +112,16 @@ const SimulationTab = ({ fbo, id }) => {
                 console.log("Error during simulation");
             }
         }
+    
+    /* I determined it will be useful for a reset button, so the user doesn't have to reload the page and reclick on the
+    open simulation button to run another simulation */
+    const resetSelection = () => {
+        setSelectedPlanes([]);
+        setPlaneTimes({});
+        setSimulationStatus("");
+        setSimulationResult({});
+        setTime('');
+    }
 
     return (
         <div id="alerts-center" className="add-bottom">
@@ -133,15 +149,6 @@ const SimulationTab = ({ fbo, id }) => {
                             <option key={index} value={data.acid}>{data.acid}</option>
                         ))}
                     </select>
-                    <div className="time-input-section">
-                        <label htmlFor="time">Select Time:</label>
-                        <input
-                            id="time"
-                            type="time"
-                            value={time}
-                            onChange={handleTimeChange}
-                            className="time-input"/>
-                    </div>
                      {/* Airplane Simulator Table */}
                     <Table
                         headers={tableHeaders}
@@ -152,6 +159,8 @@ const SimulationTab = ({ fbo, id }) => {
                      {/* Simulation Status and Simulator Button */}
                     {simulationStatus && <p>{simulationStatus}</p>}
                     <button className="run-simulation-button" onClick={runSimulation}>Run Simulation</button>
+                    { /* Reset Button */ }
+                    <button onClick={resetSelection}>Reset Selection</button>
                 </div>  
             </div>
         </div>
