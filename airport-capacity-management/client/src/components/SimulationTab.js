@@ -16,7 +16,8 @@ const SimulationTab = ({ fbo, id }) => {
         const [selectedPlanes, setSelectedPlanes] = useState([]);
         const [simulationStatus, setSimulationStatus] = useState("");
         const [simulationResult, setSimulationResult] = useState({});
-
+        const [time, setTime] = useState('');
+        const [searchQuery, setSearchQuery] = useState('');
     
         // Fetching all static data for the simulator
         useEffect(() => {            
@@ -36,16 +37,28 @@ const SimulationTab = ({ fbo, id }) => {
         // When a plane from NetJets fleet is selected from dropdown
         const handleTailNumberChange = (event) => {
             const selectedTailNumbers = Array.from(event.target.selectedOptions, option => option.value);
-            setSelectedPlanes(selectedTailNumbers);
+            setSelectedPlanes(prevSelectedPlanes => {
+                const updatedSelectedPlanes = new Set(prevSelectedPlanes);
+                selectedTailNumbers.forEach(tailNumber => updatedSelectedPlanes.add(tailNumber));
+                return Array.from(updatedSelectedPlanes);
+            });
         };
 
         /* When a user selects a time for the row that contains a specific acid, this will set the time associated with the tail number */
-        const handleTimeChange = (tailNumber, time) => {
+        /*const handleTimeChange = (tailNumber, time) => {
             setPlaneTimes(prevState => ({
                 ...prevState,
                 [tailNumber]: time
             }));
-        };
+        };*/
+        const handleTimeChange = (e) => {
+            console.log("Time: ", time);
+            setTime(e.target.value);
+        }
+
+        const filteredFleetData = fleetData.filter(plane =>
+            plane.acid.toLowerCase().includes(searchQuery.toLowerCase())
+        );
 
         /* Population of the table. It will filter through the entire fleetData, and if the list of selected Planes is included, it will
         populate the metadata of that plane on the table. This also sets up the user input for the time selection and the column to display the FBO */
@@ -56,18 +69,18 @@ const SimulationTab = ({ fbo, id }) => {
                 plane.acid,
                 plane.plane_type,
                 plane.size,
-                <input
+                /*<input
                     key={plane.acid}
                     type="time"
                     value={time}
                     onChange={(e) => handleTimeChange(plane.acid, e.target.value)}
                     className='time-input'
-                />,
+                />,*/
                 fboName
             ];
         });
 
-        const tableHeaders = ["Tail Number", "Plane Type", "Size", "Time", "FBO Name"];
+        const tableHeaders = ["Tail Number", "Plane Type", "Size", "FBO Name"];
 
         /* When the user clicks the RUN SIMULATION button (tbh, the button is just for show since it can do this without user input).
         Sends request to backend which is where we're doing all the calculations for determining if there is space. The responses depend on what's
@@ -77,6 +90,7 @@ const SimulationTab = ({ fbo, id }) => {
             try {
                 const simulationData = {
                     selectedPlanes,
+                    time,
                     airportCode
                 };
                 const response = await axios.post('http://localhost:5001/simulator/runSimulation', simulationData);
@@ -97,8 +111,16 @@ const SimulationTab = ({ fbo, id }) => {
         <div id="alerts-center" className="add-bottom">
             <div id="alerts-title">SIMULATION</div>
             <div className=" alerts-simulator">
+            <div className="header-segment-small">
+                    <label htmlFor="search">Search Tail Numbers</label>
+                    <input
+                        type="text"
+                        id="search"
+                        placeholder="Search by Tail Number"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
                     {/* Airplane Selector Table */}
-                     <div className='header-segment-small'>
                      <label htmlFor="dropdown">Tail Numbers (Select Multiple)</label>
                      <select
                          multiple
@@ -107,10 +129,19 @@ const SimulationTab = ({ fbo, id }) => {
                         onChange={handleTailNumberChange}
                         value={selectedPlanes}
                         size={10}>
-                        {fleetData.map((data, index) => (
+                        {filteredFleetData.map((data, index) => (
                             <option key={index} value={data.acid}>{data.acid}</option>
                         ))}
                     </select>
+                    <div className="time-input-section">
+                        <label htmlFor="time">Select Time:</label>
+                        <input
+                            id="time"
+                            type="time"
+                            value={time}
+                            onChange={handleTimeChange}
+                            className="time-input"/>
+                    </div>
                      {/* Airplane Simulator Table */}
                     <Table
                         headers={tableHeaders}
