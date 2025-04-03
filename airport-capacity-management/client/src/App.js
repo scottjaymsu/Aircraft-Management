@@ -87,6 +87,14 @@ function AppWrapper() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/editFBO/:airportCode/:fboId"
+          element={
+            <ProtectedRoute>
+              <EditFBO />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Explicit login route */}
         <Route path="/login" element={<LoginPage />} />
@@ -97,7 +105,7 @@ function AppWrapper() {
 
 function App() {
   return (
-    <BrowserRouter> 
+    <Router> 
         <Routes>
           <Route path="/" element={<MapComponent />} />
           <Route path="/summary/:location" element={<SummaryPage/>} />
@@ -107,7 +115,7 @@ function App() {
           <Route path="/fbopage/:airportCode" element = {<FBOPage/>} />
           <Route path="/editFBO/:airportCode/:fboId" element={<EditFBO />} />
         </Routes>
-    </BrowserRouter> 
+    </Router> 
   );}
 
 export default App;
