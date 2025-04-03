@@ -112,20 +112,6 @@ function CustomOverlay({ map, position, text }) {
   );
 }
 
-// Calculate total space for the airport 
-function calculateTotalSpace(fboData) {
-  return fboData.reduce((acc, fbo) => {
-    return acc + fbo.total_parking;
-  }, 0);
-}
-
-// Calculate taken space for the airport
-function calculateTakenSpace(fboData) {
-  return fboData.reduce((acc, fbo) => {
-    return acc + fbo.parking_taken;
-  }, 0);
-}
-
 // Summary Page Component
 export default function SummaryPage() {
   const airportCode = useParams().location;
@@ -191,7 +177,8 @@ export default function SummaryPage() {
         );
         const data = await response.json();
         console.log("Parking Coordinates:", data);
-        
+       
+        // Filter out parking lots with no coordinates and map them to the required format
         const parkingLots = data
           .filter(lot => lot.coordinates && lot.coordinates.length > 0)
           .map((lot) => {
@@ -207,6 +194,7 @@ export default function SummaryPage() {
           };
         });
         
+        // Create FBO list with parking lot data
         const FBOs = data.map((lot) => {
           return {
             name: lot.FBO_Name,
@@ -263,20 +251,21 @@ export default function SummaryPage() {
   }
 
 
-  const handlePriorityChange = (index, newPriority) => {
-    setFBOList((prevFBOs) => {
-      // copy of the FBO list
-      const updatedFBOs = [...prevFBOs];
-      updatedFBOs[index] = {
-        ...updatedFBOs[index],
-        priority: newPriority,
-      };
-      return updatedFBOs;
-    });
-  };
+  // const handlePriorityChange = (index, newPriority) => {
+  //   setFBOList((prevFBOs) => {
+  //     // copy of the FBO list
+  //     const updatedFBOs = [...prevFBOs];
+  //     updatedFBOs[index] = {
+  //       ...updatedFBOs[index],
+  //       priority: newPriority,
+  //     };
+  //     return updatedFBOs;
+  //   });
+  // };
 
   return (
     <div className="map-container">
+      {/* Google map of airport selected */}
       <GoogleMap
         mapContainerStyle={containerStyle}
         options={mapOptions}
@@ -298,6 +287,8 @@ export default function SummaryPage() {
             }}
           />
         ))}
+
+        {/* Draws the parking lot labels on the map */}
         {parkingLots.map((lot, index) => (
           <CustomOverlay
             key={`overlay-${index}`}
@@ -309,7 +300,10 @@ export default function SummaryPage() {
       </GoogleMap>
       
       <div className="info-card scrollable-content">
+        {/* Back button to go back to the home page */}
         <img onClick={handleBack} className="back-button" src="/back-arrow.png" alt="Back Button"></img>
+
+        {/* Title and status of airport */}
         <Card className="card-content">
           <CardContent className="text-center flex-1">
             <h2 className="title">{airportCode} - {airportMetadata.name}</h2>
@@ -319,22 +313,30 @@ export default function SummaryPage() {
             </p>
           </CardContent>
         </Card>
+
+        {/* Traffic Overview graph */}
         <Card className="card-content flex-2">
           <div style={{ textAlign: 'center', top: 0 }}>
             <h2>Traffic Overview</h2>
           </div>
           <TrafficOverview id={airportCode} />
         </Card>
+
+        {/* Arriving flight table */}
         <Card className="card-content flex-3">
           <CardContent>
             <FlightTable id={airportCode} flightType="arriving" />
           </CardContent>
         </Card>
+
+        {/* Departing flight table */}
         <Card className="card-content flex-3">
           <CardContent>
             <FlightTable id={airportCode} flightType="departing" />
           </CardContent>
         </Card>
+
+        {/* FBO List */}
         <FBOComponent id={airportCode}/>
         <Card className="card-content flex-3">
           <CardContent>
