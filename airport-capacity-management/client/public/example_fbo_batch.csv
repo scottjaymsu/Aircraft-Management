@@ -1,0 +1,2 @@
+Airport_Code,FBO_Name,Total_Space,iata_code,priority,coordinates,Parking_Space_Taken,Area_ft2
+KBKF,Sample two,5,BKF,3,"POLYGON ((-106.911423 39.642176, -106.911295 39.641368, -106.906379 39.641925, -106.906605 39.642734, -106.911423 39.642176))",0,0

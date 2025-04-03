@@ -27,24 +27,22 @@ exports.insertAirport = (req, res) => {
   const insertedAirports = [];
   const queries = batchData.map((airport) => {
       return new Promise((resolve, reject) => {
-        const { ident, iata_code, name, latitude_deg, longitude_deg, iso_country, iso_region, municipality } = airport;
+        const { ident, iata_code, name, latitude_deg, longitude_deg, type } = airport;
         const lat = parseFloat(latitude_deg);
         const long = parseFloat(longitude_deg);
 
         console.log(lat);
         console.log(long);
-        const query = `INSERT INTO airport_data (ident, iata_code, name, latitude_deg, longitude_deg, iso_country, iso_region, municipality)
+        const query = `INSERT INTO airport_data (ident, iata_code, name, latitude_deg, longitude_deg, type)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE 
           iata_code = VALUES(iata_code),
           name = VALUES(name),
           latitude_deg = VALUES(latitude_deg),
           longitude_deg = VALUES(longitude_deg),
-          iso_country = VALUES(iso_country),
-          iso_region = VALUES(iso_region),
-          municipality = VALUES(municipality)`;
+          type = VALUES(type)`;
 
-        db.query(query, [ ident, iata_code, name, lat, long, iso_country, iso_region, municipality], (err, results) => {
+        db.query(query, [ ident, iata_code, name, lat, long, type], (err, results) => {
           if (err) {
               console.error("Error fetching arriving planes...", err);
               reject(err);
@@ -62,3 +60,76 @@ exports.insertAirport = (req, res) => {
     res.status(500).json({ error: "error"});
   })
 }
+
+// Return any airports that match the name
+exports.getExistingFBOs = (req, res) => {
+  const identArray = req.body.map(airport => airport.ident);
+  const query = "SELECT FBO_Name FROM airport_parking WHERE FBO_Name IN (?)"
+  db.query(query, [identArray], (err, results) => {
+    if (err) {
+      console.error('Error inserting data into database:', err);
+      res.status(500).json({ error: 'Unable to insert data' });
+    }
+    else {
+      const returnResults = results.map(result => result.FBO_Name);
+      console.log(returnResults);
+      res.json(results);
+  }});
+}
+
+exports.insertFBO = (req, res) => {
+  const batchData = req.body;
+  const insertedFBOs = [];
+
+  const queries = batchData.map((fbo) => {
+    return new Promise((resolve, reject) => {
+      const { Airport_Code, FBO_Name, Total_Space, iata_code, priority, coordinates, Parking_Space_Taken = 0, Area_ft2 = 0 } = fbo;
+      
+      // Default to empty polygon if invalid or missing
+      const coordinatesValue = coordinates && coordinates.startsWith('POLYGON')
+        ? coordinates
+        : null;
+
+        const query = `
+          INSERT INTO airport_parking 
+            (Airport_Code, FBO_Name, Total_Space, iata_code, priority, coordinates, Parking_Space_Taken, Area_ft2)
+          VALUES (?, ?, ?, ?, ?, ${coordinatesValue ? 'ST_GeomFromText(?)' : 'NULL'}, ?, ?)
+          ON DUPLICATE KEY UPDATE 
+            Airport_Code = VALUES(Airport_Code),
+            FBO_Name = VALUES(FBO_Name),
+            Total_Space = VALUES(Total_Space),
+            iata_code = VALUES(iata_code),
+            priority = VALUES(priority),
+            coordinates = ${coordinatesValue ? 'ST_GeomFromText(VALUES(coordinates))' : 'NULL'},
+            Parking_Space_Taken = VALUES(Parking_Space_Taken),
+            Area_ft2 = VALUES(Area_ft2)
+        `;
+
+
+        const values = coordinatesValue 
+        ? [Airport_Code, FBO_Name, Total_Space, iata_code, priority, coordinatesValue, Parking_Space_Taken, Area_ft2]
+        : [Airport_Code, FBO_Name, Total_Space, iata_code, priority, Parking_Space_Taken, Area_ft2];
+      
+
+
+      db.query(query, values, (err, results) => {
+        if (err) {
+          console.error("Error inserting FBO:", err);
+          reject(err);
+        } else {
+          insertedFBOs.push(FBO_Name);
+          resolve(results);
+        }
+      });
+    });
+  });
+
+  Promise.all(queries)
+    .then(() => {
+      res.status(200).json({ message: "Successful", insertedFBOs });
+    })
+    .catch((error) => {
+      console.error("Error: ", error);
+      res.status(500).json({ error: "error" });
+    });
+};

@@ -2,13 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { GoogleMap, LoadScript, Polygon } from "@react-google-maps/api";
 import { Card, CardContent } from "../components/card";
-import { getStatusClass, getStatusColor } from "../utils/helpers";
+import { getStatusClass, getStatusColor } from "../utils/helpers"
 
 import "../styles/SummaryPage.css";
 import "../styles/Scrollable.css";
 import FlightTable from "../components/FlightTable";
 import TrafficOverview from "../components/TrafficOverview";
 import FBOComponent from "../components/FBOComponent";
+import Capacities from "../components/Capacities";
 
 // Map Size
 const containerStyle = {
@@ -111,20 +112,6 @@ function CustomOverlay({ map, position, text }) {
   );
 }
 
-// Calculate total space for the airport 
-function calculateTotalSpace(fboData) {
-  return fboData.reduce((acc, fbo) => {
-    return acc + fbo.total_parking;
-  }, 0);
-}
-
-// Calculate taken space for the airport
-function calculateTakenSpace(fboData) {
-  return fboData.reduce((acc, fbo) => {
-    return acc + fbo.parking_taken;
-  }, 0);
-}
-
 // Summary Page Component
 export default function SummaryPage() {
   const airportCode = useParams().location;
@@ -139,8 +126,44 @@ export default function SummaryPage() {
   const [FBOList, setFBOList] = useState([]);
   const [currentPopulation, setCurrentPopulation] = useState(0);
   const [overallCapacity, setOverallCapacity] = useState(0);
+  // airport capacity as percentage
+  const [capacity, setCapacity] = useState(0);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Fetch current population and overall capacity without using async/await
+    const fetchData = () => {
+      // Fetch number of planes currently at the airport
+      fetch(`http://localhost:5001/airportData/getParkedPlanes/${airportCode}`)
+        .then((currentResponse) => currentResponse.json())
+        .then((currentData) => {
+          const currentPopulation = currentData.length;
+          setCurrentPopulation(currentPopulation);
+          console.log("Current Population:", currentPopulation);
+
+          // Fetch overall capacity of the airport
+          fetch(`http://localhost:5001/airportData/getOverallCapacity/${airportCode}`)
+            .then((overallResponse) => overallResponse.json())
+            .then((overallData) => {
+              const overallCapacity = overallData.totalCapacity;
+              setOverallCapacity(overallCapacity);
+              console.log("Overall Capacity:", overallCapacity);
+
+              // Set capacity as percentage
+              setCapacity((currentPopulation / overallCapacity) * 100);
+            })
+            .catch((error) => {
+              console.error("Error fetching overall capacity data:", error);
+            });
+        })
+        .catch((error) => {
+          console.error("Error fetching current population data:", error);
+        });
+    };
+
+    fetchData();
+  }, [airportCode]);
 
 
   useEffect(() => {
@@ -154,7 +177,8 @@ export default function SummaryPage() {
         );
         const data = await response.json();
         console.log("Parking Coordinates:", data);
-        
+       
+        // Filter out parking lots with no coordinates and map them to the required format
         const parkingLots = data
           .filter(lot => lot.coordinates && lot.coordinates.length > 0)
           .map((lot) => {
@@ -170,6 +194,7 @@ export default function SummaryPage() {
           };
         });
         
+        // Create FBO list with parking lot data
         const FBOs = data.map((lot) => {
           return {
             name: lot.FBO_Name,
@@ -205,33 +230,6 @@ export default function SummaryPage() {
         console.error("Error fetching parking data:", error);
       }
     }
-
-    async function fetchAirportStatus() {
-      try {
-        // number of planes currently at the airport
-        const currentResponse = await fetch(
-          `http://localhost:5001/airportData/getParkedPlanes/${airportCode}`
-        );
-        const currentData = await currentResponse.json();
-        const currentPopulation = currentData.length;
-        setCurrentPopulation(currentPopulation);
-        console.log("Current Population:", currentPopulation);
-
-        // overall capacity of the airport
-        const overallResponse = await fetch(
-          `http://localhost:5001/airportData/getOverallCapacity/${airportCode}`
-        );
-        const overallData = await overallResponse.json();
-        const overallCapacity = overallData.totalCapacity; 
-        setOverallCapacity(overallCapacity);
-        console.log("Overall Capacity:", overallCapacity);
-
-      } catch (error) {
-        console.error("Error fetching airport capacity data:", error);
-      }
-    }
-
-    fetchAirportStatus();
     fetchParkingCoordinates();
     fetchAirportData();
 
@@ -253,20 +251,21 @@ export default function SummaryPage() {
   }
 
 
-  const handlePriorityChange = (index, newPriority) => {
-    setFBOList((prevFBOs) => {
-      // copy of the FBO list
-      const updatedFBOs = [...prevFBOs];
-      updatedFBOs[index] = {
-        ...updatedFBOs[index],
-        priority: newPriority,
-      };
-      return updatedFBOs;
-    });
-  };
+  // const handlePriorityChange = (index, newPriority) => {
+  //   setFBOList((prevFBOs) => {
+  //     // copy of the FBO list
+  //     const updatedFBOs = [...prevFBOs];
+  //     updatedFBOs[index] = {
+  //       ...updatedFBOs[index],
+  //       priority: newPriority,
+  //     };
+  //     return updatedFBOs;
+  //   });
+  // };
 
   return (
     <div className="map-container">
+      {/* Google map of airport selected */}
       <GoogleMap
         mapContainerStyle={containerStyle}
         options={mapOptions}
@@ -288,6 +287,8 @@ export default function SummaryPage() {
             }}
           />
         ))}
+
+        {/* Draws the parking lot labels on the map */}
         {parkingLots.map((lot, index) => (
           <CustomOverlay
             key={`overlay-${index}`}
@@ -297,34 +298,52 @@ export default function SummaryPage() {
           />
         ))}
       </GoogleMap>
-
+      
       <div className="info-card scrollable-content">
+        {/* Back button to go back to the home page */}
         <img onClick={handleBack} className="back-button" src="/back-arrow.png" alt="Back Button"></img>
+
+        {/* Title and status of airport */}
         <Card className="card-content">
           <CardContent className="text-center flex-1">
             <h2 className="title">{airportCode} - {airportMetadata.name}</h2>
-            <p className={`status-bubble ${getStatusClass(currentPopulation, overallCapacity)}`}>{currentPopulation}/{overallCapacity}</p>
+            <p className={`status-bubble ${getStatusClass(currentPopulation, overallCapacity)}`}>
+              {currentPopulation != null && overallCapacity ? 
+                `${((currentPopulation / overallCapacity) * 100).toFixed(0)}%` : ''}
+            </p>
           </CardContent>
         </Card>
-        <Card className="card-content flex-2">
 
+        {/* Traffic Overview graph */}
+        <Card className="card-content flex-2">
           <div style={{ textAlign: 'center', top: 0 }}>
             <h2>Traffic Overview</h2>
           </div>
           <TrafficOverview id={airportCode} />
         </Card>
+
+        {/* Arriving flight table */}
         <Card className="card-content flex-3">
           <CardContent>
             <FlightTable id={airportCode} flightType="arriving" />
           </CardContent>
         </Card>
+
+        {/* Departing flight table */}
         <Card className="card-content flex-3">
           <CardContent>
-          <FlightTable id={airportCode} flightType="departing" />
+            <FlightTable id={airportCode} flightType="departing" />
           </CardContent>
         </Card>
+
+        {/* FBO List */}
         <FBOComponent id={airportCode}/>
-        <button className="see-more flex-1" onClick={handleSeeMore}>see more</button>
+        <Card className="card-content flex-3">
+          <CardContent>
+                <Capacities id={airportCode} spacesLeft={overallCapacity-currentPopulation} />
+          </CardContent>
+        </Card>
+        <button className="see-more flex-1" onClick={handleSeeMore}>See more</button>
       </div>
     </div>
   );

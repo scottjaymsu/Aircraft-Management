@@ -47,6 +47,41 @@ exports.getAirportFBOs = (req, res) => {
     });
   };
 
+// Get all info for sizes of planes
+exports.getPlaneTypes = (req, res) => {
+    const query = `
+        SELECT type
+        FROM aircraft_types
+        WHERE size IS NOT NULL AND size <> ''`;
+    
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error('Error fetching plane types:', err);
+            res.status(500).send('Error fetching plane types');
+            return;
+        }
+        res.json(results);
+    });
+};
+
+// Get all info for sizes of planes
+exports.getPlaneSizes = (req, res) => {
+    const query = `
+        SELECT DISTINCT size
+        FROM aircraft_types
+        WHERE size IS NOT NULL AND size <> ''`;
+    
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error('Error fetching plane sizes:', err);
+            res.status(500).send('Error fetching plane sizes');
+            return;
+        }
+        res.json(results);
+    });
+};
+
+
 // Get NetJets fleet from netjets_fleet table
 // Map the plane type to the size of the plane
 // Map the plane type to the number of spots required
@@ -489,75 +524,126 @@ exports.removeMaintenance = (req, res) => {
     
 };
 
-function runSimulationRequest(selectedPlanes, airportCode, db, res) {
-    /*const fboQuery = `
-        SELECT 
-            ap.*,
-            ap.Total_Space,
-            COUNT(pa.fbo_id) AS spots_taken
-        FROM 
-            airport_parking ap
-        LEFT JOIN 
-            parked_at pa ON pa.fbo_id = ap.id
-        WHERE 
-            ap.Airport_Code = ?
-            AND ap.coordinates IS NOT NULL
-        GROUP BY 
-            ap.id;
-    `;*/
-
-    const fboQuery = `
-        SELECT 
-            ap.*,
-            ap.Total_Space,
-            FLOOR(Parking_Space_Taken / 3) AS spots_taken
-        FROM 
-            airport_parking ap
-        LEFT JOIN 
-            parked_at pa ON pa.fbo_id = ap.id
-        WHERE 
-            ap.Airport_Code = ?
-            AND ap.coordinates IS NOT NULL
-        GROUP BY 
-            ap.id;
-    `;
-
+function getAirportFBOs(airportCode, callback) {
+    const fboQuery = "SELECT * FROM airport_parking WHERE Airport_Code = ?;";
     db.query(fboQuery, [airportCode], (err, fboData) => {
-        if (err) {
-            console.error('Error fetching FBO data:', err);
-            res.status(500).json({ error: 'Error fetching FBO data' });
-            return;
-        }
-        const simulationResult = {};
-        let remainingPlanes = [...selectedPlanes];
-        fboData.forEach(fbo => {
-            const availableSpots = fbo.Total_Space - fbo.spots_taken;
+        const fboInfo = {};
 
-            const planesForFBO = remainingPlanes.splice(0, availableSpots);
-            
-            planesForFBO.forEach(plane => {
-                simulationResult[plane] = {
-                    fbo_id: fbo.id,
-                    fbo_name: fbo.FBO_Name
-                };
-            });
-        });
-        remainingPlanes.forEach(plane => {
-            simulationResult[plane] = {
-                fbo_id: null,
-                fbo_name: "None Available"
+        fboData.forEach(fbo => {
+            fboInfo[fbo.id] = {
+                fbo_name: fbo.FBO_Name,
+                capacity: fbo.Total_Space
             };
         });
-        res.status(200).json({ success: true, data: simulationResult });
+        callback(null, fboInfo);
     });
 }
 
+/* The actual functionality for determining when a plane has space at an FBO. */
+function runSimulationRequest(selectedPlanes, planeTime, airportCode, db, res) {
 
+    //Now that we are adjusting fbo data inside of the sql  loop, we don't need this function, but keeping functionality incase an issue arises
+    getAirportFBOs(airportCode, (err, airportFBOs) => {
+        if (err) {
+            res.status(500).json({ error: 'Error fetching FBO data' });
+            return;
+        }
+
+        const today = new Date();
+        const dateString = today.toISOString().split('T')[0];
+        const additionalPlanesByFBO = {};
+        const simulationResult = {};
+
+        /* The selected planes come in top to bottom based on when the user clicked them to add them to the table. However, for this simulator to be accurate we need to sort
+        these planes based on the time the user selected for them. Earlier ones should be simulated first and then later ones will factor those earlier ones into the calculations. */
+        selectedPlanes.sort((planeA, planeB) => {
+            const timeA = planeTime[planeA] || today.toTimeString().split(' ')[0].substring(0, 5);
+            const timeB = planeTime[planeB] || today.toTimeString().split(' ')[0].substring(0, 5);
+            return timeA.localeCompare(timeB);
+        });
+
+        processNextPlane(0);
+        function processNextPlane(index) {
+            if (index >= selectedPlanes.length) {
+                res.status(200).json({ success: true, data: simulationResult });
+                return;
+            }
+            
+            const currentPlane = selectedPlanes[index];
+            /* This is where the times are determined. If there is a match in planeTime array ( a user specified a time for the plane ) it will grab that. If not, it just uses the current
+            time that the user is simulating at. */
+            const planeTimeFormatted = planeTime[currentPlane] || today.toTimeString().split(' ')[0].substring(0, 5);
+            const formattedTime = `${dateString} ${planeTimeFormatted}:00`;
+
+            const fboQuery = `
+                WITH arrived_planes AS (SELECT flight_plans.fbo_id, netjets_fleet.acid FROM netjets_fleet
+                JOIN flight_plans ON netjets_fleet.flightRef = flight_plans.flightRef WHERE flight_plans.arrival_airport = ?),
+                scheduled_arrivals AS (SELECT fbo_id FROM flight_plans WHERE arrival_airport = ? AND status = "SCHEDULED" AND eta <= ?),
+                scheduled_departures AS (SELECT fbo_id FROM flight_plans WHERE departing_airport = ? AND status = "SCHEDULED" AND eta > ?),
+                plane_counts AS (
+                    SELECT fbo_id, COUNT(acid) AS arrived_count, 0 AS scheduled_arrival_count, 0 AS scheduled_departure_count
+                    FROM arrived_planes GROUP BY fbo_id
+                    UNION ALL SELECT fbo_id, 0, COUNT(fbo_id), 0
+                    FROM scheduled_arrivals GROUP BY fbo_id
+                    UNION ALL SELECT fbo_id, 0, 0, COUNT(fbo_id)
+                    FROM scheduled_departures GROUP BY fbo_id
+                )
+                SELECT ap.*, ap.Total_Space, COALESCE(SUM(plane_counts.arrived_count), 0) + COALESCE(SUM(plane_counts.scheduled_arrival_count), 0) - COALESCE(SUM(plane_counts.scheduled_departure_count), 0) AS spots_taken
+                FROM airport_parking ap LEFT JOIN plane_counts ON plane_counts.fbo_id = ap.id WHERE ap.Airport_Code = ? GROUP BY ap.id ORDER BY ap.Priority;`;
+
+            db.query(fboQuery, [airportCode, airportCode, formattedTime, airportCode, formattedTime, airportCode], (err, fboData) => {
+                if (err) {
+                    console.error('Error fetching FBO data for plane:', err);
+                    simulationResult[currentPlane] = {
+                        fbo_id: null,
+                        fbo_name: "Error Processing"
+                    };
+                    processNextPlane(index + 1);
+                    return;
+                }
+                /* The simulation is useless if we don't factor in the previous planes we've already simulated, so the FBOData has to be
+                adjusted to account for those additional planes that have already been "simulated" to enter that FBO */
+                const adjustedFBOData = fboData.map(fbo => {
+                    const fboClone = {...fbo};
+                    if (additionalPlanesByFBO[fbo.id]) {
+                        fboClone.spots_taken += additionalPlanesByFBO[fbo.id];
+                    }
+                    return fboClone;}
+                );
+                /* Loop through all the fbos in the adjusted fbo data -- if there are available spots then assign it to that FBO and break the loop. If it never gets assigned, that means there
+                was no space to assign it and should not have an fbo assigned. */
+                let assignedFBO = null;
+                for (const fbo of adjustedFBOData) {
+                    const availableSpots = fbo.Total_Space - fbo.spots_taken;
+                    if (availableSpots > 0) {
+                        assignedFBO = fbo;
+                        additionalPlanesByFBO[fbo.id] = (additionalPlanesByFBO[fbo.id] || 0) + 1;
+                        break;
+                    }
+                }
+
+                if (assignedFBO) {
+                    simulationResult[currentPlane] = {
+                        fbo_id: assignedFBO.id,
+                        fbo_name: assignedFBO.FBO_Name
+                    };
+                }
+                else {
+                    simulationResult[currentPlane] = {
+                        fbo_id: null,
+                        fbo_name: "None Available"
+                    };
+                }
+                processNextPlane(index + 1);
+            });
+        }
+    });
+}
 
 exports.runSimulation = (req, res) => {
     try {
-        const { selectedPlanes, airportCode } = req.body;
-        runSimulationRequest(selectedPlanes, airportCode, db, res);
+        const { selectedPlanes, planeTimes, airportCode } = req.body;
+        runSimulationRequest(selectedPlanes, planeTimes, airportCode, db, res);
     } catch (error) {
         console.error('Error running simulation:', error);
         res.status(500).json({ success: false, message: 'Error running simulation' });

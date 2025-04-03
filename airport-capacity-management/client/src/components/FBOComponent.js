@@ -130,6 +130,10 @@ export default function FBOSection({id}) {
       });
   };
 
+  const handleEditFBO = (fboId) =>{
+    navigate(`/editFBO/${id}/${fboId}`);
+  };
+
   return (
     <Card className="card-content flex-3">
       <CardContent>
@@ -163,7 +167,10 @@ export default function FBOSection({id}) {
                   <td>{fbo.name}</td>
                   <td>
                     <span className={getStatusClass(fbo.parking_taken, fbo.total_parking)}>
-                      {fbo.parking_taken}/{fbo.total_parking}
+
+                      {fbo.parking_taken != null && fbo.total_parking ? 
+                    `${((fbo.parking_taken / fbo.total_parking) * 100).toFixed(0)}%` : '/'}
+
                     </span>
                   </td>
                   <td>
@@ -183,10 +190,23 @@ export default function FBOSection({id}) {
                     )}
                   </td>
                   {isEditingFBO && (
-                    <td style={{ paddingRight: "10px" }}>
-                      <button onClick={() => handleRemoveFBO(fbo.id)} className="fbo-action-button">
-                        Remove
-                      </button>
+                    <td>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "9px" }}>
+                        <button
+                          onClick={() => handleEditFBO(fbo.id)}
+                          className="fbo-action-button"
+                          style={{ whiteSpace: "nowrap" }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleRemoveFBO(fbo.id)}
+                          className="fbo-action-button"
+                          style={{ whiteSpace: "nowrap" }}
+                        >
+                          Remove
+                        </button>
+                      </div>
                     </td>
                   )}
                 </tr>

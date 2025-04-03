@@ -33,6 +33,7 @@ const MapContainer = ({ markers, smallMarkers, onMarkerClick, setMapInstance }) 
         fullscreenControl: false, 
       });
 
+      //Each type of airport has a list, so it can be generated based on the users zoom level
       const largeAirportMarkers = [];
       const mediumAirportMarkers = [];
       const smallAirportMarkers = [];
@@ -54,13 +55,13 @@ const MapContainer = ({ markers, smallMarkers, onMarkerClick, setMapInstance }) 
           animation: window.google.maps.Animation.DROP,
         });
         
+        /* If the capacity percentage is unknown (this should not happen), it will be generated as 100 to prompt users to look into this anomaly.
+        This SVG is for the hover bars, and is generated based on the percentage of capacity of each specific airport*/
         const capacityPercentage = markerData.capacity_percentage || 100;
-
         const createSVG = (percentage) => {
           const width = 30;
           const height = 10;
           const filledWidth = width * (percentage)
-
           return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
               <rect width="${width}" height="${height}" fill="white" stroke="rgb(33,48,71)" strokeWidth="1"/>
               <rect width="${filledWidth}" height="${height}" fill="${getStatusColor(markerData.status)}"/>
@@ -142,6 +143,7 @@ const MapContainer = ({ markers, smallMarkers, onMarkerClick, setMapInstance }) 
       map.addListener("zoom_changed", updateHealthBarPositions);
       map.addListener("idle", updateHealthBarPositions);
 
+      /* These markers are for the airports without FBOs (red dots). */
       const createMarker = (markerData, icon, scale, map) => {
         return new window.google.maps.Marker({
           position: markerData.position,
@@ -166,6 +168,8 @@ const MapContainer = ({ markers, smallMarkers, onMarkerClick, setMapInstance }) 
         updateMarkers();
       });
       
+      /* First generating the points. Only large airports will originally populate on the map, everything else will be set to a null parent
+      until a separate function (updateMarkers()) prompts them to be shown*/
       smallMarkers.forEach((markerData) => {
         if (markerData.type === "large_airport") { 
           const smallMarker = createMarker(markerData, window.google.maps.SymbolPath.CIRCLE, 5, map);
@@ -183,6 +187,8 @@ const MapContainer = ({ markers, smallMarkers, onMarkerClick, setMapInstance }) 
         }
       });
 
+      /* If the zoom level is over the threshold necessary, it will set the map for each marker to be the original map, and if not, it will
+      ensure it's set to null. Only populates the markers that are within the bounds or else the lag is tremendous.*/
       const updateMarkers = () => {
         const bounds = map.getBounds();
         if (!bounds) return;

@@ -89,3 +89,40 @@ exports.deleteFBO = async (req, res) =>{
     res.status(500).json({error: "Failed to delete FBO >:("});
   }
 };
+
+exports.updateFBO = async (req, res) => {
+  try {
+    const { id, FBO_Name, Total_Space, Area_ft2, coordinates, polygonWKT } = req.body;
+
+    let polygon;
+    if (polygonWKT){
+      polygon = polygonWKT;
+    }  
+    else{
+      polygon = convertToPolygonWKT(coordinates);
+    }
+
+    if (!polygon) {
+      return res.status(400).json({ error: "Wrong polygon coordinates >:(" });
+    }
+
+    const [result] = await db.promise().query(
+      `UPDATE airport_parking
+       SET FBO_Name = ?,
+          Total_Space = ?,
+          Area_ft2 = ?,
+          coordinates = ST_GeomFromText(?)
+       WHERE id = ?`,
+      [FBO_Name, Total_Space, Area_ft2, polygon, id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "FBO not found rip" });
+    }
+
+    res.status(200).json({ message: "FBO updated successfully!" });
+  } catch (error) {
+    console.error("Error updating FBO >:(", error);
+    res.status(500).json({ error: "Error updating FBO >:(" });
+  }
+};

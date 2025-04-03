@@ -40,13 +40,13 @@ const MapComponent = () => {
   const [mapInstance, setMapInstance] = useState(null);
   const [notificationVisible, setNotificationVisible] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(false);
-
   const [markers, setMarkers] = useState([]);
   const [smallMarkers, setSmallMarkers] = useState([]);
-
   const hasLoaded = useRef(false);
   const navigate = useNavigate();
 
+  /* The use effect for when this page first loads. It needs to check if it's already been loaded because due to React's strict mode, it will try to 
+  load twice. It will then get all the airport Markers (the big ones have fbos, the red dots have no fbos and are set as "small markers" */
   useEffect(() => {
     if (hasLoaded.current) return;
     hasLoaded.current = true;

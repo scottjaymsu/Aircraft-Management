@@ -28,7 +28,7 @@ exports.getParkingCoordinates = (req, res) => {
     });
 }
 
-
+//Gets all the metadata related to a single airport in the database
 exports.getAirportData = (req, res) => {
     const {airport_code} = req.params;
 
@@ -45,33 +45,23 @@ exports.getAirportData = (req, res) => {
     });
 }
 
-exports.getArrivingPlanes = (req, res) => {
-    const {airport_code} = req.params;
+// Get average area by plane type 
+exports.GetAreaByType = (req, res) => {
+    const query = `
+        SELECT 
+            size, AVG(parkingArea) AS average_parking_area
+        FROM 
+            aircraft_types
+        WHERE 
+            size IS NOT NULL AND size <> ''
+        GROUP BY size;
+    `;
 
-    const query = "SELECT * FROM flight_plans WHERE arrival_airport = ?;";
-    
-    db.query(query, [airport_code], (err, results) => {
+    db.query(query, (err, results) => {
         if (err) {
-            console.error("Error fetching arriving planes...", err);
-            res.status(500).json({error: "Error fetching arriving planes..."});
-        }
-        else {
-            res.json(results);
-        }
-    });
-}
-  
-exports.getDepartingPlanes = (req, res) => {
-    const {airport_code} = req.params;
-
-    const query = "SELECT * FROM flight_plans WHERE departing_airport = ?;";
-    
-    db.query(query, [airport_code], (err, results) => {
-        if (err) {
-            console.error("Error fetching arriving planes...", err);
-            res.status(500).json({error: "Error fetching arriving planes..."});
-        }
-        else {
+            console.error("Error fetching average area by plane type...", err);
+            res.status(500).json({ error: "Error fetching average area by plane type..." });
+        } else {
             res.json(results);
         }
     });

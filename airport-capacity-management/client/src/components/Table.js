@@ -1,6 +1,7 @@
 import React from 'react';
 import '../styles/Table.css'
 
+//Generic component for a table across all of our website.
 const Table = ({ headers, rows, title, className, getRowProps = () => ({}) }) => {
 
   //We need to calculate column width here because it looks wonky if it's not equal length for every column

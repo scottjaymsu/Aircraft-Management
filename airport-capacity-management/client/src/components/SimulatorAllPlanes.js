@@ -5,10 +5,11 @@ import axios from 'axios';
 
 // List of all planes currently at the airport 
 const SimulatorAllPlanes = ({ allPlanes, selectedAirport }) => {
+
+    /* This is run when a user clicks on the colored square next to a plane to put them into maintenance (or take them out). If the plane is already in maintenance, it will prompt the user to remove from maintenance. If not, it will prompt to add to maintenance. */
     const handleMaintenanceClick = async (acid, status) => {
-        console.log(status);
         if (status !== "Maintenance") {
-            const confirm = window.confirm("Is this plane currently in maintenance?");
+            const confirm = window.confirm("Would you like to add this plane to maintenance?");
             if (confirm) {
                 try {
                     const response = await axios.get(`http://localhost:5001/simulator/addMaintenance/${acid}?airport=${selectedAirport}`);
