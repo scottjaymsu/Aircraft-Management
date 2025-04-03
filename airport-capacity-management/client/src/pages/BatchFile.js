@@ -393,7 +393,7 @@ function BatchFile() {
                 <>
                   <p>Inserted/Updated Airports: {insertedAirports.join(", ")}</p>
                   <button
-                    onClick={() => navigate("/")}
+                    onClick={() => navigate("/map")}
                     style={{ marginTop: "10px", cursor: "pointer" }}
                   >
                     Go to Homepage
@@ -462,7 +462,7 @@ function BatchFile() {
                 <>
                   <p>Inserted/Updated FBOs: {insertedFBOs.join(", ")}</p>
                   <button
-                    onClick={() => navigate("/")}
+                    onClick={() => navigate("/map")}
                     style={{ marginTop: "10px", cursor: "pointer" }}
                   >
                     Go to Homepage

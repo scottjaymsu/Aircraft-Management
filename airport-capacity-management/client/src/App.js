@@ -1,4 +1,3 @@
-// App.js
 import React from "react";
 import {
   BrowserRouter as Router,
@@ -16,13 +15,13 @@ import MapComponent from "./pages/Map";
 import SummaryPage from "./pages/SummaryPage";
 import FBOPage from "./pages/AddFBO";
 import EditFBO from "./pages/EditFBO";
-import ProtectedRoute from "./utils/ProtectedRoute"; 
+import ProtectedRoute from "./utils/ProtectedRoute";
 
 // Wrapper to allow useNavigate in restoreOriginalUri
 function AppWrapper() {
   const navigate = useNavigate();
 
-  // called by Okta after a successful login
+  // Called by Okta after a successful login
   const restoreOriginalUri = async (_oktaAuth, originalUri) => {
     navigate(originalUri || "/map", { replace: true });
   };
@@ -36,7 +35,7 @@ function AppWrapper() {
         {/* Callback route */}
         <Route path="/login/callback" element={<LoginCallback />} />
 
-        {/* Protected route using the custom ProtectedRoute */}
+        {/* Protected routes */}
         <Route
           path="/map"
           element={
@@ -45,8 +44,6 @@ function AppWrapper() {
             </ProtectedRoute>
           }
         />
-
-        {/* Other protected routes */}
         <Route
           path="/summary/:location"
           element={
@@ -103,19 +100,13 @@ function AppWrapper() {
   );
 }
 
+// Main App component
 function App() {
   return (
-    <Router> 
-        <Routes>
-          <Route path="/" element={<MapComponent />} />
-          <Route path="/summary/:location" element={<SummaryPage/>} />
-          <Route path="/batch" element={<BatchFile />} />
-          <Route path="/rec/:iata_code" element={<RecEngine />} />
-          <Route path="/simulator/:airportCode" element={<SimulatorComponent />} />
-          <Route path="/fbopage/:airportCode" element = {<FBOPage/>} />
-          <Route path="/editFBO/:airportCode/:fboId" element={<EditFBO />} />
-        </Routes>
-    </Router> 
-  );}
+    <Router>
+      <AppWrapper />
+    </Router>
+  );
+}
 
 export default App;
