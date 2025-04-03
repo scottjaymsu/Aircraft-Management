@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { GoogleMap, LoadScript, Polygon } from "@react-google-maps/api";
 import { Card, CardContent } from "../components/card";
-import { getStatusClass, getStatusColor } from "../utils/helpers";
+import { getStatusClass, getStatusColor } from "../utils/helpers"
 
 import "../styles/SummaryPage.css";
 import "../styles/Scrollable.css";
@@ -139,8 +139,44 @@ export default function SummaryPage() {
   const [FBOList, setFBOList] = useState([]);
   const [currentPopulation, setCurrentPopulation] = useState(0);
   const [overallCapacity, setOverallCapacity] = useState(0);
+  // airport capacity as percentage
+  const [capacity, setCapacity] = useState(0);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Fetch current population and overall capacity without using async/await
+    const fetchData = () => {
+      // Fetch number of planes currently at the airport
+      fetch(`http://localhost:5001/airportData/getParkedPlanes/${airportCode}`)
+        .then((currentResponse) => currentResponse.json())
+        .then((currentData) => {
+          const currentPopulation = currentData.length;
+          setCurrentPopulation(currentPopulation);
+          console.log("Current Population:", currentPopulation);
+
+          // Fetch overall capacity of the airport
+          fetch(`http://localhost:5001/airportData/getOverallCapacity/${airportCode}`)
+            .then((overallResponse) => overallResponse.json())
+            .then((overallData) => {
+              const overallCapacity = overallData.totalCapacity;
+              setOverallCapacity(overallCapacity);
+              console.log("Overall Capacity:", overallCapacity);
+
+              // Set capacity as percentage
+              setCapacity((currentPopulation / overallCapacity) * 100);
+            })
+            .catch((error) => {
+              console.error("Error fetching overall capacity data:", error);
+            });
+        })
+        .catch((error) => {
+          console.error("Error fetching current population data:", error);
+        });
+    };
+
+    fetchData();
+  }, [airportCode]);
 
 
   useEffect(() => {
@@ -205,33 +241,6 @@ export default function SummaryPage() {
         console.error("Error fetching parking data:", error);
       }
     }
-
-    async function fetchAirportStatus() {
-      try {
-        // number of planes currently at the airport
-        const currentResponse = await fetch(
-          `http://localhost:5001/airportData/getParkedPlanes/${airportCode}`
-        );
-        const currentData = await currentResponse.json();
-        const currentPopulation = currentData.length;
-        setCurrentPopulation(currentPopulation);
-        console.log("Current Population:", currentPopulation);
-
-        // overall capacity of the airport
-        const overallResponse = await fetch(
-          `http://localhost:5001/airportData/getOverallCapacity/${airportCode}`
-        );
-        const overallData = await overallResponse.json();
-        const overallCapacity = overallData.totalCapacity; 
-        setOverallCapacity(overallCapacity);
-        console.log("Overall Capacity:", overallCapacity);
-
-      } catch (error) {
-        console.error("Error fetching airport capacity data:", error);
-      }
-    }
-
-    fetchAirportStatus();
     fetchParkingCoordinates();
     fetchAirportData();
 
@@ -297,17 +306,19 @@ export default function SummaryPage() {
           />
         ))}
       </GoogleMap>
-
+      
       <div className="info-card scrollable-content">
         <img onClick={handleBack} className="back-button" src="/back-arrow.png" alt="Back Button"></img>
         <Card className="card-content">
           <CardContent className="text-center flex-1">
             <h2 className="title">{airportCode} - {airportMetadata.name}</h2>
-            <p className={`status-bubble ${getStatusClass(currentPopulation, overallCapacity)}`}>{currentPopulation}/{overallCapacity}</p>
+            <p className={`status-bubble ${getStatusClass(currentPopulation, overallCapacity)}`}>
+              {currentPopulation != null && overallCapacity ? 
+                `${((currentPopulation / overallCapacity) * 100).toFixed(0)}%` : ''}
+            </p>
           </CardContent>
         </Card>
         <Card className="card-content flex-2">
-
           <div style={{ textAlign: 'center', top: 0 }}>
             <h2>Traffic Overview</h2>
           </div>
@@ -320,7 +331,7 @@ export default function SummaryPage() {
         </Card>
         <Card className="card-content flex-3">
           <CardContent>
-          <FlightTable id={airportCode} flightType="departing" />
+            <FlightTable id={airportCode} flightType="departing" />
           </CardContent>
         </Card>
         <FBOComponent id={airportCode}/>

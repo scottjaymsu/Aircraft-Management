@@ -34,7 +34,8 @@ const Sidebar = ({
               className="status-icon"
               style={{ backgroundColor: getStatusColor(loc.status) }}
             >
-              {loc.total_planes}/{loc.capacity}
+              {loc.total_planes != null && loc.capacity ? 
+              `${((loc.total_planes / loc.capacity) * 100).toFixed(0)}%` : ''}
             </div>
           </li>
         ))}
