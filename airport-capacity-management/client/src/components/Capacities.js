@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 import '../styles/FlightTable.css';
+import '../styles/Capacities.css';
 
-const Capacities = ({id, spacesLeft}) => {
-    // Spaces available for each plane size
+const Capacities = ({ id, spacesLeft }) => {
     const [spacesAvailable, setSpacesAvailable] = useState({
         'Light': 0,
         'Mid-Size': 0,
@@ -12,15 +13,16 @@ const Capacities = ({id, spacesLeft}) => {
     });
 
     const [aircraftAverages, setAircraftAverages] = useState([]);
+    const [fboInfo, setFboInfo] = useState([]);
+    const [selectedFBO, setSelectedFBO] = useState("");
+    const [showDropdown, setShowDropdown] = useState(false);
 
-    // Get average for each aircraft size 
     useEffect(() => {
-        // Fetch data when the component mounts
         const fetchAircraftAverages = async () => {
             try {
                 const response = await fetch('http://localhost:5001/airports/getAircraftAverages');
                 const data = await response.json();
-                setAircraftAverages(data); 
+                setAircraftAverages(data);
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
@@ -30,37 +32,80 @@ const Capacities = ({id, spacesLeft}) => {
     }, []);
 
     useEffect(() => {
-        // Calculate spaces after the data has been fetched
         if (aircraftAverages.length > 0) {
-            const updatedSpacesAvailable = {...spacesAvailable};
-
-            // Average area of all aircraft
+            const updatedSpacesAvailable = { ...spacesAvailable };
             const totalAverage = aircraftAverages.reduce((sum, aircraft) => sum + aircraft.average_parking_area, 0) / aircraftAverages.length;
 
-            // Iterate over aircraft types 
             Object.keys(updatedSpacesAvailable).forEach((type) => {
                 const averageOfType = aircraftAverages.find(avg => avg.size === type);
 
-                updatedSpacesAvailable[type] = averageOfType && averageOfType.average_parking_area > 0 
-                    ? Math.floor((spacesLeft * totalAverage) / averageOfType.average_parking_area) 
+                updatedSpacesAvailable[type] = averageOfType && averageOfType.average_parking_area > 0
+                    ? Math.floor((spacesLeft * totalAverage) / averageOfType.average_parking_area)
                     : 0;
             });
 
-            setSpacesAvailable(updatedSpacesAvailable);  // Update the state with the new spaces available
+            setSpacesAvailable(updatedSpacesAvailable);
         }
     }, [aircraftAverages, spacesLeft]);
 
+    const fetchFBOData = useCallback(() => {
+        axios
+            .get(`http://localhost:5001/airports/getParkingCoordinates/${id}`)
+            .then((response) => {
+                if (Array.isArray(response.data) && response.data.length > 0) {
+                    const fboData = response.data.map((lot) => ({
+                        name: lot.FBO_Name || "Unknown",
+                        spaces_left: lot.Total_Space - Math.min(lot.spots_taken, lot.Total_Space)
+                    }));
+                    setFboInfo(fboData);
+                } else {
+                    console.warn("Empty or unexpected FBO data response");
+                    setFboInfo([]);
+                }
+            })
+            .catch((error) => {
+                console.error("Error fetching FBO data >:(", error);
+            });
+    }, [id]);
+
+    useEffect(() => {
+        fetchFBOData();
+    }, [fetchFBOData]);
+
     return (
         <div className='table-container'>
+            <div className='fbo-selector'>
+                <caption>
+                    Open Parking <br></br>
+                    by Aircraft Type
+                </caption>
+                <button className='fbo-button' onClick={() => setShowDropdown(!showDropdown)}>
+                    {selectedFBO ? selectedFBO : "Select FBO"}
+                </button>
+                    {showDropdown && (
+                    <ul className="dropdown-menu">
+                        {fboInfo.length > 0 ? (
+                            fboInfo.map((fbo, index) => (
+                                <li key={index} onClick={() => {
+                                    setSelectedFBO(fbo.name);
+                                    setShowDropdown(false);
+                                }}>
+                                    {fbo.name}
+                                </li>
+                            ))
+                        ) : (
+                            <li>No FBOs available</li>
+                        )}
+                    </ul>
+                )}
+            </div>
             <table>
-                <caption>Open Parking by Aircraft Type</caption>
                 <thead>
                     <tr>
                         <th className='center-content'>Aircraft Type</th>
                         <th className='center-content'>Spaces Available</th>
                     </tr>
                 </thead>
-
                 <tbody className='flight-table-container'>
                     {Object.entries(spacesAvailable).map(([type, spaces]) => (
                         <tr key={type}>

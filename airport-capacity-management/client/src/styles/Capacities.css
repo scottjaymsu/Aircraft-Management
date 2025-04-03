@@ -1,0 +1,56 @@
+.fbo-selector {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    position: relative;
+}
+
+.fbo-selector caption {
+    text-align: left;
+}
+
+.fbo-button {
+    background-color: #3b536c;
+    color: white;
+    font-weight: 600;
+    font-size: large;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-left: auto;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    transition: background 0.3s ease;
+}
+
+.fbo-button:hover {
+    background-color: #5a6f8a;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: rgba(59, 83, 108, 0.9);
+    border-radius: 5px;
+    width: max-content;
+    min-width: 150px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    padding: 0;
+    list-style: none;
+    z-index: 10;
+}
+
+.dropdown-menu li {
+    padding: 10px;
+    color: white;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s ease;
+}
+
+.dropdown-menu li:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}

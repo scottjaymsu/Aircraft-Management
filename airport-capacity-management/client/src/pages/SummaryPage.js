@@ -343,7 +343,7 @@ export default function SummaryPage() {
                 <Capacities id={airportCode} spacesLeft={overallCapacity-currentPopulation} />
           </CardContent>
         </Card>
-        <button className="see-more flex-1" onClick={handleSeeMore}>see more</button>
+        <button className="see-more flex-1" onClick={handleSeeMore}>See more</button>
       </div>
     </div>
   );
