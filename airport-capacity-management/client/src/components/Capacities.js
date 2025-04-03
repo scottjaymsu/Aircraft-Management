@@ -32,21 +32,27 @@ const Capacities = ({ id, spacesLeft }) => {
     }, []);
 
     useEffect(() => {
-        if (aircraftAverages.length > 0) {
+        if (aircraftAverages.length > 0 && selectedFBO) {
             const updatedSpacesAvailable = { ...spacesAvailable };
             const totalAverage = aircraftAverages.reduce((sum, aircraft) => sum + aircraft.average_parking_area, 0) / aircraftAverages.length;
 
-            Object.keys(updatedSpacesAvailable).forEach((type) => {
-                const averageOfType = aircraftAverages.find(avg => avg.size === type);
+            // Find the FBO data for the selected FBO
+            const selectedFboData = fboInfo.find(fbo => fbo.name === selectedFBO);
 
-                updatedSpacesAvailable[type] = averageOfType && averageOfType.average_parking_area > 0
-                    ? Math.floor((spacesLeft * totalAverage) / averageOfType.average_parking_area)
-                    : 0;
-            });
+            if (selectedFboData) {
+                // Use the selected FBO's available spaces to update the table
+                Object.keys(updatedSpacesAvailable).forEach((type) => {
+                    const averageOfType = aircraftAverages.find(avg => avg.size === type);
 
-            setSpacesAvailable(updatedSpacesAvailable);
+                    updatedSpacesAvailable[type] = averageOfType && averageOfType.average_parking_area > 0
+                        ? Math.floor((selectedFboData.spaces_left * totalAverage) / averageOfType.average_parking_area)
+                        : 0;
+                });
+
+                setSpacesAvailable(updatedSpacesAvailable);
+            }
         }
-    }, [aircraftAverages, spacesLeft]);
+    }, [aircraftAverages, spacesLeft, selectedFBO, fboInfo]);
 
     const fetchFBOData = useCallback(() => {
         axios
@@ -82,7 +88,8 @@ const Capacities = ({ id, spacesLeft }) => {
                 <button className='fbo-button' onClick={() => setShowDropdown(!showDropdown)}>
                     {selectedFBO ? selectedFBO : "Select FBO"}
                 </button>
-                    {showDropdown && (
+            </div>
+                {showDropdown && (
                     <ul className="dropdown-menu">
                         {fboInfo.length > 0 ? (
                             fboInfo.map((fbo, index) => (
@@ -98,7 +105,6 @@ const Capacities = ({ id, spacesLeft }) => {
                         )}
                     </ul>
                 )}
-            </div>
             <table>
                 <thead>
                     <tr>
