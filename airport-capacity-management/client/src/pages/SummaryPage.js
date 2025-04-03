@@ -338,7 +338,7 @@ export default function SummaryPage() {
         <FBOComponent id={airportCode}/>
         <Card className="card-content flex-3">
           <CardContent>
-                <Capacities id={airportCode} />
+                <Capacities id={airportCode} spacesLeft={overallCapacity-currentPopulation} />
           </CardContent>
         </Card>
         <button className="see-more flex-1" onClick={handleSeeMore}>see more</button>
