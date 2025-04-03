@@ -144,6 +144,40 @@ export default function SummaryPage() {
 
   const navigate = useNavigate();
 
+  useEffect(() => {
+    // Fetch current population and overall capacity without using async/await
+    const fetchData = () => {
+      // Fetch number of planes currently at the airport
+      fetch(`http://localhost:5001/airportData/getParkedPlanes/${airportCode}`)
+        .then((currentResponse) => currentResponse.json())
+        .then((currentData) => {
+          const currentPopulation = currentData.length;
+          setCurrentPopulation(currentPopulation);
+          console.log("Current Population:", currentPopulation);
+
+          // Fetch overall capacity of the airport
+          fetch(`http://localhost:5001/airportData/getOverallCapacity/${airportCode}`)
+            .then((overallResponse) => overallResponse.json())
+            .then((overallData) => {
+              const overallCapacity = overallData.totalCapacity;
+              setOverallCapacity(overallCapacity);
+              console.log("Overall Capacity:", overallCapacity);
+
+              // Set capacity as percentage
+              setCapacity((currentPopulation / overallCapacity) * 100);
+            })
+            .catch((error) => {
+              console.error("Error fetching overall capacity data:", error);
+            });
+        })
+        .catch((error) => {
+          console.error("Error fetching current population data:", error);
+        });
+    };
+
+    fetchData();
+  }, [airportCode]);
+
 
   useEffect(() => {
     console.log(airportCode);
@@ -207,36 +241,6 @@ export default function SummaryPage() {
         console.error("Error fetching parking data:", error);
       }
     }
-
-    async function fetchAirportStatus() {
-      try {
-        // number of planes currently at the airport
-        const currentResponse = await fetch(
-          `http://localhost:5001/airportData/getParkedPlanes/${airportCode}`
-        );
-        const currentData = await currentResponse.json();
-        const currentPopulation = currentData.length;
-        setCurrentPopulation(currentPopulation);
-        console.log("Current Population:", currentPopulation);
-
-        // overall capacity of the airport
-        const overallResponse = await fetch(
-          `http://localhost:5001/airportData/getOverallCapacity/${airportCode}`
-        );
-        const overallData = await overallResponse.json();
-        const overallCapacity = overallData.totalCapacity; 
-        setOverallCapacity(overallCapacity);
-        console.log("Overall Capacity:", overallCapacity);
-
-        // set capacity as percentage
-        setCapacity((currentPopulation / overallCapacity) * 100);
-
-      } catch (error) {
-        console.error("Error fetching airport capacity data:", error);
-      }
-    }
-
-    fetchAirportStatus();
     fetchParkingCoordinates();
     fetchAirportData();
 
