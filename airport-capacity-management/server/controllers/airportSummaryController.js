@@ -44,3 +44,25 @@ exports.getAirportData = (req, res) => {
         }
     });
 }
+
+// Get average area by plane type 
+exports.GetAreaByType = (req, res) => {
+    const query = `
+        SELECT 
+            size, AVG(parkingArea) AS average_parking_area
+        FROM 
+            aircraft_types
+        WHERE 
+            size IS NOT NULL AND size <> ''
+        GROUP BY size;
+    `;
+
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error("Error fetching average area by plane type...", err);
+            res.status(500).json({ error: "Error fetching average area by plane type..." });
+        } else {
+            res.json(results);
+        }
+    });
+}
