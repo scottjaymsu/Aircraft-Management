@@ -15,9 +15,12 @@ const Sidebar = ({
   return (
     <div id="side-bar" className={visible ? 'visible' : ''}>
       <div id="search-container">
+        {/* Button that toggles the visibility of the container */}
         <button id="collapse-button" onClick={toggleVisibility}>
         {visible ? <FaChevronUp size={10} /> : <FaChevronDown size={10} />}
         </button>
+
+        {/* Search bar */}
         <input
           id="map-search"
           type="text"
@@ -26,6 +29,7 @@ const Sidebar = ({
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
+      {/* List of all of the map airports and their statuses */}
       <ul id="location-list" className={`scrollable-content ${visible ? 'visible' : ''}`}>
         {locations.map((loc) => (
           <li className="list-ele" key={loc.title} onClick={() => onLocationClick(loc.title)}>
