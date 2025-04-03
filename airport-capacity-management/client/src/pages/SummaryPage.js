@@ -9,6 +9,7 @@ import "../styles/Scrollable.css";
 import FlightTable from "../components/FlightTable";
 import TrafficOverview from "../components/TrafficOverview";
 import FBOComponent from "../components/FBOComponent";
+import Capacities from "../components/Capacities";
 
 // Map Size
 const containerStyle = {
@@ -335,6 +336,11 @@ export default function SummaryPage() {
           </CardContent>
         </Card>
         <FBOComponent id={airportCode}/>
+        <Card className="card-content flex-3">
+          <CardContent>
+                <Capacities id={airportCode} />
+          </CardContent>
+        </Card>
         <button className="see-more flex-1" onClick={handleSeeMore}>see more</button>
       </div>
     </div>
