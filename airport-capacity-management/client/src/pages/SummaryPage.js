@@ -314,7 +314,7 @@ export default function SummaryPage() {
             <h2 className="title">{airportCode} - {airportMetadata.name}</h2>
             <p className={`status-bubble ${getStatusClass(currentPopulation, overallCapacity)}`}>
               {currentPopulation != null && overallCapacity ? 
-                `${((currentPopulation / overallCapacity) * 100).toFixed(0)}%` : '/'}
+                `${((currentPopulation / overallCapacity) * 100).toFixed(0)}%` : ''}
             </p>
           </CardContent>
         </Card>

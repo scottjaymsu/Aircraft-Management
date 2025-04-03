@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import '../styles/Simulator.css';
 
 /**
@@ -35,7 +36,11 @@ const SimulatorHeader = ({
     const [overallCapacity, setOverallCapacity] = useState(0);
     // airport capacity as percentage
     const [capacity, setCapacity] = useState(0);
+    // fbo capacity as percentage
+    const [fbo, setFbo] = useState([]);
+    const [fboCapacity, setFboCapacity] = useState([]);
 
+    // fetch capacity data for entire airport
     useEffect(() => {
         // Fetch current population and overall capacity without using async/await
         const fetchData = () => {
@@ -68,7 +73,32 @@ const SimulatorHeader = ({
         };
     
         fetchData();
-      }, [selectedAirport]);
+    }, [selectedAirport]);
+
+    // fetch capacity data for selected fbo
+    const fetchFBOData = useCallback(() => {
+        axios
+        .get(`http://localhost:5001/airports/getParkingCoordinates/${selectedAirport}`)
+        .then((response) => {
+            const data = response.data;
+            const fboData = data
+                .filter((lot) => lot.FBO_Name === selectedFBO) // Keep only matching records
+                .map((lot) => ({
+                    name: lot.FBO_Name,
+                    parking_taken: lot.spots_taken,
+                    total_parking: lot.Total_Space,
+                }));
+            setFbo(fboData);
+        })
+        .catch((error) => {
+            console.error("Error fetching FBO data >:(", error);
+        });
+    }, [selectedAirport, selectedFBO]);
+
+    useEffect(() => {
+        fetchFBOData();
+    }, [fetchFBOData]);
+
 
     return (
         <div id="head-dashboard">
@@ -89,11 +119,14 @@ const SimulatorHeader = ({
                 <div >{selectedAirport} Capacity</div>
                 <div>
                     {currentPopulation != null && overallCapacity ? 
-                    `${((currentPopulation / overallCapacity) * 100).toFixed(0)}%` : '/'}
+                    `${((currentPopulation / overallCapacity) * 100).toFixed(0)}%` : ''}
                 </div>
                 <div>FBO Capacity</div>
-                {selectedFBO && (
-                    <div>{selectedFBO?.Parking_Space_Taken || 0}/{selectedFBO?.Total_Space || 0}</div>
+                {selectedFBO !== "All FBOs" && fbo[0] && (
+                    <div>
+                        {fbo[0].parking_taken != null && fbo[0].total_parking ? 
+                        `${((fbo[0].parking_taken / fbo[0].total_parking) * 100).toFixed(0)}%` : '/'}
+                    </div>
                 )}
             </div>
 
