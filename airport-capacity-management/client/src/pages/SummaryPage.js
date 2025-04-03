@@ -303,18 +303,18 @@ export default function SummaryPage() {
         ))}
       </GoogleMap>
       
- 
-
       <div className="info-card scrollable-content">
         <img onClick={handleBack} className="back-button" src="/back-arrow.png" alt="Back Button"></img>
         <Card className="card-content">
           <CardContent className="text-center flex-1">
             <h2 className="title">{airportCode} - {airportMetadata.name}</h2>
-            <p className={`status-bubble ${getStatusClass(currentPopulation, overallCapacity)}`}>{`${capacity.toFixed(0)}%`}</p>
+            <p className={`status-bubble ${getStatusClass(currentPopulation, overallCapacity)}`}>
+              {currentPopulation != null && overallCapacity ? 
+                `${((currentPopulation / overallCapacity) * 100).toFixed(0)}%` : '/'}
+            </p>
           </CardContent>
         </Card>
         <Card className="card-content flex-2">
-
           <div style={{ textAlign: 'center', top: 0 }}>
             <h2>Traffic Overview</h2>
           </div>
@@ -327,7 +327,7 @@ export default function SummaryPage() {
         </Card>
         <Card className="card-content flex-3">
           <CardContent>
-          <FlightTable id={airportCode} flightType="departing" />
+            <FlightTable id={airportCode} flightType="departing" />
           </CardContent>
         </Card>
         <FBOComponent id={airportCode}/>
