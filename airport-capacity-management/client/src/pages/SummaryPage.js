@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { GoogleMap, LoadScript, Polygon } from "@react-google-maps/api";
 import { Card, CardContent } from "../components/card";
-import { getStatusClass, getStatusColor } from "../utils/helpers";
+import { getStatusClass, getStatusColor } from "../utils/helpers"
 
 import "../styles/SummaryPage.css";
 import "../styles/Scrollable.css";
@@ -139,6 +139,8 @@ export default function SummaryPage() {
   const [FBOList, setFBOList] = useState([]);
   const [currentPopulation, setCurrentPopulation] = useState(0);
   const [overallCapacity, setOverallCapacity] = useState(0);
+  // airport capacity as percentage
+  const [capacity, setCapacity] = useState(0);
 
   const navigate = useNavigate();
 
@@ -226,6 +228,9 @@ export default function SummaryPage() {
         setOverallCapacity(overallCapacity);
         console.log("Overall Capacity:", overallCapacity);
 
+        // set capacity as percentage
+        setCapacity((currentPopulation / overallCapacity) * 100);
+
       } catch (error) {
         console.error("Error fetching airport capacity data:", error);
       }
@@ -297,13 +302,15 @@ export default function SummaryPage() {
           />
         ))}
       </GoogleMap>
+      
+ 
 
       <div className="info-card scrollable-content">
         <img onClick={handleBack} className="back-button" src="/back-arrow.png" alt="Back Button"></img>
         <Card className="card-content">
           <CardContent className="text-center flex-1">
             <h2 className="title">{airportCode} - {airportMetadata.name}</h2>
-            <p className={`status-bubble ${getStatusClass(currentPopulation, overallCapacity)}`}>{currentPopulation}/{overallCapacity}</p>
+            <p className={`status-bubble ${getStatusClass(currentPopulation, overallCapacity)}`}>{`${capacity.toFixed(0)}%`}</p>
           </CardContent>
         </Card>
         <Card className="card-content flex-2">
