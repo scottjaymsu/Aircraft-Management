@@ -111,7 +111,7 @@ const MapComponent = () => {
 
       </div>
       <MapContainer markers={markers} smallMarkers={smallMarkers} setMapInstance={setMapInstance} />
-      <button class="data-button" onClick={handleAirportButton}>Add Airports</button>
+      <button class="data-button" onClick={handleAirportButton}>Add Data</button>
 
     </div>
   );
