@@ -32,8 +32,6 @@ function BatchFile() {
     "Longitude",
     "Airport Size",
     "Country",
-    "Region",
-    "Municipality",
     "IATA",
     "Remove Airport",
   ];
