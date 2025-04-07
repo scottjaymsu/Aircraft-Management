@@ -53,3 +53,45 @@ exports.getRemainingFboArea = (req, res) => {
         res.status(200).json(results);
     });
 }
+
+exports.getRemainingAirportArea = (req, res) => {
+    const { Airport_Code } = req.params;
+
+    const query = `
+        SELECT 
+            -- Total area across all FBOs
+            total_airport_area,
+            -- Total area occupied by currently parked aircraft
+            total_occupied_area,
+            -- Remaining airport area
+            (total_airport_area - total_occupied_area) AS remaining_area
+        FROM (
+            SELECT 
+                -- Subquery to get total airport area without duplication
+                (SELECT SUM(Area_ft2)
+                 FROM airport_parking
+                 WHERE Airport_Code = ?) AS total_airport_area,
+
+                -- Sum of area occupied by all parked planes
+                SUM(aircraft_types.parkingArea) AS total_occupied_area
+            FROM 
+                airport_parking
+            JOIN 
+                parked_at ON parked_at.fbo_id = airport_parking.id
+            JOIN 
+                netjets_fleet ON netjets_fleet.acid = parked_at.acid
+            JOIN 
+                aircraft_types ON aircraft_types.type = netjets_fleet.plane_type
+            WHERE 
+                airport_parking.Airport_Code = ?
+        ) AS sub;
+    `;
+
+    db.query(query, [Airport_Code, Airport_Code], (err, results) => {
+        if (err) {
+            console.error('Error fetching remaining airport area:', err);
+            return res.status(500).json({ error: 'Failed to fetch remaining airport area' });
+        }
+        res.status(200).json(results);
+    });
+};
