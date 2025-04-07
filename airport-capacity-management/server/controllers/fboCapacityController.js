@@ -21,3 +21,35 @@ exports.getAirportParking = (req, res) => {
     });
 }
 
+exports.getRemainingFboArea = (req, res) => {
+    const airport = req.params.id;
+    const fbo = req.params.fbo;
+
+    const query = `
+        SELECT 
+            airport_parking.Area_ft2,
+            SUM(at.parkingArea) AS total_parking_area,
+            airport_parking.Area_ft2 - SUM(at.parkingArea) AS remaining_area
+        FROM 
+            airport_parking
+        JOIN 
+            parked_at ON airport_parking.id = parked_at.fbo_id
+        JOIN 
+            netjets_fleet ON netjets_fleet.acid = parked_at.acid
+        JOIN 
+            aircraft_types at ON at.type = netjets_fleet.plane_type
+        WHERE 
+            airport_parking.Airport_Code = ?
+            AND airport_parking.FBO_Name = ?
+        GROUP BY 
+            airport_parking.Area_ft2;
+    `;
+
+    db.query(query, [airport, fbo], (err, results) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Remaining fbo query failed' });
+        }
+        res.status(200).json(results);
+    });
+}
