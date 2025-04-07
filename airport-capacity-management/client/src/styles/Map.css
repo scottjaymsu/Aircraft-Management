@@ -1,7 +1,4 @@
 .data-button {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
     padding: 10px 15px;
     background-color: #1c3149;
     color: #fff;
@@ -10,4 +7,13 @@
     cursor: pointer;
     font-weight: bold;
     white-space: nowrap;
+}
+
+#map-buttons {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }

@@ -32,7 +32,6 @@ const createNotifications = (markers) => {
   return notifications;
 };
 
-
 const MapComponent = () => {
   // State for search input
   const [searchTerm, setSearchTerm] = useState("");
@@ -86,6 +85,14 @@ const MapComponent = () => {
     navigate(`/batch`);
   };
 
+  // Logout function
+  const handleLogout = () => {
+    // Clear the token from local storage
+    localStorage.removeItem("token");
+    // Redirect to the login page
+    window.location.href = "/login";
+  };
+
 
   return (
     <div>
@@ -111,8 +118,11 @@ const MapComponent = () => {
 
       </div>
       <MapContainer markers={markers} smallMarkers={smallMarkers} setMapInstance={setMapInstance} />
-      <button class="data-button" onClick={handleAirportButton}>Add Airports</button>
-
+      <div id="map-buttons">
+        {/* <button className="data-button" onClick={resetMap}>Reset Map</button> */}
+        <button class="data-button" onClick={handleAirportButton}>Add Data</button>
+        <button class="data-button" onClick={handleLogout}>Logout</button>
+      </div>
     </div>
   );
 };

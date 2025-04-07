@@ -14,7 +14,7 @@ const NotificationCenter = ({ notifications, visible, toggleVisibility, handleLo
       <div id="notif-list" className="scrollable-content">
         {notifications.map((notif, index) => (
           <i className="notif-wrapper" key={index} onClick={() => handleLocationClick(notif.title)}
-          style={{ cursor: "pointer" }}>
+            style={{ cursor: "pointer" }}>
             {notif.message}
           </i>
         ))}
