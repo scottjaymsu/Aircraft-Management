@@ -41,13 +41,13 @@ function BatchFile() {
   // For inserting FBO data
   const fboHeaders = [
     "Airport Code",
-    "FBO_Name",
+    "FBO Name",
     "Total Space",
     "IATA",
     "Priority",
     "Coordinates",
-    "Parking_Space_Taken",
-    "Area_ft2",
+    "Parking Space Taken",
+    "Area ft2",
   ];
 
   const navigate = useNavigate();

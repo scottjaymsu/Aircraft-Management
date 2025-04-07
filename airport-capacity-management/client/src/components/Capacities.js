@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import ReactDom from 'react-dom';
 import axios from 'axios';
 import '../styles/FlightTable.css';
 import '../styles/Capacities.css';
@@ -85,11 +86,28 @@ const Capacities = ({ id, spacesLeft }) => {
                     Open Parking <br></br>
                     by Aircraft Type
                 </caption>
-                <button className='fbo-button' onClick={() => setShowDropdown(!showDropdown)}>
+                {/* <button className='fbo-button' onClick={() => setShowDropdown(!showDropdown)}>
                     {selectedFBO ? selectedFBO : "Select FBO"}
-                </button>
+                </button> */}
+                <div className='dropdown-wrapper'>
+                    <button className="fbo-button">
+                    {selectedFBO ? selectedFBO : "Select FBO"}
+                    </button>
+                    <ul className="dropdown-menu">
+                    {fboInfo.length > 0 ? (
+                        fboInfo.map((fbo, index) => (
+                        <li key={index} onClick={() => setSelectedFBO(fbo.name)}>
+                            {fbo.name}
+                        </li>
+                        ))
+                    ) : (
+                        <li>No FBOs available</li>
+                    )}
+                    </ul>
+                </div>
+                
             </div>
-                {showDropdown && (
+                {/* {showDropdown && (
                     <ul className="dropdown-menu">
                         {fboInfo.length > 0 ? (
                             fboInfo.map((fbo, index) => (
@@ -104,7 +122,7 @@ const Capacities = ({ id, spacesLeft }) => {
                             <li>No FBOs available</li>
                         )}
                     </ul>
-                )}
+                )} */}
             <table>
                 <thead>
                     <tr>
