@@ -2,6 +2,15 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import '../styles/Simulator.css';
+import './header/SimulatorTableFilters'; 
+
+// Components of the header
+import AirportTitle from "./header/AirportTitle";
+import SimulatorFBO from "./header/SimulatorFBO";
+import CapacityInfo from "./header/CapacityInfo";
+import Legend from "./header/Legend";
+import SimulatorTime from "./header/SimulatorTime";
+import SimulatorTableFilters from "./header/SimulatorTableFilters";
 
 /**
  * Top segment of the Simulator page 
@@ -22,7 +31,8 @@ const SimulatorHeader = ({
     planeSizes,
     selectedPlaneSizeFilter,
     handlePlaneSizeFilterChange,
-    tailNumberOptions
+    tailNumberOptions,
+    handleResetFilters
 }) => {
     // Back button navigation
     const navigate = useNavigate();
@@ -101,115 +111,60 @@ const SimulatorHeader = ({
 
 
     return (
-        <div id="head-dashboard">
-            <div id="header1">
-                <div className='header-segment-large'>
-                    <div id="title-wrapper">
-                        <button id="back-button-sim">
-                            <img onClick={handleBackClick} src="/back-arrow.png" alt="Back Button"></img>
-                        </button>
-                        <div id="airport-title">{selectedAirport || "N/A"}</div>
-                        <div id="sim-title">Flight Simulator</div>
+        <div id="head-dashboard-wrapper">
+            <div id="head-dashboard">
+                <div id="left-header-content">
+                <div id="header1">
+                    <div className='header-segment-large'>
+                    <AirportTitle selectedAirport={selectedAirport} handleBackClick={handleBackClick} />
+                    <SimulatorFBO selectedFBO={selectedFBO} />
                     </div>
-                    <div id='fbo-title-sim'>{selectedFBO?.FBO_Name || 'Select an FBO'}</div>
                 </div>
-            </div>
 
-            <div className='header-segment-small'>
-                <div >{selectedAirport} Capacity</div>
-                <div>
-                    {currentPopulation != null && overallCapacity ? 
-                    `${((currentPopulation / overallCapacity) * 100).toFixed(0)}%` : ''}
+                <CapacityInfo
+                    currentPopulation={currentPopulation}
+                    overallCapacity={overallCapacity}
+                    fbo={fbo}
+                />
+                <Legend/>
+                <SimulatorTime
+                    localTime={localTime}
+                    handleResetFilters={handleResetFilters}
+                />
                 </div>
-                <div>FBO Capacity</div>
-                {selectedFBO !== "All FBOs" && fbo[0] && (
-                    <div>
-                        {fbo[0].parking_taken != null && fbo[0].total_parking ? 
-                        `${((fbo[0].parking_taken / fbo[0].total_parking) * 100).toFixed(0)}%` : '/'}
-                    </div>
-                )}
-            </div>
 
-            <div className='header-segment-small'>
-                <div className='legend-row'>
-                    <div className='legend-square blue-color'></div>
-                    <div>Arriving</div>
-                </div>
-                <div className='legend-row'>
-                    <div className='legend-square yellow-color'></div>
-                    <div>Departing</div>
-                </div>
-                <div className='legend-row'>
-                    <div className='legend-square green-color'></div>
-                    <div>Parked</div>
-                </div>
-                <div className='legend-row'>
-                    <div className='legend-square red-color'></div>
-                    <div>Maintenance</div>
-                </div>
-            </div>
-
-            {/* make into another component */}
-            <div className='header-segment-small  right-drop'>
-                
-
-                <label htmlFor="local-datetime">Local Time</label>
-                <input type="text" id="local-datetime" readOnly value={localTime || "Loading..."}></input>
-
-                <label htmlFor="dropdown">FBO</label>
-                <select className="dropdown" name="dropdown" onChange={handleFBOChange} value={selectedFBO ? selectedFBO.FBO_Name : ''}>
-                    {fboData.map((data, index) => (
-                        <option key={index}>{data.FBO_Name}</option>
-                    ))}
-                </select>
-            </div>
-
-            <div className="header-segment-small">
-            <label htmlFor="dropdown">Tail Number</label>
-                <input 
-                        type="text" 
-                        className="dropdown top-dropdown" 
-                        name="dropdown" 
-                        value={searchTerm} 
-                        onChange={handleTailNumberChange} 
-                        placeholder="Search Tail Number"
-                        list="tailNumbers"
-                    />
-                    <datalist id="tailNumbers">
-                    {tailNumberOptions && tailNumberOptions.map((data, index) => (
-                        <option key={data.acid || index} value={data.acid}>{data.acid}</option>
-                    ))}
-                    </datalist>
-            </div>
-
-            <div className='header-segment-right'>
-                <label htmlFor="plane-type-select">Plane Type</label>
-                <select
-                    id="plane-type-select"
-                    className="dropdown"
-                    value={selectedPlaneTypeFilter}
-                    onChange={handlePlaneTypeFilterChange}
-                >
-                    <option value="All Types">All Types</option>
-                    {planeTypes.map((obj, index) => (
-                    <option key={index} value={obj.type}>{obj.type}</option>
-                    ))}
-                </select>
-                <label htmlFor="plane-size-select">Plane Size</label>
-                <select
-                    id="plane-size-select"
-                    className="dropdown"
+                <div id="right-header-content">
+                <SimulatorTableFilters
+                    label="FBO"
+                    options={fboData?.map((data) => data.FBO_Name) || []}
+                    value={selectedFBO || ''}
+                    onChange={(val) => handleFBOChange(val)}
+                    placeholder="Select FBO"
+                />
+                <SimulatorTableFilters
+                    label="Tail Number"
+                    options={tailNumberOptions?.map((data) => data.acid) || []}
+                    value={searchTerm}
+                    onChange={(val) => handleTailNumberChange(val)}
+                    placeholder="Tail Number"
+                />
+                <SimulatorTableFilters
+                    label="Plane Size"
+                    options={planeSizes?.map((data) => data.size) || []}
                     value={selectedPlaneSizeFilter}
-                    onChange={handlePlaneSizeFilterChange}
-                >
-                    <option value="All Sizes">All Sizes</option>
-                    {planeSizes.map((obj, index) => (
-                    <option key={index} value={obj.size}>{obj.size}</option>
-                    ))}
-                </select>
-
+                    onChange={(val) => handlePlaneSizeFilterChange({ target: { value: val } })}
+                    placeholder="Plane Size"
+                />
+                <SimulatorTableFilters
+                    label="Plane Type"
+                    options={planeTypes?.map((data) => data.type) || []}
+                    value={selectedPlaneTypeFilter}
+                    onChange={(val) => handlePlaneTypeFilterChange({ target: { value: val } })}
+                    placeholder="Plane Type"
+                />
+                </div>
             </div>
-        </div>
+            </div>
 
     );
 };

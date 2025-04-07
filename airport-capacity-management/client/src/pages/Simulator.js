@@ -174,15 +174,15 @@ const SimulatorComponent = () => {
 
     // Switches to selected FBO when selected from the dropdown
     // Planes assigned to that FBO will only be shown when selected
-    const handleFBOChange = (event) => {
-        const selectedFBOName = event.target.value;
+    const handleFBOChange = (selectedFBOName) => {
         if (selectedFBOName === "All FBOs") {
-            setSelectedFBO("All FBOs"); 
+          setSelectedFBO("All FBOs");
         } else {
-            const selectedFBO = fboData.find(fbo => fbo.FBO_Name === selectedFBOName);
-            setSelectedFBO(selectedFBO ? selectedFBO.FBO_Name : "All FBOs"); 
+          const selectedFBO = fboData.find(fbo => fbo.FBO_Name === selectedFBOName);
+          setSelectedFBO(selectedFBO ? selectedFBO.FBO_Name : "All FBOs");
         }
-    };
+      };
+      
 
     // Filter planes based on selected plane type
     const handlePlaneTypeFilterChange = (event) => {
@@ -204,17 +204,39 @@ const SimulatorComponent = () => {
     });
     
 
-    const handleTailNumberChange = (event) => {
-        const selectedTailNumber = event.target.value;
+    const handleTailNumberChange = (selectedTailNumber) => {
         setSearchTerm(selectedTailNumber);
-    
+        setSelectedTailNumber(selectedTailNumber); // this is what controls the filter
+      
+        if (!selectedTailNumber) {
+          // If cleared, also reset plane info state
+          setSelectedPlaneType('');
+          setSelectedPlaneLocation('');
+          setSelectedPlaneSize('');
+          setSelecteedSpots('');
+          return;
+        }
+      
         const selectedPlane = allPlanes.find(plane => plane.acid === selectedTailNumber);
-    
-        setSelectedTailNumber(selectedTailNumber); // for filtering
+      
         setSelectedPlaneType(selectedPlane?.plane_type || 'Unavailable');
         setSelectedPlaneLocation(selectedPlane?.FBO_name || 'N/A');
         setSelectedPlaneSize(selectedPlane?.size || 'Unavailable');
         setSelecteedSpots(selectedPlane?.numberSpots || '1');
+      };
+     
+    // Reset all filters to default values
+    // This is called when the user clicks the "Reset Filters" button
+    const handleResetFilters = () => {
+    setSearchTerm('');
+    setSelectedTailNumber('');
+    setSelectedPlaneTypeFilter('All Types');
+    setSelectedPlaneSizeFilter('All Sizes');
+    setSelectedPlaneType('');
+    setSelectedPlaneLocation('');
+    setSelectedPlaneSize('');
+    setSelecteedSpots('');
+    setSelectedFBO('All FBOs'); // optional, only include if you want to reset FBO too
     };
     
     
@@ -246,6 +268,7 @@ const SimulatorComponent = () => {
                     selectedPlaneSizeFilter={selectedPlaneSizeFilter}
                     handlePlaneSizeFilterChange={handlePlaneSizeFilterChange}
                     tailNumberOptions={filteredTailNumbers}
+                    handleResetFilters={handleResetFilters}
         
 
                 />
