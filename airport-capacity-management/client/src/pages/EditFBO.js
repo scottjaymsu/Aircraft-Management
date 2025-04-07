@@ -273,7 +273,7 @@ function EditFBO() {
   };
 
   const handleCancel = () =>{
-    navigate(-1);
+    navigate(`/summary/${airportCode}`);
   };
 
   return (
@@ -334,8 +334,9 @@ function EditFBO() {
           justifyContent: "space-between",
         }}
       >
+        <img onClick={handleCancel} className="back-button" src="/back-arrow.png" alt="Back Button" style={{ cursor: "pointer", marginBottom: "16px" }}/>
         <div>
-          <h2 className="title" style={{textAlign: "left", marginBottom: "16px"}}>
+          <h2 className="title" style={{textAlign: "center", marginBottom: "16px", marginTop: "20px", marginLeft: "-10px"}}>
             Edit FBO
           </h2>
           <div style={{marginBottom: "16px"}}>
