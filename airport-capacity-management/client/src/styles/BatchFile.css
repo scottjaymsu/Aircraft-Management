@@ -8,6 +8,11 @@
   padding: 20px;
   background-color: #f6f4f2;
 }
+.airport-table td {
+  max-width: 300px;
+  overflow-wrap: break-word;
+  vertical-align: middle;
+}
 
 .top-bar-header {
   display: flex;

@@ -179,18 +179,56 @@ export default function SummaryPage() {
         console.log("Parking Coordinates:", data);
        
         // Filter out parking lots with no coordinates and map them to the required format
+        const parseWKTPolygon = (wkt) => {
+          if (!wkt.startsWith("POLYGON(") && !wkt.startsWith("POLYGON (")) {
+            console.error("Invalid WKT format:", wkt);
+            return [];
+          }
+          wkt = wkt.replace("POLYGON (", "POLYGON(");
+          const coordinateStr = wkt.slice(8, -1); // remove POLYGON( and final )
+          const points = coordinateStr.split(",");
+          return points.map((pt) => {
+            const [lat, lng] = pt.trim().split(/\s+/).map(Number);
+            return { lat, lng };
+          });
+        };
+        // TODO: remove after betas keeping in case soemthing breaks
+        // const parkingLots = data
+        //   .filter(lot => lot.coordinates && lot.coordinates.length > 0)
+        //   .map((lot) => {
+        //     const coordinates = lot.coordinates[0].map((coord) => ({
+        //       lat: coord.x,
+        //       lng: coord.y,
+        //     }));
+        //   return {
+        //     name: lot.FBO_Name,
+        //     coordinates: coordinates,
+        //     color: getStatusColor(lot.spots_taken, lot.Total_Space),
+        //     labelPosition: coordinates[0],
+        //   };
+        // });
         const parkingLots = data
-          .filter(lot => lot.coordinates && lot.coordinates.length > 0)
-          .map((lot) => {
-            const coordinates = lot.coordinates[0].map((coord) => ({
+        .filter((lot) => lot.coordinates)
+        .map((lot) => {
+          let coordinates = [];
+
+          if (typeof lot.coordinates === "string") {
+            coordinates = parseWKTPolygon(lot.coordinates);
+          } else if (
+            Array.isArray(lot.coordinates) &&
+            lot.coordinates.length > 0
+          ) {
+            coordinates = lot.coordinates[0].map((coord) => ({
               lat: coord.x,
               lng: coord.y,
             }));
+          }
+
           return {
             name: lot.FBO_Name,
-            coordinates: coordinates,
+            coordinates,
             color: getStatusColor(lot.spots_taken, lot.Total_Space),
-            labelPosition: coordinates[0],
+            labelPosition: coordinates[0] || { lat: 0, lng: 0 },
           };
         });
         
@@ -200,7 +238,8 @@ export default function SummaryPage() {
             name: lot.FBO_Name,
             parking_taken: lot.spots_taken,
             total_parking: lot.Total_Space,
-            priority: lot.priority || 1, // Default priority to 1 if not provided
+            // Default priority to 1 if not provided
+            priority: lot.priority || 1,
           };
         });
         setFBOList(FBOs);

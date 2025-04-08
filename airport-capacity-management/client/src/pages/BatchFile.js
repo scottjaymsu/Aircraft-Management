@@ -24,6 +24,19 @@ function BatchFile() {
   const [insertedFBOs, setInsertedFBOs] = useState([]);
   const [showFboModal, setShowFboModal] = useState(false);
 
+  // Map for FBO header keys
+  // Keys are different than headers in the database
+  const fboHeaderKeyMap = {
+    "Airport Code": "Airport_Code",
+    "FBO Name": "FBO_Name",
+    "Total Space": "Total_Space",
+    "IATA": "iata_code",
+    "Priority": "priority",
+    "Coordinates": "coordinates",
+    "Parking Space Taken": "Parking_Space_Taken",
+    "Area ft2": "Area_ft2",
+  };
+
   // For inserting airport data
   const headers = [
     "IDENT",
@@ -46,6 +59,7 @@ function BatchFile() {
     "Coordinates",
     "Parking Space Taken",
     "Area ft2",
+    "Remove FBO",
   ];
 
   const navigate = useNavigate();
@@ -218,19 +232,53 @@ function BatchFile() {
       return values;
     });
   };
-
+  // TODO remove after betas: keeping incase something breaks
   // Format rows for FBO table
+  // const getFormattedFBORows = () => {
+  //   return fboData.map((fbo, index) => {
+  //     const values = Object.values(fbo);
+  //     values.push(
+  //       <button className="delete" onClick={() => handleFboDeletion(index)}>
+  //         Delete
+  //       </button>
+  //     );
+  //     return values;
+  //   });
+  // };
   const getFormattedFBORows = () => {
     return fboData.map((fbo, index) => {
-      const values = Object.values(fbo);
-      values.push(
+      const rowValues = fboHeaders.slice(0, -1).map((header) => {
+        const key = fboHeaderKeyMap[header];
+        let val = fbo[key];
+  
+        if (header === "Coordinates" && typeof val === "string") {
+          val = (
+            <div
+              style={{
+                maxWidth: "300px",
+                overflowX: "auto",
+                whiteSpace: "nowrap",
+                fontSize: "0.85em",
+                fontFamily: "monospace",
+              }}
+            >
+              {val}
+            </div>
+          );
+        }
+  
+        return val || "—";
+      });
+  
+      rowValues.push(
         <button className="delete" onClick={() => handleFboDeletion(index)}>
           Delete
         </button>
       );
-      return values;
+      return rowValues;
     });
   };
+  
 
   // Row styling for Airports
   const getRowProps = (row) => {
