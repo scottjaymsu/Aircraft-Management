@@ -169,7 +169,7 @@ export default function FBOSection({id}) {
                     <span className={getStatusClass(fbo.parking_taken, fbo.total_parking)}>
 
                       {fbo.parking_taken != null && fbo.total_parking ? 
-                    `${((fbo.parking_taken / fbo.total_parking) * 100).toFixed(0)}%` : '/'}
+                    `${((fbo.parking_taken / fbo.total_parking) * 100).toFixed(0)}%` : 'N/A'}
 
                     </span>
                   </td>
