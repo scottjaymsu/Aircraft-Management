@@ -1,5 +1,5 @@
 import React from 'react';
-import './component.css';
+import '../styles/component.css';
 import { getStatusColor } from '../utils/helpers';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 

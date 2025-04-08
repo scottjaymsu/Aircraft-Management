@@ -1,6 +1,6 @@
 import React from "react";
 import { FaBell } from "react-icons/fa";
-import "./component.css";
+import "../styles/component.css";
 import "../styles/Scrollable.css";
 
 const NotificationCenter = ({ notifications, visible, toggleVisibility, handleLocationClick }) => {

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import './component.css';
+import '../styles/component.css';
 import { getStatusColor } from "../utils/helpers";
 
 // Center of the U.S. Position
