@@ -150,7 +150,7 @@ const MapContainer = ({ markers, smallMarkers, onMarkerClick, setMapInstance }) 
           title: markerData.title,
           icon: {
             path: icon,
-            fillColor: 'red',
+            fillColor: '#1c3149',
             fillOpacity: 1,
             strokeColor: "rgb(33,48,71)",
             strokeWeight: 1,
