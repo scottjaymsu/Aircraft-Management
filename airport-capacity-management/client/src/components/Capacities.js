@@ -18,6 +18,10 @@ const Capacities = ({ id, spacesLeft }) => {
     const [selectedFBO, setSelectedFBO] = useState("");
     const [showDropdown, setShowDropdown] = useState(false);
 
+    const toggleDropdown = () => {
+        setShowDropdown((prev) => !prev);
+    };
+
     useEffect(() => {
         const fetchAircraftAverages = async () => {
             try {
@@ -86,43 +90,33 @@ const Capacities = ({ id, spacesLeft }) => {
                     Open Parking <br></br>
                     by Aircraft Type
                 </caption>
-                {/* <button className='fbo-button' onClick={() => setShowDropdown(!showDropdown)}>
-                    {selectedFBO ? selectedFBO : "Select FBO"}
-                </button> */}
                 <div className='dropdown-wrapper'>
-                    <button className="fbo-button">
+                    <button className="fbo-button" onClick={toggleDropdown}>
                     {selectedFBO ? selectedFBO : "Select FBO"}
+                   
                     </button>
-                    <ul className="dropdown-menu">
-                    {fboInfo.length > 0 ? (
-                        fboInfo.map((fbo, index) => (
-                        <li key={index} onClick={() => setSelectedFBO(fbo.name)}>
-                            {fbo.name}
-                        </li>
-                        ))
-                    ) : (
-                        <li>No FBOs available</li>
+                    {showDropdown && (
+                        <ul className="dropdown-menu">
+                            {fboInfo.length > 0 ? (
+                                fboInfo.map((fbo, index) => (
+                                    <li
+                                        key={index}
+                                        onClick={() => {
+                                            setSelectedFBO(fbo.name);
+                                            setShowDropdown(false);
+                                        }}
+                                    >
+                                        {fbo.name}
+                                    </li>
+                                ))
+                            ) : (
+                                <li>No FBOs available</li>
+                            )}
+                        </ul>
                     )}
-                    </ul>
                 </div>
                 
             </div>
-                {/* {showDropdown && (
-                    <ul className="dropdown-menu">
-                        {fboInfo.length > 0 ? (
-                            fboInfo.map((fbo, index) => (
-                                <li key={index} onClick={() => {
-                                    setSelectedFBO(fbo.name);
-                                    setShowDropdown(false);
-                                }}>
-                                    {fbo.name}
-                                </li>
-                            ))
-                        ) : (
-                            <li>No FBOs available</li>
-                        )}
-                    </ul>
-                )} */}
             <table>
                 <thead>
                     <tr>
