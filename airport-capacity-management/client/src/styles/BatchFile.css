@@ -146,11 +146,11 @@
 
 /* The container that specifically holds the table inside the box */
 .table-container-box {
-  background-color: #ffffff;
+  background-color: inherit;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  min-height: 200px;
+  min-height: 150px;
 }
 
 /* Deletion button inside the table */

@@ -1,5 +1,5 @@
 table {
-    background: #CCC7C8;
+    background: #e3dedf;
     border-collapse: collapse;
     border-spacing: 0;
     border-top-left-radius: 15px;
@@ -64,6 +64,7 @@ td, th {
     overflow-wrap: break-word;
     padding: 12px;
   }
+  
   td {
     /* font-weight: lighter; */
   }
