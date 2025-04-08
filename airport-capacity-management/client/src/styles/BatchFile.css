@@ -61,30 +61,39 @@
 .tabs {
   display: flex;
   justify-content: center;
-  margin-bottom: 20px;
+  position: fixed;
+  top: 55px;
+  right: 15px;
 }
 
 .tab-button {
-  padding: 10px 20px;
-  margin: 0 5px;
-  background-color: #1c3149;
-  color: #fff;
+  padding: 10px 60px;
+  background-color: #ddd8da;
   border: none;
-  border-radius: 8px;
   cursor: pointer;
   font-size: 16px;
   font-weight: semi-bold;
 }
 
+.tab-button.left {
+  margin-left: 5px;
+  border-radius: 8px 0 0 0;
+}
+
+.tab-button.right {
+  margin-right: 5px;
+  border-radius: 0 8px 0 0;
+}
+
 .tab-button.active {
-  background-color: #4175b0;
+  background-color: rgb(203,199,200);
 }
 
 /* The box that contains the file buttons, table, and parse button */
 .upload-box {
-  background-color: #d7d5d3;
+  background-color: rgb(203,199,200);
   border: none;
-  border-radius: 10px;
+  border-radius: 10px 0px 10px 10px;
   padding: 20px;
   margin-bottom: 40px;
   margin-left: 45px
@@ -100,15 +109,18 @@
 
 /* Buttons for uploading / downloading example */
 .upload-button {
-  padding: 12px 20px;
+  padding: 8px 20px;
   background-color: #1c3149;
   color: #fff;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-weight: bold;
   font-size: 16px;
   white-space: nowrap;
+}
+
+.upload-button:hover {
+  background-color: #14202c;
 }
 
 .upload-button a {
@@ -118,16 +130,18 @@
 
 /* Button to parse (Add All) */
 .parse-button {
-  padding: 12px 20px;
+  padding: 8px 20px;
   background-color: #b69c68;
   color: #fff;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-weight: bold;
   font-size: 16px;
   white-space: nowrap;
-  margin-top: 20px;
+}
+
+.parse-button:hover {
+  background-color: #a68b5b;
 }
 
 /* The container that specifically holds the table inside the box */

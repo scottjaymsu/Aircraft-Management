@@ -8,7 +8,7 @@ import Modal from "../components/Modal";
 
 function BatchFile() {
   // Track active tab
-  const [activeTab, setActiveTab] = useState("airport");
+  const [activeTab, setActiveTab] = useState("Airport");
 
   // Airport Data
   const [airportData, setAirportData] = useState([]);
@@ -307,21 +307,21 @@ function BatchFile() {
           <div className="title-section">
             <div className="batch-title">Batch File Upload</div>
             <div className="batch-subtitle">
-              Upload CSV/Batch Files to insert or update data.
+            Upload a CSV/Batch File containing {activeTab} data, then click "Add All {activeTab}s" to save them.
             </div>
           </div>
         </div>
         {/* Tabs */}
         <div className="tabs">
           <button
-            className={`tab-button ${activeTab === "airport" ? "active" : ""}`}
-            onClick={() => setActiveTab("airport")}
+            className={`tab-button left ${activeTab === "Airport" ? "active" : ""}`}
+            onClick={() => setActiveTab("Airport")}
           >
             Airport Data Upload
           </button>
           <button
-            className={`tab-button ${activeTab === "fbo" ? "active" : ""}`}
-            onClick={() => setActiveTab("fbo")}
+            className={`tab-button right ${activeTab === "FBO" ? "active" : ""}`}
+            onClick={() => setActiveTab("FBO")}
           >
             FBO Data Upload
           </button>
@@ -329,7 +329,7 @@ function BatchFile() {
       </div>
 
       {/* AIRPORT TAB CONTENT */}
-      {activeTab === "airport" && (
+      {activeTab === "Airport" && (
         <div className="upload-box">
           {/* Top row with left-aligned "Download/Choose" and right-aligned "Add All" */}
           <div className="top-row">
@@ -404,7 +404,7 @@ function BatchFile() {
       )}
 
       {/* FBO TAB CONTENT */}
-      {activeTab === "fbo" && (
+      {activeTab === "FBO" && (
         <div className="upload-box">
           {/* Top row with left-aligned "Download/Choose" and right-aligned "Add All" */}
           <div className="top-row">
