@@ -287,8 +287,8 @@ const SimulatorComponent = () => {
                         and Capacity Movement 
                      */}
                      <div>
-                     <button className="swich-alerts" onClick={handleSimulationTabClick} id="simulation-tab-button">
-                        {showSimulationTab ? "Hide Simulation Tab": "Show Simulation Tab"}
+                     <button className="run-simulation-button" onClick={handleSimulationTabClick} id="simulation-tab-button">
+                        {showSimulationTab ? "Show Recommendation Tab": "Show Simulation Tab"}
                     </button>
                     {showSimulationTab ? (
                         <SimulationTab

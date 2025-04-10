@@ -74,7 +74,6 @@ const SimulationTab = ({ fbo, id }) => {
             return [
                 plane.acid,
                 plane.plane_type, 
-                plane.size,
                 <input
                     key={plane.acid}
                     type="time"
@@ -86,7 +85,7 @@ const SimulationTab = ({ fbo, id }) => {
             ];
         }).filter(row => row !== null);
 
-        const tableHeaders = ["Tail Number", "Plane Type", "Size", "Time", "FBO Name"];
+        const tableHeaders = ["Tail Number", "Plane Type", "Time", "FBO Name"];
 
         /* When the user clicks the RUN SIMULATION button (tbh, the button is just for show since it can do this without user input).
         Sends request to backend which is where we're doing all the calculations for determining if there is space. The responses depend on what's

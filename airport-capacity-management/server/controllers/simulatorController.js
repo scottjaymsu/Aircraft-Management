@@ -609,23 +609,21 @@ function runSimulationRequest(selectedPlanes, planeTime, airportCode, db, res) {
                     SELECT flight_plans.fbo_id, netjets_fleet.acid, netjets_fleet.plane_type
                     FROM netjets_fleet
                     JOIN flight_plans ON netjets_fleet.flightRef = flight_plans.flightRef
-                    WHERE flight_plans.arrival_airport = 'KTEB'
+                    WHERE flight_plans.arrival_airport = ?
                 ),
                 scheduled_arrivals AS (
                     SELECT fbo_id, netjets_fleet.acid, netjets_fleet.plane_type
                     FROM flight_plans
                     JOIN netjets_fleet ON flight_plans.flightRef = netjets_fleet.flightRef
-                    WHERE arrival_airport = 'KTEB' 
-                    AND status = 'SCHEDULED' 
-                    AND eta <= NOW()
+                    WHERE arrival_airport = ?
+                    AND status = 'SCHEDULED' AND eta <= ?
                 ),
                 scheduled_departures AS (
                     SELECT fbo_id, netjets_fleet.acid, netjets_fleet.plane_type
                     FROM flight_plans
                     JOIN netjets_fleet ON flight_plans.flightRef = netjets_fleet.flightRef
-                    WHERE departing_airport = 'KTEB' 
-                    AND status = 'SCHEDULED' 
-                    AND eta > NOW()
+                    WHERE departing_airport = ?
+                    AND status = 'SCHEDULED' AND eta > ?
                 ),
                 plane_areas AS (
                     SELECT fbo_id, SUM(parkingArea) AS arrived_area, 0 AS scheduled_arrival_area, 0 AS scheduled_departure_area
@@ -646,7 +644,7 @@ function runSimulationRequest(selectedPlanes, planeTime, airportCode, db, res) {
                     COALESCE(SUM(plane_areas.arrived_area), 0) + COALESCE(SUM(plane_areas.scheduled_arrival_area), 0) - COALESCE(SUM(plane_areas.scheduled_departure_area), 0) AS space_taken
                 FROM airport_parking ap
                 LEFT JOIN plane_areas ON plane_areas.fbo_id = ap.id
-                WHERE ap.Airport_Code = 'KTEB'
+                WHERE ap.Airport_Code = ?
                 GROUP BY ap.id
                 ORDER BY ap.Priority;`
 
