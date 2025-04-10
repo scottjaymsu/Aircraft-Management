@@ -626,15 +626,15 @@ function runSimulationRequest(selectedPlanes, planeTime, airportCode, db, res) {
                     AND status = 'SCHEDULED' AND eta > ?
                 ),
                 plane_areas AS (
-                    SELECT fbo_id, SUM(parkingArea) AS arrived_area, 0 AS scheduled_arrival_area, 0 AS scheduled_departure_area
+                    SELECT fbo_id, SUM(parkingArea * 1.1) AS arrived_area, 0 AS scheduled_arrival_area, 0 AS scheduled_departure_area
                     FROM arrived_planes
                     JOIN aircraft_types ON arrived_planes.plane_type = aircraft_types.type
                     GROUP BY fbo_id UNION ALL
-                    SELECT fbo_id, 0, SUM(parkingArea), 0
+                    SELECT fbo_id, 0, SUM(parkingArea * 1.1), 0
                     FROM scheduled_arrivals
                     JOIN aircraft_types ON scheduled_arrivals.plane_type = aircraft_types.type
                     GROUP BY fbo_id UNION ALL
-                    SELECT fbo_id, 0, 0, SUM(parkingArea)
+                    SELECT fbo_id, 0, 0, SUM(parkingArea * 1.1)
                     FROM scheduled_departures
                     JOIN aircraft_types ON scheduled_departures.plane_type = aircraft_types.type
                     GROUP BY fbo_id
@@ -673,8 +673,8 @@ function runSimulationRequest(selectedPlanes, planeTime, airportCode, db, res) {
                     let assignedFBO = null;
                     for (const fbo of adjustedFBOData) {
                         const availableSpots = fbo.Area_ft2 - fbo.space_taken;
-                        console.log("Current available spots: ", availableSpots);
-                        if (availableSpots >= parkingArea) {
+                        const paddedArea = parkingArea * 1.1;
+                        if (availableSpots >= paddedArea) {
                             assignedFBO = fbo;
                             additionalSpaceByFBO[fbo.id] = (additionalSpaceByFBO[fbo.id] || 0) + parkingArea;
                             break;
