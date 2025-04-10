@@ -551,7 +551,7 @@ function runSimulationRequest(selectedPlanes, planeTime, airportCode, db, res) {
 
         const today = new Date();
         const dateString = today.toISOString().split('T')[0];
-        const additionalPlanesByFBO = {};
+        const additionalSpaceByFBO = {};
         const simulationResult = {};
 
         /* The selected planes come in top to bottom based on when the user clicked them to add them to the table. However, for this simulator to be accurate we need to sort
@@ -575,7 +575,20 @@ function runSimulationRequest(selectedPlanes, planeTime, airportCode, db, res) {
             const planeTimeFormatted = planeTime[currentPlane] || today.toTimeString().split(' ')[0].substring(0, 5);
             const formattedTime = `${dateString} ${planeTimeFormatted}:00`;
 
-            const fboQuery = `
+            const getPlaneInfoQuery = "SELECT nf.plane_type, at.parkingArea FROM netjets_fleet nf JOIN aircraft_types at ON nf.plane_type = at.type WHERE nf.acid = ? LIMIT 1;"
+            db.query(getPlaneInfoQuery, [currentPlane], (err, planeInfoResult) => {
+                if (err || planeInfoResult.length === 0) {
+                    console.error('Error fetching plane type/parkingArea:', err);
+                    simulationResult[currentPlane] = {
+                        fbo_id: null,
+                        fbo_name: "Error Getting Plane Info"
+                    };
+                    processNextPlane(index + 1);
+                    return;
+                }
+                const { plane_type, parkingArea } = planeInfoResult[0];
+                // This is the original query that just factors in parking space without space of plane.
+            /*const fboQuery = `
                 WITH arrived_planes AS (SELECT flight_plans.fbo_id, netjets_fleet.acid FROM netjets_fleet
                 JOIN flight_plans ON netjets_fleet.flightRef = flight_plans.flightRef WHERE flight_plans.arrival_airport = ?),
                 scheduled_arrivals AS (SELECT fbo_id FROM flight_plans WHERE arrival_airport = ? AND status = "SCHEDULED" AND eta <= ?),
@@ -589,52 +602,101 @@ function runSimulationRequest(selectedPlanes, planeTime, airportCode, db, res) {
                     FROM scheduled_departures GROUP BY fbo_id
                 )
                 SELECT ap.*, ap.Total_Space, COALESCE(SUM(plane_counts.arrived_count), 0) + COALESCE(SUM(plane_counts.scheduled_arrival_count), 0) - COALESCE(SUM(plane_counts.scheduled_departure_count), 0) AS spots_taken
-                FROM airport_parking ap LEFT JOIN plane_counts ON plane_counts.fbo_id = ap.id WHERE ap.Airport_Code = ? GROUP BY ap.id ORDER BY ap.Priority;`;
+                FROM airport_parking ap LEFT JOIN plane_counts ON plane_counts.fbo_id = ap.id WHERE ap.Airport_Code = ? GROUP BY ap.id ORDER BY ap.Priority;`;*/
 
-            db.query(fboQuery, [airportCode, airportCode, formattedTime, airportCode, formattedTime, airportCode], (err, fboData) => {
-                if (err) {
-                    console.error('Error fetching FBO data for plane:', err);
-                    simulationResult[currentPlane] = {
-                        fbo_id: null,
-                        fbo_name: "Error Processing"
-                    };
+                //This new query factors in the space of planes rather than just one parking spot (fbo space divided by 10 to ensure simulator functionality, but should be considered in full in real scenarios)
+                const fboQuery = `WITH arrived_planes AS (
+                    SELECT flight_plans.fbo_id, netjets_fleet.acid, netjets_fleet.plane_type
+                    FROM netjets_fleet
+                    JOIN flight_plans ON netjets_fleet.flightRef = flight_plans.flightRef
+                    WHERE flight_plans.arrival_airport = 'KTEB'
+                ),
+                scheduled_arrivals AS (
+                    SELECT fbo_id, netjets_fleet.acid, netjets_fleet.plane_type
+                    FROM flight_plans
+                    JOIN netjets_fleet ON flight_plans.flightRef = netjets_fleet.flightRef
+                    WHERE arrival_airport = 'KTEB' 
+                    AND status = 'SCHEDULED' 
+                    AND eta <= NOW()
+                ),
+                scheduled_departures AS (
+                    SELECT fbo_id, netjets_fleet.acid, netjets_fleet.plane_type
+                    FROM flight_plans
+                    JOIN netjets_fleet ON flight_plans.flightRef = netjets_fleet.flightRef
+                    WHERE departing_airport = 'KTEB' 
+                    AND status = 'SCHEDULED' 
+                    AND eta > NOW()
+                ),
+                plane_areas AS (
+                    SELECT fbo_id, SUM(parkingArea) AS arrived_area, 0 AS scheduled_arrival_area, 0 AS scheduled_departure_area
+                    FROM arrived_planes
+                    JOIN aircraft_types ON arrived_planes.plane_type = aircraft_types.type
+                    GROUP BY fbo_id UNION ALL
+                    SELECT fbo_id, 0, SUM(parkingArea), 0
+                    FROM scheduled_arrivals
+                    JOIN aircraft_types ON scheduled_arrivals.plane_type = aircraft_types.type
+                    GROUP BY fbo_id UNION ALL
+                    SELECT fbo_id, 0, 0, SUM(parkingArea)
+                    FROM scheduled_departures
+                    JOIN aircraft_types ON scheduled_departures.plane_type = aircraft_types.type
+                    GROUP BY fbo_id
+                )
+                SELECT
+                    ap.*,ap.Area_ft2/10 AS Area_ft2,
+                    COALESCE(SUM(plane_areas.arrived_area), 0) + COALESCE(SUM(plane_areas.scheduled_arrival_area), 0) - COALESCE(SUM(plane_areas.scheduled_departure_area), 0) AS space_taken
+                FROM airport_parking ap
+                LEFT JOIN plane_areas ON plane_areas.fbo_id = ap.id
+                WHERE ap.Airport_Code = 'KTEB'
+                GROUP BY ap.id
+                ORDER BY ap.Priority;`
+
+                db.query(fboQuery, [airportCode, airportCode, formattedTime, airportCode, formattedTime, airportCode], (err, fboData) => {
+                    if (err) {
+                        console.error('Error fetching FBO data for plane:', err);
+                        simulationResult[currentPlane] = {
+                            fbo_id: null,
+                            fbo_name: "Error Processing"
+                        };
+                        processNextPlane(index + 1);
+                        return;
+                    }
+                    /* The simulation is useless if we don't factor in the previous planes we've already simulated, so the FBOData has to be
+                    adjusted to account for those additional planes that have already been "simulated" to enter that FBO */
+                    const adjustedFBOData = fboData.map(fbo => {
+                        const fboClone = {...fbo};
+                        if (additionalSpaceByFBO[fbo.id]) {
+                            fboClone.space_taken += additionalSpaceByFBO[fbo.id];
+                        }
+                        return fboClone;}
+                    );
+
+                    /* Loop through all the fbos in the adjusted fbo data -- if there are available spots then assign it to that FBO and break the loop. If it never gets assigned, that means there
+                    was no space to assign it and should not have an fbo assigned. */
+                    let assignedFBO = null;
+                    for (const fbo of adjustedFBOData) {
+                        const availableSpots = fbo.Area_ft2 - fbo.space_taken;
+                        console.log("Current available spots: ", availableSpots);
+                        if (availableSpots >= parkingArea) {
+                            assignedFBO = fbo;
+                            additionalSpaceByFBO[fbo.id] = (additionalSpaceByFBO[fbo.id] || 0) + parkingArea;
+                            break;
+                        }
+                    }
+
+                    if (assignedFBO) {
+                        simulationResult[currentPlane] = {
+                            fbo_id: assignedFBO.id,
+                            fbo_name: assignedFBO.FBO_Name
+                        };
+                    }
+                    else {
+                        simulationResult[currentPlane] = {
+                            fbo_id: null,
+                            fbo_name: "None Available"
+                        };
+                    }
                     processNextPlane(index + 1);
-                    return;
-                }
-                /* The simulation is useless if we don't factor in the previous planes we've already simulated, so the FBOData has to be
-                adjusted to account for those additional planes that have already been "simulated" to enter that FBO */
-                const adjustedFBOData = fboData.map(fbo => {
-                    const fboClone = {...fbo};
-                    if (additionalPlanesByFBO[fbo.id]) {
-                        fboClone.spots_taken += additionalPlanesByFBO[fbo.id];
-                    }
-                    return fboClone;}
-                );
-                /* Loop through all the fbos in the adjusted fbo data -- if there are available spots then assign it to that FBO and break the loop. If it never gets assigned, that means there
-                was no space to assign it and should not have an fbo assigned. */
-                let assignedFBO = null;
-                for (const fbo of adjustedFBOData) {
-                    const availableSpots = fbo.Total_Space - fbo.spots_taken;
-                    if (availableSpots > 0) {
-                        assignedFBO = fbo;
-                        additionalPlanesByFBO[fbo.id] = (additionalPlanesByFBO[fbo.id] || 0) + 1;
-                        break;
-                    }
-                }
-
-                if (assignedFBO) {
-                    simulationResult[currentPlane] = {
-                        fbo_id: assignedFBO.id,
-                        fbo_name: assignedFBO.FBO_Name
-                    };
-                }
-                else {
-                    simulationResult[currentPlane] = {
-                        fbo_id: null,
-                        fbo_name: "None Available"
-                    };
-                }
-                processNextPlane(index + 1);
+                });
             });
         }
     });
