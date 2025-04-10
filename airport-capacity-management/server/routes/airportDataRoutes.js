@@ -10,6 +10,7 @@ router.get('/getAirportData/:id', airportDataController.getAirportData);
 router.get('/getCurrentCapacity/:id', airportDataController.getCurrentCapacity);
 router.get('/getOverallCapacity/:id', airportDataController.getOverallCapacity);
 router.get('/getParkedPlanes/:id', airportDataController.getParkedPlanes);
-router.get('/getAirportPlaneAreas/:id', areaController.getAirportPlaneAreas);
+router.get('/getAirportCapacity/:id', areaController.getAirportCapacity);
+router.get('/getFboCapacity/:id/:fbo', areaController.getFboCapacity);
 
 module.exports = router;
