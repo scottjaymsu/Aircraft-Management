@@ -24,7 +24,7 @@ public class MessageController {
         return ResponseEntity.ok(response);
     }
 
-    // This method should be called when a JMS message is received
+    // Add messages to the queue to be exposed via the api
     public static void storeMessage(String message) {
         messageQueue.add(message);
     }

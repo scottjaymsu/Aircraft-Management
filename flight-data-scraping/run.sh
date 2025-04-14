@@ -1,54 +1,70 @@
 #!/bin/bash
 
-BUILD=false
-TEST=false
+JAVA=false
+LOCAL=false
+DEBUG=false
+PUSH=false
 
-while getopts "bt" flag; do
-    case ${flag} in
-        b) BUILD=true ;;
-        t) TEST=true ;;
-        *) echo "Usage: $0 [-b] [-t]"; 
-           exit 1 ;;
+# Parse long options manually
+for arg in "$@"; do
+    case $arg in
+        -java)
+            JAVA=true
+            ;;
+        -local)
+            LOCAL=true
+            ;;
+        -debug)
+            DEBUG=true
+            ;;
+        -push)
+            PUSH=true
+            ;;
+        *)
+            echo "Usage: $0 [-java] [-local] [-debug]"
+            exit 1
+            ;;
     esac
 done
 
-if [ "$BUILD" = true ]; then
-    echo "BUILDING PROJECT"
-    cd jumpstart-latest/
-
-    echo "CLEANING THE MVN PACKAGE"
-    mvn clean package
-
-    echo "REMOVING THE OLD JUMPSTART JAR"
-    rm lib/jumpstart-jar-with-dependencies.jar
-
-    echo "MOVE NEW JAR TO LIB FOLDER"
-    mv target/jumpstart-jar-with-dependencies.jar lib/jumpstart-jar-with-dependencies.jar
-
-    cd ..
-
-    echo "BUILD DOCKER IMAGE"
-    docker build --platform linux/amd64 -t username486/netjets_server:latest .
-    # amd version so it can run on AWS amd servers
-fi
-
-if [ "$TEST" = true ]; then
+if [ "$JAVA" = true ]; then
     echo "COMPILE JAVA MESSAGE CONSUMER APP"
     cd FAA-message-consumer/jumpstart-latest/
     mvn clean package
     rm lib/jumpstart-jar-with-dependencies.jar
-    mv target/jumpstart-jar-with-dependencies.jar lib/jumpstart-jar-with-dependencies.jar
+    mv target/jumpstart-1.5.0.jar lib/jumpstart-jar-with-dependencies.jar
     cd ..
     cd ..
-
-    echo "BUILD DOCKER IMAGES"
-    cd testing/
-    docker-compose -f docker-compose.test.yml up --build
-
-    echo "TESTING..."
-
 fi
 
-# echo "RUN DOCKER CONTAINER"
+if [ "$LOCAL" = true ]; then
 
-# docker run -it --rm --name flight_data_scraper-fdps-v -v "$(pwd)/fdps.conf:/app/application.conf" username486/netjets_server:latest
+    if [ "$DEBUG" = true ]; then
+        echo "BUILD AND RUN DOCKER IMAGES IN DEBUG MODE"
+        docker-compose --profile debug up --build
+    else
+        echo "BUILD AND RUN DOCKER IMAGES IN NORMAL MODE"
+        docker-compose --profile local up --build -d 
+    fi
+fi
+
+if [ "$PUSH" = true ]; then
+    echo "BUILD PRODUCTION DOCKER IMAGES"
+    docker-compose --profile production build --no-cache
+    echo "LOGIN TO DOCKER HUB"
+    source .env
+    echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+    echo "PUSH PRODUCTION DOCKER IMAGES TO DOCKER HUB"
+    docker-compose --profile production push
+
+    echo "COPY OVER .ENV FILE AND DOCKER-COMPOSE FILE TO SERVER"
+    scp -i $SERVER_KEY_LOCAL_PATH .env $SERVER_ADDRESS:/home/ec2-user
+    scp -i $SERVER_KEY_LOCAL_PATH docker-compose.yml $SERVER_ADDRESS:/home/ec2-user
+    echo "SSH TO SERVER"
+    ssh -i $SERVER_KEY_LOCAL_PATH $SERVER_ADDRESS '\
+        echo "PULL PRODUCTION DOCKER IMAGES FROM DOCKER HUB" && \
+        docker-compose --profile production pull && \
+        echo "RUN PRODUCTION DOCKER IMAGES" && \
+        docker-compose --profile production up -d && \
+        exit'
+fi

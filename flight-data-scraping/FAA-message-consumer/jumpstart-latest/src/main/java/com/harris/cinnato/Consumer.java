@@ -14,15 +14,22 @@ import com.typesafe.config.ConfigFactory;
 
 import java.util.concurrent.TimeUnit;
 
+import javax.swing.Spring;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
 /**
  * Main entry-point for starting the JMS Consumer given the configuration loaded @see com.typesafe.config.ConfigFactory.
  * Starts the metrics reporter and connects the JMS Consumer to the message broker.
  */
+@SpringBootApplication
 class Consumer {
     // private static final Logger logger = LoggerFactory.getLogger(Consumer.class);
     private static final MetricRegistry metrics = new MetricRegistry();
 
     public static void main(String[] args) throws Exception {
+        SpringApplication.run(Consumer.class, args);
         Output reporter = null;
         Config config = ConfigFactory.load();
         String reporterName = config.getString("output");

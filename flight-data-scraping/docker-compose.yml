@@ -1,26 +1,172 @@
 services:
-  message-consumer:
+
+  flight-plan-tracking-base: &flight-plan-tracking-base
+    profiles:
+      - never-run
+    container_name: flight-plan-tracking
+    build:
+      context: ./flight_plan_tracking
+      dockerfile: Dockerfile 
+    ports:
+      - "5001:5000"
+      - "5678:5678"
+    env_file:
+      - .env
+    networks:
+      - Flight-data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://flight-plan-tracking:5000/flight-plan"]
+      interval: 1s
+      timeout: 10s
+      retries: 10
+      start_period: 1s
+
+  flight-plan-tracking-production:
+    <<: *flight-plan-tracking-base
+    image: ${DOCKER_USERNAME}/${DOCKER_REPO}:flight-plan-tracking
+    profiles:
+      - production
+    platform: linux/amd64
+    depends_on:
+      message-consumer-production:
+        condition: service_healthy
+
+  flight-plan-tracking-local: &flight-plan-tracking-local
+    <<: *flight-plan-tracking-base
+    image: flight-plan-tracking:latest
+    profiles:
+      - local
+      - test
+    depends_on:
+      message-consumer-local:
+        condition: service_healthy
+      test-db:
+        condition: service_healthy
+
+  flight-plan-tracking-debug:
+    <<: *flight-plan-tracking-local
+    profiles:
+      - debug
+    environment:
+      DEBUG: "True"
+      PYTHONUNBUFFERED: 1
+
+
+  
+  message-consumer-local: &message-consumer-local
     image: message-consumer:latest
+    profiles:
+      - local
+      - debug
+    container_name: message-consumer
     build:
       context: ./FAA-message-consumer
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
     networks:
-      - FAA-messages
+      - Flight-data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/messages/consume"]
+      interval: 1s
+      timeout: 10s
+      retries: 10
+      start_period: 1s
 
-  flight-plan-tracking:
-    image: flight-plan-tracking:latest
+  message-consumer-production:
+    <<: *message-consumer-local
+    image: ${DOCKER_USERNAME}/${DOCKER_REPO}:message-consumer
+    profiles:
+      - production
+    platform: linux/amd64
+
+
+
+  database-manager-local: &database-manager-local
+    image: database-manager:latest
+    profiles:
+      - local
+      - test
+    container_name: database-manager
     build:
-      context: ./flight_plan_tracking
+      context: ./database_manager
       dockerfile: Dockerfile
+    networks:
+      - Flight-data
     env_file:
       - .env
+    environment:
+      DB_HOST: test-db
+      DB_NAME: netjets
+      DB_USER: user
+      DB_PASSWORD: password
     depends_on:
-      - message-consumer
+      flight-plan-tracking-local:
+        condition: service_healthy
+      test-db:
+        condition: service_healthy
+
+  database-manager-debug:
+    <<: *database-manager-local
+    profiles:
+      - debug
+    environment:
+      DB_HOST: test-db
+      DB_NAME: netjets
+      DB_USER: user
+      DB_PASSWORD: password
+      DEBUG: "True"
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5679:5679"
+    depends_on:
+      flight-plan-tracking-debug:
+        condition: service_healthy
+      test-db:
+        condition: service_healthy
+
+  database-manager-production:
+    <<: *database-manager-local
+    image: ${DOCKER_USERNAME}/${DOCKER_REPO}:database-manager
+    profiles:
+      - production
+    environment:
+      DUMMY : "True"
+    platform: linux/amd64
+    depends_on:
+      flight-plan-tracking-production:
+        condition: service_healthy
+
+
+  
+  test-db:
+    image: test-db:latest
+    profiles:
+      - local
+      - debug
+      - test
+    build:
+      context: testing/test_db
+      dockerfile: Dockerfile
+    container_name: test-db
+    ports:
+      - "3306:3306"
     networks:
-      - FAA-messages
+      - Flight-data
+    environment:
+      MYSQL_DATABASE: netjets
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--host=localhost"]
+      interval: 5s
+      timeout: 50s
+      retries: 10
+      start_period: 10s
+
+  
 
 networks:
-  FAA-messages:
+  Flight-data:
     driver: bridge

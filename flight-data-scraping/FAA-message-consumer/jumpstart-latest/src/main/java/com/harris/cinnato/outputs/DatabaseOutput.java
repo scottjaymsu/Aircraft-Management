@@ -840,6 +840,8 @@ public class DatabaseOutput extends Output {
 
     /**
      * Parse the XML to determine if the message is a NetJets flight
+     * Uses a buffer system to optimize processing time
+     * This will sanitze the xml of its namespaces (i.e. <fdm:fltdMessage> --> <fltdMessage>)
      * @param reader
      * @throws XMLStreamException
      */
@@ -852,7 +854,7 @@ public class DatabaseOutput extends Output {
         while (reader.hasNext()) {
             int event = reader.next();
 
-            if (event == XMLStreamConstants.START_ELEMENT) {
+            if (!isNetJetsFlight && event == XMLStreamConstants.START_ELEMENT) {
                 // We are looking for 'fltdMessage' objects that are NetJets flights
                 String elementName = reader.getLocalName();
 
@@ -879,7 +881,7 @@ public class DatabaseOutput extends Output {
                     // If valid, process and store the message
                     isNetJetsFlight = true;
                     xmlWriter.getBuffer().setLength(0); // Reset buffer
-                    xmlWriter.append("<fdm:fltdMessage");
+                    xmlWriter.append("<fltdMessage");
 
                     // Since we just passed some of the attriubtes, pull them again here
                     // We are saving the xml message to the buffer
@@ -893,19 +895,40 @@ public class DatabaseOutput extends Output {
                     xmlWriter.append(">");
                 }
             } 
-            else if (event == XMLStreamConstants.CHARACTERS && isNetJetsFlight) {
-                // We are inside an xml object, so add all of it to the buffer if we are currently inside a NetJets flight message
-                xmlWriter.append(reader.getText());
-            } 
-            else if (event == XMLStreamConstants.END_ELEMENT) {
-                String elementName = reader.getLocalName();
+            else if (isNetJetsFlight) {
+                if (event == XMLStreamConstants.END_ELEMENT) {
+                    String elementName = reader.getLocalName();
 
-                // This is the end of an xml object. If it was a NetJets flight that we were reading,
-                // dump the buffer to the message api and reset
-                if ("fltdMessage".equals(elementName) && isNetJetsFlight) {
-                    xmlWriter.append("</fdm:fltdMessage>");
-                    MessageController.storeMessage(xmlWriter.toString());
-                    isNetJetsFlight = false;
+                    // If this is the end of the netjets flight message,
+                    // dump the buffer to the message api and reset
+                    if ("fltdMessage".equals(elementName) && isNetJetsFlight) {
+                        xmlWriter.append("</fltdMessage>");
+                        MessageController.storeMessage(xmlWriter.toString());
+                        isNetJetsFlight = false;
+                    } 
+                    // Else, this is the end tag of a nested element, so save it to the buffer and continue
+                    else {
+                        xmlWriter.append("</")
+                            .append(elementName)
+                            .append(">");
+                    }
+                }
+                // Else, this is not the end of the message, so save all elements, attributes, and content
+                else if (event == XMLStreamConstants.CHARACTERS ) {
+                    xmlWriter.append(reader.getText());
+                }
+                else if (event == XMLStreamConstants.START_ELEMENT) {
+                    xmlWriter.append("<").append(reader.getLocalName());
+
+                    // Save all attributes of the element
+                    for (int i = 0; i < reader.getAttributeCount(); i++) {
+                        xmlWriter.append(" ")
+                                .append(reader.getAttributeLocalName(i))
+                                .append("=\"")
+                                .append(reader.getAttributeValue(i))
+                                .append("\"");
+                    }
+                    xmlWriter.append(">");
                 }
             }
         }

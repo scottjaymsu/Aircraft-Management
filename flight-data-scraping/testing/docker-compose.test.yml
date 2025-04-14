@@ -15,18 +15,18 @@ services:
       timeout: 50s
       retries: 10
       start_period: 10s
-  
-  test-message-consumer:
-    image: test-message-consumer:latest
-    build:
-      context: ./test_message_consumer
+
+  message-consumer:
+    image: username486/netjets_server:message-consumer
+    build: 
+      context: ../FAA-message-consumer
       dockerfile: Dockerfile
     ports:
-      - "8080:5000"
+      - "8080:8080"
     networks:
-      - FAA-messages
+      - "FAA-messages"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/messages/consume"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/messages/consume"]
       interval: 1s
       timeout: 10s
       retries: 10
@@ -42,7 +42,7 @@ services:
     depends_on:
       test-db:
         condition: service_healthy
-      test-message-consumer:
+      message-consumer:
         condition: service_healthy
     networks:
       - FAA-messages

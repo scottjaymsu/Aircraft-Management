@@ -3,6 +3,8 @@ FROM openjdk:11-jre
 RUN mkdir -p /app/
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y curl
+
 COPY ./jumpstart-latest/lib/jumpstart-jar-with-dependencies.jar .
 COPY application.conf /app/application.conf
 
