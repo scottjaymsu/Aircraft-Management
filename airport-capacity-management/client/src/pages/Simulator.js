@@ -150,14 +150,27 @@ const SimulatorComponent = () => {
 
     }, [airportCode, fetchAllPlanes, timeInterval]);
 
-    // Constant Updates time in GMT
-    // Currently just our time but can change individual airport times 
+    /* This sets the local time for the current airport. It makes a request to our backend which is able to generate the timezone of the airport
+    based on it's lat/long coordinates. It will then generate the local time and display it for users looking at the header of the simulation page. */
     useEffect(() => {
+        let timeZoneAbbr = 'UTC';
+    
+        const fetchTimeZone = async () => {
+            try {
+                const response = await axios.get(`http://localhost:5001/airportData/getCurrentTime/${airportCode}`);
+                if (response.data && response.data.timeZoneAbbr) {
+                    timeZoneAbbr = response.data.timeZoneAbbr;
+                }
+            } catch (error) {
+                console.error('Error fetching time zone:', error);
+            }
+        };
+        fetchTimeZone();
+
         const interval = setInterval(() => {
             const now = new Date();
-            // Month/Day/YEAR Hour:Minute:Second GMT
             const formattedDate = now.toLocaleString('en-US', {
-                timeZone: 'GMT',
+                timeZone: timeZoneAbbr,
                 month: 'numeric',
                 day: 'numeric',
                 year: 'numeric',
@@ -165,12 +178,14 @@ const SimulatorComponent = () => {
                 minute: '2-digit',
                 second: '2-digit',
                 hour12: false
-            }) + ' GMT';
+            })
+    
             setLocalTime(formattedDate);
         }, 1000);
-
+    
         return () => clearInterval(interval);
-    }, []);
+    }, [airportCode]);
+    
 
     // Switches to selected FBO when selected from the dropdown
     // Planes assigned to that FBO will only be shown when selected
