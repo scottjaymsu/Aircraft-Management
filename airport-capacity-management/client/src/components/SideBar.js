@@ -12,6 +12,31 @@ const Sidebar = ({
   visible,
   toggleVisibility,
 }) => {
+  const [capacities, setCapacities] = React.useState({});
+
+  React.useEffect(() => {
+  let isCalled = false;
+
+  const fetchCapacities = async () => {
+    if (isCalled) return;
+    isCalled = true;
+
+    const updatedCapacities = {};
+    for (const loc of locations) {
+      try {
+        const response = await fetch(`http://localhost:5001/airportData/getAirportCapacity/${loc.title}`);
+        const data = await response.json();
+        updatedCapacities[loc.title] = data.percentage_occupied;
+      } catch (error) {
+        console.error(`Error fetching capacity for ${loc.title}:`, error);
+      }
+    }
+    setCapacities(updatedCapacities);
+  };
+
+    fetchCapacities();
+  }, []);
+
   return (
     <div id="side-bar" className={visible ? 'visible' : ''}>
       <div id="search-container">

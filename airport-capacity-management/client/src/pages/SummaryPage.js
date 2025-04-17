@@ -131,8 +131,27 @@ export default function SummaryPage() {
 
   const navigate = useNavigate();
 
+  // Fetch airport capacity percentage
   useEffect(() => {
-    // Fetch current population and overall capacity without using async/await
+    // Fetch airport capacity data
+    const fetchCapacityData = () => {
+      fetch(`http://localhost:5001/airportData/getAirportCapacity/${airportCode}`)
+        .then((response) => response.json())
+        .then((data) => {
+          const percentageOccupied = parseFloat(data.percentage_occupied);
+          console.log("Percentage Occupied:", percentageOccupied);
+          setCapacity(percentageOccupied); // Store percentageOccupied in capacity state
+        })
+        .catch((error) => {
+          console.error("Error fetching airport capacity data:", error);
+        });
+    };
+
+    fetchCapacityData();
+  }, [airportCode]);
+
+  useEffect(() => {
+    // Fetch current population and overall capacity
     const fetchData = () => {
       // Fetch number of planes currently at the airport
       fetch(`http://localhost:5001/airportData/getParkedPlanes/${airportCode}`)
@@ -347,8 +366,7 @@ export default function SummaryPage() {
           <CardContent className="text-center flex-1">
             <h2 className="title">{airportCode} - {airportMetadata.name}</h2>
             <p className={`status-bubble ${getStatusClass(currentPopulation, overallCapacity)}`}>
-              {currentPopulation != null && overallCapacity ? 
-                `${((currentPopulation / overallCapacity) * 100).toFixed(0)}%` : ''}
+                {(currentPopulation/overallCapacity * 100).toFixed(2)}%
             </p>
           </CardContent>
         </Card>
