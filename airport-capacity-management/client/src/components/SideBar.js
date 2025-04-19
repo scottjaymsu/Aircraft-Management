@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/component.css';
-import { getStatusColor } from '../utils/helpers';
+import { getColor } from '../utils/helpers';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import axios from 'axios';
 
@@ -25,7 +25,8 @@ const Sidebar = ({
         // Convert array to map { airport: percentage_occupied }
         const capMap = {};
         data.forEach(entry => {
-          capMap[entry.airport] = entry.percentage_occupied;
+            const percentageOccupied = parseFloat(entry.percentage_occupied);
+            capMap[entry.airport] = Math.round(percentageOccupied);
         });
 
         setCapacities(capMap);
@@ -62,9 +63,9 @@ const Sidebar = ({
             {loc.title}
             <div
               className="status-icon"
-              style={{ backgroundColor: getStatusColor(loc.status) }}
+              style={{ backgroundColor: getColor(capacities[loc.title]) }}
             >
-              {capacities[loc.title] || "\u00A0"}
+              {capacities[loc.title] != null ? `${capacities[loc.title]}%` : "\u00A0"}
             </div>
           </li>
         ))}

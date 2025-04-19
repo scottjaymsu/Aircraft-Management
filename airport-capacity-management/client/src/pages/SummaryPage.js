@@ -138,8 +138,8 @@ export default function SummaryPage() {
         .then((data) => {
           const percentageOccupied = parseFloat(data.percentage_occupied);
           if (!isNaN(percentageOccupied)) {
-            console.log("Percentage Occupied:", percentageOccupied);
-            setCapacity(percentageOccupied); // Store percentageOccupied in capacity state
+            // Store percentageOccupied in capacity state
+            setCapacity(Math.round(percentageOccupied));
           } else {
             console.error("Invalid percentage_occupied value:", data.percentage_occupied);
             setCapacity(0); // Default to 0 if the value is invalid
