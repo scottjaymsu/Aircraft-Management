@@ -4,7 +4,14 @@ import axios from 'axios';
 import '../styles/FlightTable.css';
 import '../styles/Capacities.css';
 
-const Capacities = ({ id, spacesLeft }) => {
+const Capacities = ({ id }) => {
+    const [aircraftAverages, setAircraftAverages] = useState([]);
+    const [fboInfo, setFboInfo] = useState([]);
+    const [selectedFBO, setSelectedFBO] = useState("");
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [area, setArea] = useState(0);
+    const [fboAreas, setFboAreas] = useState({});
+
     const [spacesAvailable, setSpacesAvailable] = useState({
         'Light': 0,
         'Mid-Size': 0,
@@ -13,15 +20,45 @@ const Capacities = ({ id, spacesLeft }) => {
         'Long Range Large': 0
     });
 
-    const [aircraftAverages, setAircraftAverages] = useState([]);
-    const [fboInfo, setFboInfo] = useState([]);
-    const [selectedFBO, setSelectedFBO] = useState("");
-    const [showDropdown, setShowDropdown] = useState(false);
+    // store fbos and areas
+    useEffect(() => {
+        const fetchFboData = async () => {
+            try {
+                const response = await axios.get(`http://localhost:5001/airportData/getAllFboCapacities/${id}`);
+                const fboMap = {};
+
+                // Build map of FBO to remaining area
+                response.data.forEach(item => {
+                    fboMap[item.fbo] = parseFloat(item.area_remaining);
+                });
+
+                setFboAreas(fboMap);
+
+                // Set fboInfo with objects that have a `name` key
+                const fboNames = response.data.map(item => ({ name: item.fbo }));
+                setFboInfo(fboNames);
+            } catch (error) {
+                console.error('Error fetching FBO capacities:', error);
+            }
+        };
+
+        fetchFboData();
+    }, [id]);
+
 
     const toggleDropdown = () => {
         setShowDropdown((prev) => !prev);
     };
 
+    
+    // get selected fbo area
+    useEffect(() => {
+        if (selectedFBO) {
+            setArea(fboAreas[selectedFBO]);
+        }
+    }, [selectedFBO, fboAreas]);
+
+    // get aircraft averages
     useEffect(() => {
         const fetchAircraftAverages = async () => {
             try {
@@ -37,51 +74,20 @@ const Capacities = ({ id, spacesLeft }) => {
     }, []);
 
     useEffect(() => {
-        if (aircraftAverages.length > 0 && selectedFBO) {
+        if (aircraftAverages.length > 0 && selectedFBO && area > 0) {
             const updatedSpacesAvailable = { ...spacesAvailable };
-            const totalAverage = aircraftAverages.reduce((sum, aircraft) => sum + aircraft.average_parking_area, 0) / aircraftAverages.length;
 
-            // Find the FBO data for the selected FBO
-            const selectedFboData = fboInfo.find(fbo => fbo.name === selectedFBO);
+            Object.keys(updatedSpacesAvailable).forEach((type) => {
+                const averageOfType = aircraftAverages.find(avg => avg.size === type);
 
-            if (selectedFboData) {
-                // Use the selected FBO's available spaces to update the table
-                Object.keys(updatedSpacesAvailable).forEach((type) => {
-                    const averageOfType = aircraftAverages.find(avg => avg.size === type);
-
-                    updatedSpacesAvailable[type] = averageOfType && averageOfType.average_parking_area > 0
-                        ? Math.floor((selectedFboData.spaces_left * totalAverage) / averageOfType.average_parking_area)
-                        : 0;
-                });
-
-                setSpacesAvailable(updatedSpacesAvailable);
-            }
-        }
-    }, [aircraftAverages, spacesLeft, selectedFBO, fboInfo]);
-
-    const fetchFBOData = useCallback(() => {
-        axios
-            .get(`http://localhost:5001/airports/getParkingCoordinates/${id}`)
-            .then((response) => {
-                if (Array.isArray(response.data) && response.data.length > 0) {
-                    const fboData = response.data.map((lot) => ({
-                        name: lot.FBO_Name || "Unknown",
-                        spaces_left: lot.Total_Space - Math.min(lot.spots_taken, lot.Total_Space)
-                    }));
-                    setFboInfo(fboData);
-                } else {
-                    console.warn("Empty or unexpected FBO data response");
-                    setFboInfo([]);
-                }
-            })
-            .catch((error) => {
-                console.error("Error fetching FBO data >:(", error);
+                updatedSpacesAvailable[type] = averageOfType && averageOfType.average_parking_area > 0
+                    ? Math.floor(area / averageOfType.average_parking_area)
+                    : 0;
             });
-    }, [id]);
 
-    useEffect(() => {
-        fetchFBOData();
-    }, [fetchFBOData]);
+            setSpacesAvailable(updatedSpacesAvailable);
+        }
+    }, [aircraftAverages, selectedFBO, area]);
 
     return (
         <div className='table-container'>
