@@ -117,8 +117,6 @@ exports.getCurrentTime = (req, res) => {
             const timeZone = tzLookup(latitude_deg, longitude_deg);
             const localTime = DateTime.now().setZone(timeZone).toISO();
             const timeZoneAbbr = DateTime.now().setZone(timeZone).toFormat('ZZZ');
-            console.log(localTime);
-            console.log("Timezone: ", timeZoneAbbr);
             res.json({ timeZoneAbbr, localTime });
         } catch (error) {
             console.error("Error determining time zone.", error);

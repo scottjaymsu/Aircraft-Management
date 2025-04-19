@@ -640,7 +640,7 @@ function runSimulationRequest(selectedPlanes, planeTime, airportCode, db, res) {
                     GROUP BY fbo_id
                 )
                 SELECT
-                    ap.*,ap.Area_ft2/10 AS Area_ft2,
+                    ap.*,ap.Area_ft2/5 AS Area_ft2,
                     COALESCE(SUM(plane_areas.arrived_area), 0) + COALESCE(SUM(plane_areas.scheduled_arrival_area), 0) - COALESCE(SUM(plane_areas.scheduled_departure_area), 0) AS space_taken
                 FROM airport_parking ap
                 LEFT JOIN plane_areas ON plane_areas.fbo_id = ap.id

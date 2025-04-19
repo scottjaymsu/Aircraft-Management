@@ -45,6 +45,8 @@ const currStatusStringGen = (status) => {
 //determines a capacity status based on if the current planes at the airport (gotten froma flight plans table) is over or under the total
 //fbo capacity. I put reaching capacity as 90% of the total capacity, it can be changed later. Also returns some metadata related to long and lat
 exports.getAirportMarkers = async (req, res) => {
+
+    /* This query is specifically used for if you'd rather have a capacity based percentage, than an area based percentage.
     const query = `SELECT ad.ident, ad.latitude_deg, ad.longitude_deg,
     COALESCE(COUNT(DISTINCT netjets_fleet.flightRef), 0) AS total_planes,
     COALESCE(capacity_info.capacity, 0) AS capacity,
@@ -61,6 +63,23 @@ exports.getAirportMarkers = async (req, res) => {
     LEFT JOIN netjets_fleet ON netjets_fleet.flightRef = flight_plans.flightRef
     LEFT JOIN ( SELECT ap.Airport_Code, SUM(ap.Total_Space) AS capacity FROM airport_parking ap GROUP BY ap.Airport_Code) AS capacity_info ON ad.ident = capacity_info.Airport_Code
     GROUP BY ad.ident, ad.latitude_deg, ad.longitude_deg;`
+    */
+
+    /* This query is for an area based calculation based on the total fbo areas (divided by 5 to ensure easy spacing for airplanes), as well as the total footprint of each airplane currently at the airport */
+    const query = `SELECT ap.Airport_Code AS ident, a.latitude_deg, a.longitude_deg,
+        SUM(at.parkingArea * 1.1) AS total_planes,
+        (SELECT SUM(Area_ft2) / 5 FROM airport_parking WHERE Airport_Code = ap.Airport_Code) AS capacity,
+        CASE WHEN SUM(at.parkingArea * 1.1) / (SELECT SUM(Area_ft2) / 5 FROM airport_parking WHERE Airport_Code = ap.Airport_Code) > 0.9 THEN 'Overcapacity'
+            WHEN SUM(at.parkingArea * 1.1) / (SELECT SUM(Area_ft2) / 5 FROM airport_parking WHERE Airport_Code = ap.Airport_Code) > 0.7 THEN 'Reaching Capacity'
+            ELSE 'Undercapacity' END AS capacity_status,
+        ROUND(SUM(at.parkingArea * 1.1) / (SELECT SUM(Area_ft2) / 5 FROM airport_parking WHERE Airport_Code = ap.Airport_Code), 2) AS capacity_percentage
+    FROM airport_parking ap
+    JOIN flight_plans fp ON fp.fbo_id = ap.id
+    JOIN netjets_fleet nf ON nf.acid = fp.acid
+    JOIN aircraft_types at ON at.type = nf.plane_type
+    JOIN airport_data a ON a.ident = ap.Airport_Code
+    GROUP BY ap.Airport_Code, a.latitude_deg, a.longitude_deg;
+    `
     
     db.query(query, [], (err, results) => {
         if (err) {
@@ -80,6 +99,7 @@ exports.getAirportMarkers = async (req, res) => {
                 capacity_percentage: row.capacity_percentage
             }))
             res.json(formattedResults);
+            
         }
     });
 };
