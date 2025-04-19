@@ -12,6 +12,7 @@ router.get('/getOverallCapacity/:id', airportDataController.getOverallCapacity);
 router.get('/getParkedPlanes/:id', airportDataController.getParkedPlanes);
 router.get('/getAirportCapacity/:id', areaController.getAirportCapacity);
 router.get('/getFboCapacity/:id/:fbo', areaController.getFboCapacity);
+router.get('/getAllAirportCapacities', areaController.getAllAirportCapacities);
 router.get('/getCurrentTime/:id', airportDataController.getCurrentTime);
 
 

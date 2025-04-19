@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles/component.css';
 import { getStatusColor } from '../utils/helpers';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import axios from 'axios';
 
 const Sidebar = ({
   searchTerm,
@@ -12,27 +13,27 @@ const Sidebar = ({
   visible,
   toggleVisibility,
 }) => {
-  const [capacities, setCapacities] = React.useState({});
+  // Airport capacities 
+  const [capacities, setCapacities] = useState({});
 
-  React.useEffect(() => {
-  let isCalled = false;
-
-  const fetchCapacities = async () => {
-    if (isCalled) return;
-    isCalled = true;
-
-    const updatedCapacities = {};
-    for (const loc of locations) {
+  useEffect(() => {
+    const fetchCapacities = async () => {
       try {
-        const response = await fetch(`http://localhost:5001/airportData/getAirportCapacity/${loc.title}`);
-        const data = await response.json();
-        updatedCapacities[loc.title] = data.percentage_occupied;
+        const response = await axios.get("http://localhost:5001/airportData/getAllAirportCapacities");
+        const data = response.data;
+
+        // Convert array to map { airport: percentage_occupied }
+        const capMap = {};
+        data.forEach(entry => {
+          capMap[entry.airport] = entry.percentage_occupied;
+        });
+
+        setCapacities(capMap);
+        console.log("Capacities:", capMap);
       } catch (error) {
-        console.error(`Error fetching capacity for ${loc.title}:`, error);
+        console.error("Failed to fetch airport capacities:", error);
       }
-    }
-    setCapacities(updatedCapacities);
-  };
+    };
 
     fetchCapacities();
   }, []);
@@ -63,8 +64,7 @@ const Sidebar = ({
               className="status-icon"
               style={{ backgroundColor: getStatusColor(loc.status) }}
             >
-              {loc.total_planes != null && loc.capacity ? 
-              `${((loc.total_planes / loc.capacity) * 100).toFixed(0)}%` : ''}
+              {capacities[loc.title] || "\u00A0"}
             </div>
           </li>
         ))}

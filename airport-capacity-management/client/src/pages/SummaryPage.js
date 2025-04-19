@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { GoogleMap, LoadScript, Polygon } from "@react-google-maps/api";
+import { GoogleMap, Polygon } from "@react-google-maps/api";
 import { Card, CardContent } from "../components/card";
 import { getStatusClass, getStatusColor } from "../utils/helpers"
 
