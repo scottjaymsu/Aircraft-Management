@@ -2,14 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { GoogleMap, Polygon } from "@react-google-maps/api";
 import { Card, CardContent } from "../components/card";
-import { getStatusClass, getStatusColor } from "../utils/helpers"
+import { getStatusClass, getColor } from "../utils/helpers"
 
 import "../styles/SummaryPage.css";
 import "../styles/Scrollable.css";
 import FlightTable from "../components/FlightTable";
 import TrafficOverview from "../components/TrafficOverview";
 import FBOComponent from "../components/FBOComponent";
-import Capacities from "../components/Capacities";
+import axios from "axios";
 
 // Map Size
 const containerStyle = {
@@ -123,11 +123,36 @@ export default function SummaryPage() {
   });
 
   const [airportMetadata, setAirportMetadata] = useState([]);
-  const [FBOList, setFBOList] = useState([]);
   // airport capacity as percentage
   const [capacity, setCapacity] = useState(null);
+  // fbo capacities for airport
+  const [fboCapacities, setFboCapacities] = useState({});
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchFboCapacities = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5001/airportData/getAllFboCapacities/${airportCode}`);
+        const data = response.data;
+
+        // Convert array to map { fbo: percentage_occupied }
+        const fboMap = {};
+        data.forEach(entry => {
+          const percentageOccupied = parseFloat(entry.percentage_occupied);
+          // round to nearest integer
+          fboMap[entry.fbo] = Math.round(percentageOccupied); 
+        });
+
+        setFboCapacities(fboMap);
+        console.log("FBO Capacities:", fboMap);
+      } catch (error) {
+        console.error("Failed to fetch FBO capacities:", error);
+      }
+    };
+
+    fetchFboCapacities();
+  }, [airportCode]);
 
   // Fetch airport capacity percentage
   useEffect(() => {
@@ -214,23 +239,11 @@ export default function SummaryPage() {
           return {
             name: lot.FBO_Name,
             coordinates,
-            color: getStatusColor(lot.spots_taken, lot.Total_Space),
+            color: getColor(fboCapacities[lot.FBO_Name]),
             labelPosition: coordinates[0] || { lat: 0, lng: 0 },
           };
         });
         
-        // Create FBO list with parking lot data
-        const FBOs = data.map((lot) => {
-          return {
-            name: lot.FBO_Name,
-            parking_taken: lot.spots_taken,
-            total_parking: lot.Total_Space,
-            // Default priority to 1 if not provided
-            priority: lot.priority || 1,
-          };
-        });
-        setFBOList(FBOs);
-
         setParkingLots(parkingLots);
       } catch (error) {
         console.error("Error fetching parking data:", error);
@@ -259,7 +272,7 @@ export default function SummaryPage() {
     fetchParkingCoordinates();
     fetchAirportData();
 
-  }, [airportCode]);
+  }, [airportCode, fboCapacities]);
 
 
   //
@@ -348,7 +361,6 @@ export default function SummaryPage() {
           </div>
           <TrafficOverview id={airportCode} />
         </Card>
-
         {/* Arriving flight table */}
         <Card className="card-content flex-3">
           <CardContent>
