@@ -124,10 +124,8 @@ export default function SummaryPage() {
 
   const [airportMetadata, setAirportMetadata] = useState([]);
   const [FBOList, setFBOList] = useState([]);
-  const [currentPopulation, setCurrentPopulation] = useState(0);
-  const [overallCapacity, setOverallCapacity] = useState(0);
   // airport capacity as percentage
-  const [capacity, setCapacity] = useState(0);
+  const [capacity, setCapacity] = useState(null);
 
   const navigate = useNavigate();
 
@@ -139,8 +137,13 @@ export default function SummaryPage() {
         .then((response) => response.json())
         .then((data) => {
           const percentageOccupied = parseFloat(data.percentage_occupied);
-          console.log("Percentage Occupied:", percentageOccupied);
-          setCapacity(percentageOccupied); // Store percentageOccupied in capacity state
+          if (!isNaN(percentageOccupied)) {
+            console.log("Percentage Occupied:", percentageOccupied);
+            setCapacity(percentageOccupied); // Store percentageOccupied in capacity state
+          } else {
+            console.error("Invalid percentage_occupied value:", data.percentage_occupied);
+            setCapacity(0); // Default to 0 if the value is invalid
+          }
         })
         .catch((error) => {
           console.error("Error fetching airport capacity data:", error);
@@ -149,41 +152,6 @@ export default function SummaryPage() {
 
     fetchCapacityData();
   }, [airportCode]);
-
-  useEffect(() => {
-    // Fetch current population and overall capacity
-    const fetchData = () => {
-      // Fetch number of planes currently at the airport
-      fetch(`http://localhost:5001/airportData/getParkedPlanes/${airportCode}`)
-        .then((currentResponse) => currentResponse.json())
-        .then((currentData) => {
-          const currentPopulation = currentData.length;
-          setCurrentPopulation(currentPopulation);
-          console.log("Current Population:", currentPopulation);
-
-          // Fetch overall capacity of the airport
-          fetch(`http://localhost:5001/airportData/getOverallCapacity/${airportCode}`)
-            .then((overallResponse) => overallResponse.json())
-            .then((overallData) => {
-              const overallCapacity = overallData.totalCapacity;
-              setOverallCapacity(overallCapacity);
-              console.log("Overall Capacity:", overallCapacity);
-
-              // Set capacity as percentage
-              setCapacity((currentPopulation / overallCapacity) * 100);
-            })
-            .catch((error) => {
-              console.error("Error fetching overall capacity data:", error);
-            });
-        })
-        .catch((error) => {
-          console.error("Error fetching current population data:", error);
-        });
-    };
-
-    fetchData();
-  }, [airportCode]);
-
 
   useEffect(() => {
     console.log(airportCode);
@@ -361,17 +329,19 @@ export default function SummaryPage() {
         {/* Back button to go back to the home page */}
         <img onClick={handleBack} className="back-button" src="/back-arrow.png" alt="Back Button"></img>
 
-        {/* Title and status of airport */}
-        <Card className="card-content">
-          <CardContent className="text-center flex-1">
-            <h2 className="title">{airportCode} - {airportMetadata.name}</h2>
-            <p className={`status-bubble ${getStatusClass(currentPopulation, overallCapacity)}`}>
-                {(currentPopulation/overallCapacity * 100).toFixed(2)}%
-            </p>
-          </CardContent>
-        </Card>
 
-        {/* Traffic Overview graph */}
+          <Card className="card-content">
+            <CardContent className="text-center flex-1">
+              <h2 className="title">
+                {airportMetadata.name ? `${airportCode} - ${airportMetadata.name}` : "\u00A0"}
+              </h2>
+              <p className={`status-bubble ${getStatusClass(capacity)}`}>
+                {capacity !== null ? `${capacity}%` : "\u00A0"}
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Traffic Overview graph */}
         <Card className="card-content flex-2">
           <div style={{ textAlign: 'center', top: 0 }}>
             <h2>Traffic Overview</h2>
@@ -397,7 +367,7 @@ export default function SummaryPage() {
         <FBOComponent id={airportCode}/>
         <Card className="card-content flex-3">
           <CardContent>
-                <Capacities id={airportCode} spacesLeft={overallCapacity-currentPopulation} />
+                {/* <Capacities id={airportCode} spacesLeft={overallCapacity-currentPopulation} /> */}
           </CardContent>
         </Card>
         <button className="see-more flex-1" onClick={handleSeeMore}>See more</button>
