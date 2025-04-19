@@ -303,7 +303,7 @@ const SimulatorComponent = () => {
                      */}
                      <div>
                      <button className="run-simulation-button" onClick={handleSimulationTabClick} id="simulation-tab-button">
-                        {showSimulationTab ? "Show Recommendation Tab": "Show Simulation Tab"}
+                        {showSimulationTab ? "Show Recommendations": "Open Simulation"}
                     </button>
                     {showSimulationTab ? (
                         <SimulationTab

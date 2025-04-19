@@ -82,10 +82,10 @@ const SimulatorAlerts = ({ fbo, id }) => {
                 Operational Recommendations 
                 <div id="sort-by">
                     <span id="sort-by-text">Sort By...</span>
-                    <button onClick={() => setAlerts([...alerts].sort((a, b) => new Date(a.eta) - new Date(b.eta)))} >
+                    <button className="reset-button" onClick={() => setAlerts([...alerts].sort((a, b) => new Date(a.eta) - new Date(b.eta)))} >
                         Time Grounded
                     </button>
-                    <button onClick={() => setAlerts([...alerts].sort((a, b) => a.parkingArea - b.parkingArea))}>
+                    <button className="reset-button" onClick={() => setAlerts([...alerts].sort((a, b) => a.parkingArea - b.parkingArea))}>
                         Size
                     </button>
                 </div>
@@ -102,28 +102,31 @@ const SimulatorAlerts = ({ fbo, id }) => {
                         </thead>
                         <tbody>
                             {alerts.length > 0 ? (
-                                alerts.map((alert) => (
-                                    <React.Fragment key={alert.acid}>
-                                        <tr onClick={() => toggleRow(alert.acid)} style={{ cursor: "pointer" }}>
-                                            <td>
-                                                <div className="alert-box green-color"></div>
-                                                <span>{alert.acid || "Unknown"}</span>
-                                            </td>
-                                            <td>{alert.plane_type || "Unknown"}</td>
-                                            <td>{alert.size || "Unknown"}</td>
-                                        </tr>
-                                        {expandedRows[alert.acid] && (
-                                            <tr>
-                                                <td colSpan="3">
-                                                    <div>
-                                                        <strong>Recommendation:</strong>
-                                                        <p>{rec ? `Move to ${rec}` : "No recommendation available"}</p>
-                                                    </div>
+                                alerts
+                                    // Filter out alerts with unknown acid
+                                    .filter((alert) => alert.acid) 
+                                    .map((alert) => (
+                                        <React.Fragment key={alert.acid}>
+                                            <tr onClick={() => toggleRow(alert.acid)} style={{ cursor: "pointer" }}>
+                                                <td>
+                                                    <div className="alert-box green-color"></div>
+                                                    <span>{alert.acid}</span>
                                                 </td>
+                                                <td>{alert.plane_type || "Unknown"}</td>
+                                                <td>{alert.size || "Unknown"}</td>
                                             </tr>
-                                        )}
-                                    </React.Fragment>
-                                ))
+                                            {expandedRows[alert.acid] && (
+                                                <tr>
+                                                    <td colSpan="3">
+                                                        <div>
+                                                            <strong>Recommendation:</strong>
+                                                            <p>{rec ? `Move to ${rec}` : "No recommendation available"}</p>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </React.Fragment>
+                                    ))
                             ) : (
                                 <tr>
                                     <td colSpan="3" style={{ textAlign: "center" }}>No recommendations available</td>

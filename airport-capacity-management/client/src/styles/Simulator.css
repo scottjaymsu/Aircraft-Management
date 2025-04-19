@@ -522,6 +522,12 @@ select option {
 
 #sort-by button {
     width: 125px;
+    margin: 0;
+    white-space: nowrap; /* Prevent text wrapping */ 
+}
+
+#sort-by-text {
+    white-space: nowrap; /* Prevent text wrapping */
 }
 
 .switch-alerts {
