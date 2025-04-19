@@ -15,7 +15,6 @@ export default function FBOSection({id}) {
   useEffect(() => {
     const fetchFboCapacities = async () => {
       try {
-        // Adjust the endpoint URL to use the FBO-specific data
         const response = await axios.get(`http://localhost:5001/airportData/getAllFboCapacities/${id}`);
         const data = response.data;
 
@@ -35,7 +34,7 @@ export default function FBOSection({id}) {
     };
 
     fetchFboCapacities();
-  }, []);
+  }, [id]);
 
   const fetchFBOData = useCallback(() =>{
     axios
@@ -193,10 +192,7 @@ export default function FBOSection({id}) {
                   <td>{fbo.name}</td>
                   <td>
                     <span className={getStatusClass(fboCapacities[fbo.name])}>
-
-                    {fboCapacities[fbo.name] != null ? `${fboCapacities[fbo.name]}%` : "\u00A0"}
-
-            
+                      {fboCapacities[fbo.name] != null ? `${fboCapacities[fbo.name]}%` : "\u00A0"}
                     </span>
                   </td>
                   <td>
