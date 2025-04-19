@@ -45,10 +45,34 @@ const SimulatorHeader = ({
     const [currentPopulation, setCurrentPopulation] = useState(0);
     const [overallCapacity, setOverallCapacity] = useState(0);
     // airport capacity as percentage
-    const [capacity, setCapacity] = useState(0);
+    const [capacity, setCapacity] = useState(null);
     // fbo capacity as percentage
     const [fbo, setFbo] = useState([]);
     const [fboCapacity, setFboCapacity] = useState([]);
+
+  // Fetch airport capacity percentage
+  useEffect(() => {
+    // Fetch airport capacity data
+    const fetchCapacityData = () => {
+      fetch(`http://localhost:5001/airportData/getAirportCapacity/${selectedAirport}`)
+        .then((response) => response.json())
+        .then((data) => {
+          const percentageOccupied = parseFloat(data.percentage_occupied);
+          if (!isNaN(percentageOccupied)) {
+            // Store percentageOccupied in capacity state
+            setCapacity(Math.round(percentageOccupied));
+          } else {
+            console.error("Invalid percentage_occupied value:", data.percentage_occupied);
+            setCapacity(0); // Default to 0 if the value is invalid
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching airport capacity data:", error);
+        });
+    };
+
+    fetchCapacityData();
+  }, [selectedAirport]);    
 
     // fetch capacity data for entire airport
     useEffect(() => {
@@ -122,8 +146,7 @@ const SimulatorHeader = ({
                 </div>
 
                 <CapacityInfo
-                    currentPopulation={currentPopulation}
-                    overallCapacity={overallCapacity}
+                    capacity={capacity}
                     fbo={fbo}
                 />
                 <Legend/>
