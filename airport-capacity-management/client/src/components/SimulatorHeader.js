@@ -43,10 +43,10 @@ const SimulatorHeader = ({
     const [currentPopulation, setCurrentPopulation] = useState(0);
     const [overallCapacity, setOverallCapacity] = useState(0);
     // airport capacity as percentage
-
+    const [capacity, setCapacity] = useState(0);
     // fbo capacity as percentage
     const [fbo, setFbo] = useState([]);
-
+    const [fboCapacity, setFboCapacity] = useState([]);
 
     // fetch capacity data for entire airport
     useEffect(() => {
@@ -164,6 +164,7 @@ const SimulatorHeader = ({
                 </div>
             </div>
             </div>
+
     );
 };
 
