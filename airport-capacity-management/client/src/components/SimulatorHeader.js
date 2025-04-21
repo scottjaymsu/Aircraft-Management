@@ -18,8 +18,6 @@ import SimulatorTableFilters from "./header/SimulatorTableFilters";
 const SimulatorHeader = ({
     selectedAirport, 
     selectedFBO, 
-    takenSpace, 
-    totalSpace, 
     searchTerm, 
     handleTailNumberChange, 
     handleFBOChange, 
@@ -45,10 +43,10 @@ const SimulatorHeader = ({
     const [currentPopulation, setCurrentPopulation] = useState(0);
     const [overallCapacity, setOverallCapacity] = useState(0);
     // airport capacity as percentage
-    const [capacity, setCapacity] = useState(0);
+
     // fbo capacity as percentage
     const [fbo, setFbo] = useState([]);
-    const [fboCapacity, setFboCapacity] = useState([]);
+
 
     // fetch capacity data for entire airport
     useEffect(() => {
@@ -92,7 +90,8 @@ const SimulatorHeader = ({
         .then((response) => {
             const data = response.data;
             const fboData = data
-                .filter((lot) => lot.FBO_Name === selectedFBO) // Keep only matching records
+                // Keep only matching records
+                .filter((lot) => lot.FBO_Name === selectedFBO) 
                 .map((lot) => ({
                     name: lot.FBO_Name,
                     parking_taken: lot.spots_taken,
@@ -165,7 +164,6 @@ const SimulatorHeader = ({
                 </div>
             </div>
             </div>
-
     );
 };
 

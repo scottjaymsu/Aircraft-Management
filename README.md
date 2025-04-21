@@ -1,8 +1,59 @@
-# netjets-web-application
+# Airport Capacity and Ground Space Management 
+
+## Description
+
+A full stack web application developed for NetJets to provide real-time and projected capacities
+at airports. This application can provide reccomendations, such as where to move aircraft in order to 
+provide space for incoming flights, as well as simulate projected parking scenarios for planned flights for estimating the capacity at specific FBOs. Airport and FBO data can be added manally by batch file. FBOs can also be drawn by the user in addition to the batch file upload.
 
 
+## Tech Stack 
+
+**Front End**
+
+* React.js
+* Google Maps API
+* JavaScript
+* HTML
+* CSS
+
+**Back End**
+* Node.js
+* JavaScript
+
+**Database**
+* MySQL
+
+**DevOps and Infra**
+* AWS Amplify
+* Docker
+* GitLab
 
 ## Getting started
+
+1. Install Dependencies 
+
+```
+cd client
+npm install
+```
+
+```
+cd server
+npm install
+```
+
+2. Running Project
+```
+cd client
+npm start
+```
+
+```
+cd server
+node index.js
+```
+
 
 To make it easy for you to get started with GitLab, here's a list of recommended next steps.
 

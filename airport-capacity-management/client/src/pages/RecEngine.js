@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import Table from '../components/Table.js';
 import '../styles/RecEngine.css'
-
+// TODO I dont think we actually use this page might me able to be deleted 
 function RecEngine() {
   const { iata_code } = useParams();
   const [airportInformation, setAirportInformation] = useState(null);
@@ -15,11 +15,11 @@ function RecEngine() {
   const [selectedFBO, setSelectedFBO] = useState(null);
   const [selectedFBOInformation, setSelectedFBOInformation] = useState(null);
 
-  //I tried making this a useRef and no matter what it gave me errors? I should follow-up, but for now i'm making these useStates TODO
+  // I tried making this a useRef and no matter what it gave me errors? I should follow-up, but for now i'm making these useStates TODO
   const [allPlanes, setAllPlanes] = useState([]);
   const [airportFBOs, setAirportFBOs] = useState([]);
   
-  //Initial loading of the needed elements when the scren first renders, am I supposed to structure it as just one full useEffect? TODO
+  // Initial loading of the needed elements when the scren first renders, am I supposed to structure it as just one full useEffect? TODO
   useEffect(() => {
     const getAirportInformation = async() => {
       try {
