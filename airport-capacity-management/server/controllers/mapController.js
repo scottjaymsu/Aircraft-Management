@@ -99,7 +99,6 @@ exports.getAirportMarkers = async (req, res) => {
                 capacity_percentage: row.capacity_percentage
             }))
             res.json(formattedResults);
-            
         }
     });
 };
