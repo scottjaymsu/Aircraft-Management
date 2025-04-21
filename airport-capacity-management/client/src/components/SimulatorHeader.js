@@ -14,6 +14,25 @@ import SimulatorTableFilters from "./header/SimulatorTableFilters";
 
 /**
  * Top segment of the Simulator page 
+ * Displays a title, FBO, capacity information, and time
+ * And offers filters for tail number, plane size, and plane type
+ * 
+ * Props:
+ * - selectedAirport: The currently selected airport
+ * - selectedFBO: The currently selected FBO
+ * - searchTerm: The current search term for tail number
+ * - handleTailNumberChange: Function to handle tail number change
+ * - handleFBOChange: Function to handle FBO change
+ * - fboData: Data for FBOs
+ * - localTime: The current local time
+ * - planeTypes: List of plane types
+ * - selectedPlaneTypeFilter: The currently selected plane type filter
+ * - handlePlaneTypeFilterChange: Function to handle plane type filter change
+ * - planeSizes: List of plane sizes
+ * - selectedPlaneSizeFilter: The currently selected plane size filter
+ * - handlePlaneSizeFilterChange: Function to handle plane size filter change
+ * - tailNumberOptions: List of tail number options
+ * - handleResetFilters: Function to handle reset filters
  */
 const SimulatorHeader = ({
     selectedAirport, 
@@ -83,7 +102,7 @@ const SimulatorHeader = ({
         fetchData();
     }, [selectedAirport]);
 
-    // fetch capacity data for selected fbo
+    // Fetch capacity data for selected fbo
     const fetchFBOData = useCallback(() => {
         axios
         .get(`http://localhost:5001/airports/getParkingCoordinates/${selectedAirport}`)
