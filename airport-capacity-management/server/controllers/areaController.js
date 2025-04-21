@@ -82,6 +82,90 @@ exports.getAirportCapacity = (req, res) => {
     });
 };
 
+/**
+ * Gets remaining capacities for all airports
+ */
+exports.getAllAirportCapacities = (req, res) => {
+    const airport_area_query = `
+        SELECT
+            Airport_Code,
+            SUM(Area_ft2) AS total_area
+        FROM
+            airport_parking
+        GROUP BY
+            Airport_Code;
+    `;
+
+    const occupied_area_query = `
+        SELECT 
+            airport_parking.Airport_Code,
+            SUM(aircraft_types.parkingArea * 1.1) AS occupied_area
+        FROM
+            airport_parking
+        JOIN
+            flight_plans
+            ON flight_plans.fbo_id = airport_parking.id
+        JOIN
+            netjets_fleet
+            ON netjets_fleet.acid = flight_plans.acid
+        JOIN
+            aircraft_types
+            ON aircraft_types.type = netjets_fleet.plane_type
+        GROUP BY
+            airport_parking.Airport_Code;
+    `;
+
+    // Get total area
+    db.query(airport_area_query, (err, areaResults) => {
+        if (err) {
+            console.error("Error fetching airport areas:", err);
+            return res.status(500).json({ error: "Error fetching airport areas" });
+        }
+
+        // Get occupied area
+        db.query(occupied_area_query, (err2, occupiedResults) => {
+            if (err2) {
+                console.error("Error fetching occupied areas:", err2);
+                return res.status(500).json({ error: "Error fetching occupied areas" });
+            }
+
+            // Convert results into maps
+            const totalMap = {};
+            areaResults.forEach(row => {
+                totalMap[row.Airport_Code] = parseFloat(row.total_area) / 5;
+            });
+
+            const occupiedMap = {};
+            occupiedResults.forEach(row => {
+                occupiedMap[row.Airport_Code] = parseFloat(row.occupied_area);
+            });
+
+            // Combine both maps
+            const summary = Object.keys(totalMap).map(code => {
+                const total = totalMap[code];
+                const occupied = occupiedMap[code] || 0;
+                const percentage = (occupied / total) * 100;
+
+                return {
+                    airport: code,
+                    total_area: total.toFixed(2),
+                    occupied_area: occupied.toFixed(2),
+                    percentage_occupied: percentage.toFixed(2) + "%",
+                    area_remaining: (total - occupied).toFixed(2)
+                };
+            });
+
+            // Console log the result
+            // console.log("Airport Capacity Summary:");
+            // summary.forEach(entry => {
+            //     console.log(`${entry.airport} - Total: ${entry.total_area} | Occupied: ${entry.occupied_area} | Remaining: ${entry.area_remaining} | ${entry.percentage_occupied}`);
+            // });
+
+            res.status(200).json(summary);
+        });
+    });
+};
+
 // Get fbo capacity for a given airport
 exports.getFboCapacity = (req, res) => {
     const airport = req.params.id;
@@ -163,6 +247,94 @@ exports.getFboCapacity = (req, res) => {
                 percentage_occupied: percentage.toFixed(2) + "%",
                 planes: planeResults
             });
+        });
+    });
+};
+
+exports.getAllFboCapacities = (req, res) => {
+    const airport = req.params.id;
+
+    const fbo_area_query = `
+        SELECT
+            FBO_Name,
+            Area_ft2 AS total_area
+        FROM
+            airport_parking
+        WHERE
+            Airport_Code = ?
+        GROUP BY
+            FBO_Name;
+    `;
+    
+    const occupied_area_query = `
+    SELECT 
+        airport_parking.FBO_Name,
+        SUM(aircraft_types.parkingArea * 1.1) AS occupied_area
+    FROM
+        airport_parking
+    JOIN
+        flight_plans
+        ON flight_plans.fbo_id = airport_parking.id
+    JOIN
+        netjets_fleet
+        ON netjets_fleet.acid = flight_plans.acid
+    JOIN
+        aircraft_types
+        ON aircraft_types.type = netjets_fleet.plane_type
+    WHERE
+        Airport_Code = ?
+    GROUP BY
+        airport_parking.FBO_Name;
+    `;
+
+    // Get total area for FBOs
+    db.query(fbo_area_query, [airport], (err, areaResults) => {
+        if (err) {
+            console.error("Error fetching FBO areas:", err);
+            return res.status(500).json({ error: "Error fetching FBO areas" });
+        }
+
+        // Get occupied area for FBOs
+        db.query(occupied_area_query, [airport], (err2, occupiedResults) => {
+            if (err2) {
+                console.error("Error fetching occupied areas:", err2);
+                return res.status(500).json({ error: "Error fetching occupied areas" });
+            }
+
+            // Convert results into maps
+            const totalMap = {};
+            areaResults.forEach(row => {
+                // Scale areas
+                totalMap[row.FBO_Name] = parseFloat(row.total_area) / 5; 
+            });
+
+            const occupiedMap = {};
+            occupiedResults.forEach(row => {
+                occupiedMap[row.FBO_Name] = parseFloat(row.occupied_area);
+            });
+
+            // Combine both maps
+            const summary = Object.keys(totalMap).map(fbo => {
+                const total = totalMap[fbo];
+                const occupied = occupiedMap[fbo] || 0;
+                const percentage = (occupied / total) * 100;
+
+                return {
+                    fbo: fbo,
+                    total_area: total.toFixed(2),
+                    occupied_area: occupied.toFixed(2),
+                    percentage_occupied: percentage.toFixed(2) + "%",
+                    area_remaining: (total - occupied).toFixed(2)
+                };
+            });
+
+            // Console log the result
+            // console.log("FBO Capacity Summary:");
+            // summary.forEach(entry => {
+            //     console.log(`${entry.fbo} - Total: ${entry.total_area} | Occupied: ${entry.occupied_area} | Remaining: ${entry.area_remaining} | ${entry.percentage_occupied}`);
+            // });
+
+            res.status(200).json(summary);
         });
     });
 };

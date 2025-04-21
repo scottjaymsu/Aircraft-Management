@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import '../styles/Simulator.css';
@@ -50,7 +50,8 @@ const SimulatorHeader = ({
     handlePlaneSizeFilterChange,
     tailNumberOptions,
     handleResetFilters
-}) => {
+}) => 
+  {
     // Back button navigation
     const navigate = useNavigate();
     const handleBackButton = () => {
@@ -59,74 +60,56 @@ const SimulatorHeader = ({
 
     const handleBackClick = () => handleBackButton();
 
-    const [currentPopulation, setCurrentPopulation] = useState(0);
-    const [overallCapacity, setOverallCapacity] = useState(0);
     // airport capacity as percentage
-    const [capacity, setCapacity] = useState(0);
-    // fbo capacity as percentage
-    const [fbo, setFbo] = useState([]);
-    const [fboCapacity, setFboCapacity] = useState([]);
+    const [capacity, setCapacity] = useState(null);
+    // fbo capacities for airport
+    const [fboCapacities, setFboCapacities] = useState({});
 
-    // fetch capacity data for entire airport
     useEffect(() => {
-        // Fetch current population and overall capacity without using async/await
-        const fetchData = () => {
-          // Fetch number of planes currently at the airport
-          fetch(`http://localhost:5001/airportData/getParkedPlanes/${selectedAirport}`)
-            .then((currentResponse) => currentResponse.json())
-            .then((currentData) => {
-              const currentPopulation = currentData.length;
-              setCurrentPopulation(currentPopulation);
-              console.log("Current Population:", currentPopulation);
-    
-              // Fetch overall capacity of the airport
-              fetch(`http://localhost:5001/airportData/getOverallCapacity/${selectedAirport}`)
-                .then((overallResponse) => overallResponse.json())
-                .then((overallData) => {
-                  const overallCapacity = overallData.totalCapacity;
-                  setOverallCapacity(overallCapacity);
-                  console.log("Overall Capacity:", overallCapacity);
-    
-                  // Set capacity as percentage
-                  setCapacity((currentPopulation / overallCapacity) * 100);
-                })
-                .catch((error) => {
-                  console.error("Error fetching overall capacity data:", error);
-                });
-            })
-            .catch((error) => {
-              console.error("Error fetching current population data:", error);
-            });
-        };
-    
-        fetchData();
+      const fetchFboCapacities = async () => {
+        try {
+          const response = await axios.get(`http://localhost:5001/airportData/getAllFboCapacities/${selectedAirport}`);
+          const data = response.data;
+
+          // Convert array to map { fbo: percentage_occupied }
+          const fboMap = {};
+          data.forEach(entry => {
+            const percentageOccupied = parseFloat(entry.percentage_occupied);
+            // round to nearest integer
+            fboMap[entry.fbo] = Math.round(percentageOccupied); 
+          });
+
+          setFboCapacities(fboMap);
+          console.log("FBO Capacities:", fboMap);
+        } catch (error) {
+          console.error("Failed to fetch FBO capacities:", error);
+        }
+      };
+
+      fetchFboCapacities();
     }, [selectedAirport]);
 
-    // Fetch capacity data for selected fbo
-    const fetchFBOData = useCallback(() => {
-        axios
-        .get(`http://localhost:5001/airports/getParkingCoordinates/${selectedAirport}`)
-        .then((response) => {
-            const data = response.data;
-            const fboData = data
-                // Keep only matching records
-                .filter((lot) => lot.FBO_Name === selectedFBO) 
-                .map((lot) => ({
-                    name: lot.FBO_Name,
-                    parking_taken: lot.spots_taken,
-                    total_parking: lot.Total_Space,
-                }));
-            setFbo(fboData);
-        })
-        .catch((error) => {
-            console.error("Error fetching FBO data >:(", error);
-        });
-    }, [selectedAirport, selectedFBO]);
-
+    // Fetch airport capacity percentage
     useEffect(() => {
-        fetchFBOData();
-    }, [fetchFBOData]);
+      // Fetch airport capacity data
+      const fetchCapacityData = () => {
+        fetch(`http://localhost:5001/airportData/getAirportCapacity/${selectedAirport}`)
+          .then((response) => response.json())
+          .then((data) => {
+            const percentageOccupied = parseFloat(data.percentage_occupied);
+            if (!isNaN(percentageOccupied)) {
+              setCapacity(Math.round(percentageOccupied));
+            } else {
+              setCapacity(null); 
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching airport capacity data:", error);
+          });
+      };
 
+      fetchCapacityData();
+    }, [selectedAirport]);    
 
     return (
         <div id="head-dashboard-wrapper">
@@ -134,15 +117,13 @@ const SimulatorHeader = ({
                 <div id="left-header-content">
                 <div id="header1">
                     <div className='header-segment-large'>
-                    <AirportTitle selectedAirport={selectedAirport} handleBackClick={handleBackClick} />
-                    <SimulatorFBO selectedFBO={selectedFBO} />
+                      <AirportTitle selectedAirport={selectedAirport} handleBackClick={handleBackClick} />
+                      <SimulatorFBO selectedFBO={selectedFBO} />
                     </div>
                 </div>
-
                 <CapacityInfo
-                    currentPopulation={currentPopulation}
-                    overallCapacity={overallCapacity}
-                    fbo={fbo}
+                    capacity={capacity}
+                    fboCapacity={fboCapacities[selectedFBO]}
                 />
                 <Legend/>
                 <SimulatorTime

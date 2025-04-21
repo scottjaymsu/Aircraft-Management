@@ -10,6 +10,31 @@ export default function FBOSection({id}) {
   const [isEditingFBO, setIsEditingFBO] = useState(false);
   const [originalPriorities, setOriginalPriorities] = useState([]);
   const navigate = useNavigate();
+  const [fboCapacities, setFboCapacities] = useState({});
+
+  useEffect(() => {
+    const fetchFboCapacities = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5001/airportData/getAllFboCapacities/${id}`);
+        const data = response.data;
+
+        // Convert array to map { fbo: percentage_occupied }
+        const fboMap = {};
+        data.forEach(entry => {
+          const percentageOccupied = parseFloat(entry.percentage_occupied);
+          // round to nearest integer
+          fboMap[entry.fbo] = Math.round(percentageOccupied); 
+        });
+
+        setFboCapacities(fboMap);
+        console.log("FBO Capacities:", fboMap);
+      } catch (error) {
+        console.error("Failed to fetch FBO capacities:", error);
+      }
+    };
+
+    fetchFboCapacities();
+  }, [id]);
 
   const fetchFBOData = useCallback(() =>{
     axios
@@ -166,11 +191,8 @@ export default function FBOSection({id}) {
                 <tr key={index}>
                   <td>{fbo.name}</td>
                   <td>
-                    <span className={getStatusClass(fbo.parking_taken, fbo.total_parking)}>
-
-                      {fbo.parking_taken != null && fbo.total_parking ? 
-                    `${((fbo.parking_taken / fbo.total_parking) * 100).toFixed(0)}%` : 'N/A'}
-
+                    <span className={getStatusClass(fboCapacities[fbo.name])}>
+                      {fboCapacities[fbo.name] != null ? `${fboCapacities[fbo.name]}%` : "\u00A0"}
                     </span>
                   </td>
                   <td>

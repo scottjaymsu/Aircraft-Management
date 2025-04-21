@@ -437,14 +437,13 @@ select option {
     flex-direction: column;
     align-items: center;
     background-color: #d7d5d3;
-    border-radius: 5px;
-    width: 100%;
-    height: 97%;
+    width: 99%;
+    height: 92%;
     overflow: hidden;
-    border-top: 2px solid #444240;
-    border-left: 2px solid #444240;
-    border-right: 2px solid #444240;
-
+    border-top: 3x solid #444240;
+    border-left: 3px solid #444240;
+    border-right: 3px solid #444240;
+    border-bottom: 3px solid #444240;
 }
 
 /* 
@@ -489,10 +488,17 @@ select option {
     display: flex;
     gap: 10px; /* Space between buttons */
     align-items: center;
+    margin-left: 10%;
 }
 
 #sort-by button {
     width: 125px;
+    margin: 0;
+    white-space: nowrap; /* Prevent text wrapping */ 
+}
+
+#sort-by-text {
+    white-space: nowrap; /* Prevent text wrapping */
 }
 
 .switch-alerts {
