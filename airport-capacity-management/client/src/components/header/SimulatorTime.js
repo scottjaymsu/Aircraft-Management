@@ -1,6 +1,9 @@
 import '../../styles/SimulatorTableFilters.css';
 /**
  * Segment for the time and reset button
+ * Props: 
+ * - localTime: The current local time
+ * - handleResetFilters: Function to reset filters
  */
 const SimulatorTime = ({ localTime, handleResetFilters }) => (
     <div className="sim-time-wrapper" style={{ marginRight: "15px" }}>
