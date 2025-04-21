@@ -2,9 +2,7 @@
 
 ## Description
 
-A full stack web application developed for NetJets to provide real-time and projected capacities
-at airports. This application can provide reccomendations, such as where to move aircraft in order to 
-provide space for incoming flights, as well as simulate projected parking scenarios for planned flights for estimating the capacity at specific FBOs. Airport and FBO data can be added manally by batch file. FBOs can also be drawn by the user in addition to the batch file upload.
+A full stack web application developed for NetJets to provide real-time and projected capacities at airports. This application can provide recommendations, such as where to move aircraft in order to provide space for incoming flights, as well as simulate projected parking scenarios for planned flights for estimating the capacity at specific FBOs. Airport and FBO data can be added manually by batch file. FBOs can also be drawn by the user in addition to the batch file upload.
 
 
 ## Tech Stack 
