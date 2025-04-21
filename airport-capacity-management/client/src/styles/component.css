@@ -62,13 +62,13 @@
  */
 #notif-list {
   flex-grow: 1;
-  overflow-y: auto;
   max-height: 60vh;
   margin-right: 5px;
   padding: 10px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  overflow: hidden;
 }
 
 /* 
