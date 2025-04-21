@@ -4,8 +4,6 @@
     flex-direction: column;
     background-color: #f6f4f2;
     height: 100vh;
-
-   
     font-family: Arial, Helvetica, sans-serif;
     color: #444240;
 }
@@ -31,8 +29,6 @@ width: 100%;
 margin: 0;
 }
   
-
-
 #left-header-content {
     flex: 0 0 62%;
     display: flex;
@@ -45,7 +41,7 @@ margin: 0;
   }
   
 #right-header-content {
-    flex: 0 0 34%; /* ✅ Increase width */
+    flex: 0 0 34%; /* Increase width */
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     column-gap: 10px;
@@ -88,19 +84,6 @@ margin: 0;
     gap: 10px;
 }
 
-/* .local-time-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start;
-
-    width: 80%;
-    column-gap: 10px;
-    row-gap: 10px;
-    align-items: start;
-    padding: 10px;
-    height: fit-content;
-} */
 .custom-select-wrapper {
     margin-top: 0;
     margin-bottom: 10px;
@@ -164,18 +147,6 @@ margin: 0;
     background-color: #5a6f8a;
 }
 
-@media (max-width: 768px) {
-    #head-dashboard {
-        flex-direction: column;
-    }
-    .header-segment-large {
-        flex: 1;
-    }
-    .header-segment-small {
-        flex: 1;
-    }
-    
-}
 /* HEADER BLOCK 1 */
 
 #header1 {
@@ -698,15 +669,6 @@ select option {
     color: white;
     font-weight: bold;
 } 
-/* .run-simulation-button:hover {
-    background-color: white; 
-}
-
-.table-container {
-    height: auto;
-    overflow: visible;
-}
-
 
 /* Classes for colors */
 .red-color {

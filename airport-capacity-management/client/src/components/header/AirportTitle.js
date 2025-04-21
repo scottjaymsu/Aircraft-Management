@@ -1,5 +1,9 @@
 /**
  * Title Section of Simulator Header
+ * 
+ * Props:
+ * - selectedAirport: The currently selected airport
+ * - handleBackClick: Function to handle back button click
  */
 const AirportTitle = ({ selectedAirport, handleBackClick }) => (
   <div id="title-wrapper">

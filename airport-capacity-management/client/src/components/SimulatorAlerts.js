@@ -2,6 +2,14 @@ import React, { useState, useEffect, use } from "react";
 import axios from "axios";
 import "../styles/Simulator.css";
 
+/**
+ * SimulatorAlerts Component
+ * Displays operational recommendations for planes at a specific FBO.
+ * 
+ * Props:
+ * - fbo: The currently selected FBO
+ * - id: The ID of the airport
+ */
 const SimulatorAlerts = ({ fbo, id }) => {
     const [alerts, setAlerts] = useState([]);
     const [error, setError] = useState("");

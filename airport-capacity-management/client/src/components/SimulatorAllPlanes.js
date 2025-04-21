@@ -3,10 +3,22 @@ import '../styles/Simulator.css';
 import '../styles/Scrollable.css';
 import axios from 'axios';
 
-// List of all planes currently at the airport 
+/**
+ * SimulatorAllPlanes Component
+ * Shows a table of all planes with their status, type, size, and next event.
+ * Allows users to add or remove planes from maintenance.
+ * 
+ * Props:
+ * - allPlanes: Array of all planes with their details
+ * - selectedAirport: The currently selected airport
+ */
 const SimulatorAllPlanes = ({ allPlanes, selectedAirport }) => {
 
-    /* This is run when a user clicks on the colored square next to a plane to put them into maintenance (or take them out). If the plane is already in maintenance, it will prompt the user to remove from maintenance. If not, it will prompt to add to maintenance. */
+    /* 
+        This is run when a user clicks on the colored square next to a plane to put them into maintenance (or take them out). 
+        If the plane is already in maintenance, it will prompt the user to remove from maintenance. 
+        If not, it will prompt to add to maintenance. 
+    */
     const handleMaintenanceClick = async (acid, status) => {
         if (status !== "Maintenance") {
             const confirm = window.confirm("Would you like to add this plane to maintenance?");
@@ -78,8 +90,6 @@ const SimulatorAllPlanes = ({ allPlanes, selectedAirport }) => {
                     </tbody>
                 </table>
             </div>
-                
- 
         </div>
 
     );

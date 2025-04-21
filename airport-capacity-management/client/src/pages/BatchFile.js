@@ -232,19 +232,6 @@ function BatchFile() {
       return values;
     });
   };
-  // TODO remove after betas: keeping incase something breaks
-  // Format rows for FBO table
-  // const getFormattedFBORows = () => {
-  //   return fboData.map((fbo, index) => {
-  //     const values = Object.values(fbo);
-  //     values.push(
-  //       <button className="delete" onClick={() => handleFboDeletion(index)}>
-  //         Delete
-  //       </button>
-  //     );
-  //     return values;
-  //   });
-  // };
   const getFormattedFBORows = () => {
     return fboData.map((fbo, index) => {
       const rowValues = fboHeaders.slice(0, -1).map((header) => {

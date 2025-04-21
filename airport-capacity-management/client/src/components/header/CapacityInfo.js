@@ -1,6 +1,12 @@
 /**
  * Total airport Capacity and individual FBO Capacities
- * Of simulator component
+ * Of Simulator component
+ * Displays in the Header of the simulator component 
+ * 
+ * Props:
+ * - currentPopulation: Number of planes currently at the airport
+ * - overallCapacity: Overall capacity of the airport
+ * - fbo: Array of FBO data
  */
 const CapacityInfo = ({ capacity, fboCapacity }) => {
  

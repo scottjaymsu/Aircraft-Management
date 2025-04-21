@@ -2,6 +2,12 @@ import Select from "react-select";
 import '../../styles/SimulatorTableFilters.css'; 
 /**
  * Component for selectable filters of the Simulator table
+ * Props:
+ * - options: Array of options to display in the select dropdown
+ * - value: Currently selected value
+ * - onChange: Function to call when the selected value changes
+ * - placeholder: Placeholder text for the select input
+ * - label: Label for the select input
  */
 const SimulatorTableFilters = ({
   options,

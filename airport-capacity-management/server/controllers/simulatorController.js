@@ -166,7 +166,7 @@ exports.getAllPlanes = async (req, res) => {
                 LEFT JOIN airport_parking ap ON pa.fbo_id = ap.id
                 WHERE fp.arrival_airport = ?
                 AND fp.status = 'ARRIVED'
-                
+                AND FBO_name IS NOT NULL
                 AND NOT EXISTS (
                     -- Exclude planes that are currently in maintenance at the same airport
                     SELECT 1 
@@ -201,6 +201,7 @@ exports.getAllPlanes = async (req, res) => {
                 LEFT JOIN airport_parking ap ON pa.fbo_id = ap.id 
                 WHERE fp.departing_airport = ? 
                 AND fp.status = 'FLYING'
+                AND FBO_name IS NOT NULL
                 GROUP BY fp.acid, ap.FBO_name
             `;
             db.query(query, [airportCode], (err, results) => {
@@ -224,6 +225,7 @@ exports.getAllPlanes = async (req, res) => {
                 LEFT JOIN airport_parking ap ON pa.fbo_id = ap.id 
                 WHERE fp.arrival_airport = ? 
                 AND fp.status = 'FLYING'
+                AND FBO_name is NOT NULL
                 GROUP BY fp.acid, ap.FBO_name
             `;
             db.query(query, [airportCode], (err, results) => {
@@ -247,6 +249,7 @@ exports.getAllPlanes = async (req, res) => {
             LEFT JOIN airport_parking ap ON pa.fbo_id = ap.id
             WHERE fp.departing_airport = ? 
             AND fp.status = 'MAINTENANCE'
+            AND fbo_name IS NOT NULL
             GROUP BY fp.acid, ap.FBO_name;
             `;
             db.query(query, [airportCode], (err, results) => {
@@ -640,7 +643,7 @@ function runSimulationRequest(selectedPlanes, planeTime, airportCode, db, res) {
                     GROUP BY fbo_id
                 )
                 SELECT
-                    ap.*,ap.Area_ft2/10 AS Area_ft2,
+                    ap.*,ap.Area_ft2/5 AS Area_ft2,
                     COALESCE(SUM(plane_areas.arrived_area), 0) + COALESCE(SUM(plane_areas.scheduled_arrival_area), 0) - COALESCE(SUM(plane_areas.scheduled_departure_area), 0) AS space_taken
                 FROM airport_parking ap
                 LEFT JOIN plane_areas ON plane_areas.fbo_id = ap.id
