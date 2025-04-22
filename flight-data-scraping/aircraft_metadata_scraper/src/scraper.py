@@ -26,6 +26,7 @@ def scrape_aircraft_data():
         xls_url = f'{url}/aircraft_data'
         response = requests.get(xls_url)
         file_content = BytesIO(response.content)
-        df = pd.read_excel(file_content)
+        df = pd.read_excel(file_content, usecols=["FAA_Designator", "Parking_area_ft2"])
+        df = df.rename(columns={"FAA_Designator": "type", "Parking_area_ft2": "parkingArea"})
         insert_aircraft_data(df)
         update_date(website_date)

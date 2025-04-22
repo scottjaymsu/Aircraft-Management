@@ -65,6 +65,7 @@ if [ "$PUSH" = true ]; then
         echo "PULL PRODUCTION DOCKER IMAGES FROM DOCKER HUB" && \
         docker-compose --profile production pull && \
         echo "RUN PRODUCTION DOCKER IMAGES" && \
+        docker-compose --profile production down && \
         docker-compose --profile production up -d && \
         exit'
 fi

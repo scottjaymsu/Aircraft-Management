@@ -12,6 +12,7 @@ def insert_into_flight_plans_table(connection, flight_plan):
     etd = flight_plan.get('etd')
     eta = flight_plan.get('eta')
     status = flight_plan.get('status')
+    fbo_id = flight_plan.get('fbo_id')
 
     if flight_ref is None or acid is None:
         return
@@ -58,6 +59,12 @@ def insert_into_flight_plans_table(connection, flight_plan):
         values += ", %s"
         updates += "status = VALUES(status), "
         params.append(status)
+
+    if fbo_id is not None:
+        sql += ", fbo_id"
+        values += ", %s"
+        updates += "fbo_id = VALUES(fbo_id), "
+        params.append(fbo_id)
 
     # Close the column and values parts
     sql += ")" + values + ")"

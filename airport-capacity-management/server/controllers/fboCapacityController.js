@@ -26,23 +26,14 @@ exports.getRemainingFboArea = (req, res) => {
     const fbo = req.params.fbo;
 
     const query = `
-        SELECT 
-            airport_parking.Area_ft2,
+        SELECT airport_parking.Area_ft2,
             SUM(at.parkingArea) AS total_parking_area,
-            airport_parking.Area_ft2 - SUM(at.parkingArea) AS remaining_area
-        FROM 
-            airport_parking
-        JOIN 
-            parked_at ON airport_parking.id = parked_at.fbo_id
-        JOIN 
-            netjets_fleet ON netjets_fleet.acid = parked_at.acid
-        JOIN 
-            aircraft_types at ON at.type = netjets_fleet.plane_type
-        WHERE 
-            airport_parking.Airport_Code = ?
-            AND airport_parking.FBO_Name = ?
-        GROUP BY 
-            airport_parking.Area_ft2;
+            airport_parking.Area_ft2 - SUM(at.parkingArea) AS remaining_area 
+            FROM netjets_fleet 
+            JOIN aircraft_types AS at ON netjets_fleet.plane_type = at.type 
+            JOIN flight_plans ON netjets_fleet.flightRef = flight_plans.flightRef 
+            JOIN airport_parking ON flight_plans.fbo_id = airport_parking.id 
+            WHERE airport_parking.Airport_Code = ? AND airport_parking.FBO_Name = ?;
     `;
 
     db.query(query, [airport, fbo], (err, results) => {
@@ -74,14 +65,10 @@ exports.getRemainingAirportArea = (req, res) => {
 
                 -- Sum of area occupied by all parked planes
                 SUM(aircraft_types.parkingArea) AS total_occupied_area
-            FROM 
-                airport_parking
-            JOIN 
-                parked_at ON parked_at.fbo_id = airport_parking.id
-            JOIN 
-                netjets_fleet ON netjets_fleet.acid = parked_at.acid
-            JOIN 
-                aircraft_types ON aircraft_types.type = netjets_fleet.plane_type
+            FROM netjets_fleet 
+            JOIN aircraft_types ON netjets_fleet.plane_type = aircraft_types.type 
+            JOIN flight_plans ON netjets_fleet.flightRef = flight_plans.flightRef 
+            JOIN airport_parking ON flight_plans.fbo_id = airport_parking.id
             WHERE 
                 airport_parking.Airport_Code = ?
         ) AS sub;

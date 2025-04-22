@@ -6,6 +6,7 @@ import time
 
 from insert_into_flight_plans_table import insert_into_flight_plans_table
 from update_fleet_table import update_fleet_table
+from remove_from_flight_plans_table import remove_from_flight_plans_table
 
 if __name__ == "__main__":
 
@@ -41,6 +42,7 @@ if __name__ == "__main__":
         while connection:
             # Pull flight plan dictionaries from the api endpoint
             try:
+                flight_plan = dict()
                 response = requests.get(API_URL)
                 flight_plan = response.json()['flight_plan']
 
@@ -52,12 +54,15 @@ if __name__ == "__main__":
                 status = flight_plan.get('status')
 
                 # If the status is anything other than "CANCELLED", then insert the flight plan into the database
-                if status != "CANCELLED":
+                if status != "CANCELED":
                     insert_into_flight_plans_table(connection, flight_plan)
 
                     # If the status is "FLYING", then make the fleet table point to this flight plan as the most "recent" flight plan (the flight plan that was most recently acitve)
                     if status == "FLYING":
                         update_fleet_table(connection, flight_plan.get('acid'), flight_plan.get('flight_ref'), flight_plan.get('model'))
+                else:
+                    # The flight plan was cancelled, so we need to remove it from the flight plans
+                    remove_from_flight_plans_table(connection, flight_plan.get('flight_ref'))
 
             # Sleep for a short period to avoid overwhelming the API
             time.sleep(0.2)
