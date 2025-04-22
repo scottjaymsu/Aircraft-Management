@@ -43,19 +43,23 @@ npm install
 ```
 
 2. Running Project:
-In one terminal session:
+
+    In one terminal session:
+
 ```
 cd airport-capacity-management/client
 npm start
 ```
 
-In a separate terminal session:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In a separate terminal session:
+
 ```
 cd airport-capacity-management/server
 node index.js
 ```
 
-The AWS RDS database is not publically accesssible, it must be accessed via a ssh tunnel through an AWS EC2 bastion server, so set that up in a third terminal session:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The AWS RDS database is not publically accesssible, it must be accessed via a ssh tunnel through an AWS EC2 bastion server, so set that up in a third terminal session:
+
 ```
 ssh -i {local path to ec2 .pem key file} -L 50173:{RDS database endpoint}:3306 {EC2 endpoint}
 ```
