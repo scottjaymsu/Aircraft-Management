@@ -28,9 +28,6 @@ const SimulatorComponent = () => {
     // Data for all flight plans this airport 
     const [allPlanes, setAllPlanes] = useState([]);
 
-
-    const [totalSpace, setTotalSpace] = useState(0);
-    const [takenSpace, setTakenSpace] = useState(0);
     // Filter based on selected FBO
     const [selectedFBO, setSelectedFBO] = useState("All FBOs");
     // Filter based on selected plane type
@@ -84,10 +81,7 @@ const SimulatorComponent = () => {
                 console.log(`Fetching data for location: ${airportCode}`);
                 const response = await axios.get(`http://localhost:5001/simulator/getAirportFBOs/${airportCode}`);
                 setFboData(response.data);
-                const totalRow = response.data[0];
-                setTotalSpace(totalRow.Total_Space || 0);
-                setTakenSpace(totalRow.Parking_Space_Taken || 0);
-
+                
                 // Set default FBO to first one in list
                 setSelectedFBO("All FBOs");
                 setSelectedAirport(response.data[0].Airport_Code);
@@ -269,8 +263,6 @@ const SimulatorComponent = () => {
                 <SimulatorHeader
                     selectedAirport={selectedAirport}
                     selectedFBO={selectedFBO}
-                    takenSpace={takenSpace}
-                    totalSpace={totalSpace}
                     searchTerm={searchTerm}
                     handleTailNumberChange={handleTailNumberChange}
                     handleFBOChange={handleFBOChange}
