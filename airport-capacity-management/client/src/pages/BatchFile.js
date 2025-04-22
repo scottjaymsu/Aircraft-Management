@@ -64,9 +64,17 @@ function BatchFile() {
 
   const navigate = useNavigate();
 
-  // Handle Airport CSV upload
+  /* This handles the File Upload and parses the data. If the file does not contain seven attributes for every airport, then it will be rejected
+  to ensure erroneous data isn't added to the database. */
   const handleAirportFileUpload = (event) => {
     if (event.target.files[0]) {
+
+      //If a user doesn't upload a csv we shouldn't let that go through...
+      if (!event.target.files[0].name.endsWith('.csv')) {
+        alert("Only CSV files will be accepted.");
+        return;
+      }
+
       setAirportData([]);
       setExistingAirports([]);
       setAirportsLoading(true);
@@ -75,6 +83,15 @@ function BatchFile() {
         header: true,
         skipEmptyLines: true,
         complete: async (results) => {
+          /* If the csv file does not have seven columns for each row, it will cause errors in determining specific data. 
+          We will prompt the user to correct this error because all of the seven rows will be needed for data insertion anyways. */
+          const columnCount = 7;
+          const invalidRows = results.data.filter((row) => Object.keys(row).length !== columnCount);
+          if (invalidRows.length > 0) {
+            setAirportsLoading(false);
+            alert("The uploaded CSV contains incorrect data. Please reupload with all columns filled out.");
+            return;
+          }
           setAirportData(results.data);
           try {
             const response = await axios.post(
@@ -96,6 +113,13 @@ function BatchFile() {
   // Handle FBO CSV upload
   const handleFBOFileUpload = (event) => {
     if (event.target.files[0]) {
+
+      //If a user doesn't upload a csv we shouldn't let that go through...
+      if (!event.target.files[0].name.endsWith('.csv')) {
+        alert("Only CSV files will be accepted.");
+        return;
+      }
+
       setFboData([]);
       setExistingFBOs([]);
       setFboLoading(true);
@@ -104,6 +128,15 @@ function BatchFile() {
         header: true,
         skipEmptyLines: true,
         complete: async (results) => {
+           /* If the csv file does not have seven columns for each row, it will cause errors in determining specific data. 
+          We will prompt the user to correct this error because all of the seven rows will be needed for data insertion anyways. */
+          const columnCount = 8;
+          const invalidRows = results.data.filter((row) => Object.keys(row).length !== columnCount);
+          if (invalidRows.length > 0) {
+            setFboLoading(false);
+            alert("The uploaded CSV contains incorrect data. Please reupload with all columns filled out.");
+            return;
+          }
           setFboData(results.data);
           try {
             const response = await axios.post(
@@ -122,16 +155,16 @@ function BatchFile() {
     }
   };
 
-  // Insert or update Airport data in DB
+  /* This will upload the airport into the database. If any of the data is invalid for the latitude and longitude*/
   const handleAirportParse = async () => {
     const validAirportData = airportData.filter((airport) => {
-      const ident = airport["ident"];
       const latitude = airport["latitude_deg"];
       const longitude = airport["longitude_deg"];
-      const iata = airport["iata_code"];
+      const airport_size = airport["airport_size"];
 
-      const identInvalid =
-        !ident || ident.length !== 4 || ident[0] !== "K" || !latitude;
+      const validAirportSizes = ["large_airport", "medium_airport", "small_airport"];
+      const invalidAirportSize = !validAirportSizes.includes(airport_size);
+
       const latlongInvalid =
         !latitude ||
         parseFloat(latitude) < -90 ||
@@ -139,9 +172,8 @@ function BatchFile() {
         !longitude ||
         parseFloat(longitude) < -180 ||
         parseFloat(longitude) > 180;
-      const iataInvalid = !iata || iata.length !== 3;
 
-      return !(identInvalid || latlongInvalid || iataInvalid);
+      return !(latlongInvalid || invalidAirportSize);
     });
 
     try {
@@ -161,27 +193,20 @@ function BatchFile() {
   // Insert or update FBO data in DB
   const handleFBOParse = async () => {
     const validFBOData = fboData.filter((fbo) => {
-      const airportCode = fbo["Airport_Code"];
       const fboName = fbo["FBO_Name"];
       const totalSpace = fbo["Total_Space"];
-      const iata = fbo["iata_code"];
       const priority = fbo["priority"];
       const coordinates = fbo["coordinates"];
 
-      const airportCodeInvalid =
-        !airportCode || airportCode.length !== 4 || airportCode[0] !== "K";
       const fboNameInvalid = !fboName || fboName.length === 0;
       const totalSpaceInvalid = !totalSpace || isNaN(totalSpace);
-      const iataInvalid = !iata || iata.length !== 3;
       const priorityInvalid = !priority || isNaN(priority);
       const coordinatesInvalid =
         coordinates && !coordinates.startsWith("POLYGON");
 
       return !(
-        airportCodeInvalid ||
         fboNameInvalid ||
         totalSpaceInvalid ||
-        iataInvalid ||
         priorityInvalid ||
         coordinatesInvalid
       );
@@ -267,25 +292,29 @@ function BatchFile() {
   };
   
 
-  // Row styling for Airports
+  /* The way we set up our table, we can pass props to the rows to color them a certain way. Since we want to let users know
+  if the data they uploaded will accurately get added, the best way to do this is to color ways and allow users to hover over the rows
+  to determine if their data is correct. */
   const getRowProps = (row) => {
     const ident = row[0];
     const isExisting = existingAirports.some((a) => a.ident === ident);
+    const airport_size = row[4];
+    const validAirportSizes = ["large_airport", "medium_airport", "small_airport"];
+    const invalidAirportSize = !validAirportSizes.includes(airport_size);
 
-    // Simple checks
-    const identInvalid = !ident || ident.length !== 4 || ident[0] !== "K";
-
+    /* Let the user know each reason as to why the airport may not be valid OR if it already exists. */
     let title = "";
-    if (identInvalid) {
-      title += "Invalid IDENT (Should be four characters beginning with a K)\n";
-    }
     if (isExisting) {
       title +=
         "CAUTION: Airport already exists in the database. This will update existing data.";
     }
+    if (invalidAirportSize) {
+      title += "Invalid Airport Size (Valid options: small_airport, medium_airport, large_airport)"
+    }
 
+    /* Color the row based on if there is an issue (red means it can't be inserted, yellow means it will overwrite current data) */
     return {
-      style: identInvalid
+      style: invalidAirportSize
         ? { backgroundColor: "rgb(239 181 181)" }
         : isExisting
           ? { backgroundColor: "#efd092" }
@@ -298,17 +327,16 @@ function BatchFile() {
   const getFboRowProps = (row) => {
     const airportCode = row[0];
     const fboName = row[1];
-    const isExisting = existingFBOs.some((f) => f.FBO_Name === fboName);
-
-    const airportCodeInvalid =
-      !airportCode || airportCode.length !== 4 || airportCode[0] !== "K";
+    const airportFbos = existingFBOs[airportCode] || [];
+    const isExisting = airportFbos.includes(fboName);
     const fboNameInvalid = !fboName || fboName.length === 0;
+    const totalSpace = row[2];
+    const priority = row[4];
+    const totalSpaceInvalid = !totalSpace || isNaN(totalSpace);
+    const priorityInvalid = !priority || isNaN(priority);
 
     let title = "";
-    if (airportCodeInvalid) {
-      title +=
-        "Invalid Airport Code (Should be four characters beginning with a K)\n";
-    }
+
     if (fboNameInvalid) {
       title += "Invalid FBO Name.\n";
     }
@@ -316,10 +344,17 @@ function BatchFile() {
       title +=
         "CAUTION: FBO already exists in the database. This will update existing data.";
     }
+    if (totalSpaceInvalid) {
+      title += "Invalid Total Space (must be a number).\n";
+    }
+    if (priorityInvalid) {
+      title += "Invalid Priority (must be a number).\n";
+    }
+
 
     return {
       style:
-        airportCodeInvalid || fboNameInvalid
+        fboNameInvalid
           ? { backgroundColor: "rgb(239 181 181)" }
           : isExisting
             ? { backgroundColor: "#efd092" }
