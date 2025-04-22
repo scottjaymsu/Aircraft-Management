@@ -48,7 +48,6 @@ exports.addFBO = async (req, res) =>{
       [
         Airport_Code,
         FBO_Name,
-        0,
         Total_Space,
         Area_ft2,
         iata_code,
