@@ -7,11 +7,9 @@ exports.getParkingCoordinates = (req, res) => {
         SELECT 
             ap.*,
             ap.Total_Space,
-            COUNT(pa.fbo_id) AS spots_taken
+            (SELECT COUNT(*) FROM netjets_fleet JOIN flight_plans ON netjets_fleet.flightRef = flight_plans.flightRef WHERE flight_plans.fbo_id = ap.id AND flight_plans.status = 'ARRIVED') AS spots_taken
         FROM 
             airport_parking ap
-        LEFT JOIN 
-            parked_at pa ON pa.fbo_id = ap.id
         WHERE 
             ap.Airport_Code = ?
         GROUP BY 
