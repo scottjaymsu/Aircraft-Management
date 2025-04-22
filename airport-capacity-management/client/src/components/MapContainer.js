@@ -17,6 +17,8 @@ const MapContainer = ({ markers, smallMarkers, onMarkerClick, setMapInstance }) 
   // For navigation
   const navigate = useNavigate();
 
+  /*Each type of airport has a list, so it can be generated based on the users zoom level, (large shows automaticallyy, medium is five clicks zoom, 
+  and small is 7 clicks zoom) to avoid lagging when generating the map */
   const markersListening = (map) => {
   const largeAirportMarkers = [];
   const mediumAirportMarkers = [];
@@ -39,6 +41,8 @@ const MapContainer = ({ markers, smallMarkers, onMarkerClick, setMapInstance }) 
       animation: window.google.maps.Animation.DROP,
     });
 
+    /* If the capacity percentage is not generated, that means it's capacity is 0 and will be set accordingly.
+    This SVG is for the hover bars, and is generated based on the percentage of capacity of each specific airport*/
     const capacityPercentage = markerData.capacity_percentage || 100;
     const createSVG = (percentage) => {
       const width = 30;
@@ -74,6 +78,7 @@ const MapContainer = ({ markers, smallMarkers, onMarkerClick, setMapInstance }) 
     marker.addListener("click", () => navigate(`/summary/${markerData.title}`));
   });
 
+  /* These markers are for the airports without FBOs (navy dots). */
   const createMarker = (markerData, icon, scale, map) => {
     return new window.google.maps.Marker({
       position: markerData.position,
@@ -91,6 +96,8 @@ const MapContainer = ({ markers, smallMarkers, onMarkerClick, setMapInstance }) 
     });
   };
 
+  /* First generating the points. Only large airports will originally populate on the map, everything else will be set to a null parent
+  until a separate function (updateMarkers()) prompts them to be shown*/
   smallMarkers.forEach((markerData) => {
     const marker = createMarker(markerData, window.google.maps.SymbolPath.CIRCLE, 5, null);
     marker.addListener("click", () => navigate(`/summary/${markerData.title}`));
@@ -105,6 +112,7 @@ const MapContainer = ({ markers, smallMarkers, onMarkerClick, setMapInstance }) 
     }
   });
 
+  /* If the user zoom threshold is high enough, we now populate the map with the smaller or medium airports IF IT'S WITHIN THE BOUNDS  (or the map would still lag.) */
   const updateMarkers = () => {
     const bounds = map.getBounds();
     if (!bounds) return;
@@ -143,6 +151,8 @@ const MapContainer = ({ markers, smallMarkers, onMarkerClick, setMapInstance }) 
     animate();
   };
 
+  /* This changes the position of the health bar to match where the marker is. Since we couldn't just put iit as an addition of the position
+  of the airport marker itself we had to create a functiion to determine where it should be put based off the marker. */
   const updateHealthBarPositions = () => {
     const projection = map.getProjection();
     if (!projection) return;
