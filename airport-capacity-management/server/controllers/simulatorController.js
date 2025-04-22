@@ -147,11 +147,11 @@ exports.getAllPlanes = async (req, res) => {
                             AND future_fp.departing_airport = ?
                             AND future_fp.status = 'SCHEDULED'
                             AND future_fp.etd > NOW()) AS event, 
-                        netjets_fleet.plane_type, 'Parked' AS status, aircraft_types.size, airport_parking.FBO_Name 
+                        netjets_fleet.plane_type, 'Parked' AS status, aircraft_types.size, airport_parking.FBO_name
                         FROM netjets_fleet 
                         JOIN flight_plans ON netjets_fleet.flightRef = flight_plans.flightRef 
-                        LEFT JOIN aircraft_types ON netjets_fleet.plane_type = aircraft_types.type 
-                        LEFT JOIN airport_parking ON flight_plans.fbo_id = airport_parking.id 
+                        JOIN aircraft_types ON netjets_fleet.plane_type = aircraft_types.type 
+                        JOIN airport_parking ON flight_plans.fbo_id = airport_parking.id 
                         WHERE arrival_airport = ? AND status = 'ARRIVED';
             `;
     
@@ -164,7 +164,7 @@ exports.getAllPlanes = async (req, res) => {
         // Status = Scheduled
         const departingPlanes = await new Promise((resolve, reject) => {
             const query = `
-                SELECT flight_plans.acid, flight_plans.etd AS event, netjets_fleet.plane_type, 'Departing' AS status, airport_parking.FBO_Name 
+                SELECT flight_plans.acid, flight_plans.etd AS event, netjets_fleet.plane_type, 'Departing' AS status, airport_parking.FBO_name 
                 FROM flight_plans 
                 JOIN netjets_fleet ON flight_plans.acid = netjets_fleet.acid 
                 JOIN airport_parking ON flight_plans.fbo_id = airport_parking.id 
@@ -179,7 +179,7 @@ exports.getAllPlanes = async (req, res) => {
         // Status = Flying 
         const arrivingPlanes = await new Promise((resolve, reject) => {
             const query = `
-                SELECT flight_plans.acid, flight_plans.eta AS event, netjets_fleet.plane_type, 'Arriving' AS status, airport_parking.FBO_Name 
+                SELECT flight_plans.acid, flight_plans.eta AS event, netjets_fleet.plane_type, 'Arriving' AS status, airport_parking.FBO_name 
                 FROM flight_plans 
                 JOIN netjets_fleet ON flight_plans.acid = netjets_fleet.acid 
                 JOIN airport_parking ON flight_plans.fbo_id = airport_parking.id 
@@ -194,7 +194,7 @@ exports.getAllPlanes = async (req, res) => {
         // Status = Maintenance
         const maintenancePlanes = await new Promise((resolve, reject) => {
             const query = `
-            SELECT flight_plans.acid, flight_plans.eta AS event, netjets_fleet.plane_type, 'Maintenance' AS status, airport_parking.FBO_Name 
+            SELECT flight_plans.acid, flight_plans.eta AS event, netjets_fleet.plane_type, 'Maintenance' AS status, airport_parking.FBO_name 
                 FROM flight_plans 
                 JOIN netjets_fleet ON flight_plans.acid = netjets_fleet.acid 
                 JOIN airport_parking ON flight_plans.fbo_id = airport_parking.id 
