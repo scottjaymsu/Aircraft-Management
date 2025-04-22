@@ -20,7 +20,7 @@ const createNotifications = (markers) => {
     if (capacity_percentage >= 0.8) {
       notifications.push({
         title: marker.title,
-        message: `${title} is at ${Math.round(capacity_percentage * 100)}% redirect incoming flights.`,
+        message: `${title} is at ${Math.round(capacity_percentage * 100)}%. Redirect incoming flights.`
       });
     }
   });
