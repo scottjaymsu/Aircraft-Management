@@ -27,6 +27,7 @@ A full stack web application developed for NetJets to provide real-time and proj
 * Docker
 * GitLab
 
+
 ## Getting started
 
 1. Install Dependencies 
@@ -52,6 +53,7 @@ cd server
 node index.js
 ```
 
+
 ## Okta Login
 Currently, okta is set up with a sample dev account. It will need to be integrated with the internal Okta system for NetJets. All account creation, editing, and deletion is done through Okta. Okta is implemented using the Okta-hosted Sign-in Widget to redirect the users to authenticate, then redirect back to the app. This is the recommended approach by Okta.
 
@@ -66,6 +68,7 @@ Password:
 NetJetsSampleAccount
 ```
 
+
 ## Main Map Page
 ![alt text](README_images/map_page_overview.png)
 The map page serves as a landing page for the user, as well as provides an overview on the statuses of airports all across the United States. Here, users can easily navigate to their desired airport through either the search function in the top right corner, or by clicking on the airport's icon. 
@@ -77,6 +80,7 @@ Airport icons are displayed two ways. When they do not yet have FBOs set up, the
 To access the Summary Page, click on either the icon associated with the desired airport, or click on the name of the airport in the dropdown menu. 
 
 To access the Batch File Upload page, click on the "Add Data" button. 
+
 
 ## Summary Page
 The summary page gives the user a closer look into a specific airport. At the top, there is a percentage that represents the status of the capacity filled of the entire airport. To the right, the page displays a satellite photo of the airport selected with the FBOs labeled and outlined in the color associated with their current capacity. 
@@ -91,9 +95,11 @@ The Open Parking by Aircraft Type table tells the user how many of each type of 
 
 The Recommendation page can be accessed by clicking the "See more" button at the bottom of the page. 
 
+
 ## Edit FBO page
 ![alt text](README_images/edit_fbo.png)
 The Edit FBO page allows a user to either create a new FBO or edit an existing FBO. Once a user draws out the outline of the new FBO, the system automatically calculates the amount of planes that can fit in the area. The user can then either increase or decrease the plane footprint to make a more accurate capacity calculation, depending on what the parking area will be used for. 
+
 
 ## Batch File Upload Page
 The Batch File Upload page allows a user to upload a batch file of either airport data or specific FBO data. 
@@ -106,6 +112,11 @@ A user can select the "Airport Data Upload" tab, upload a CSV file with the corr
 
 ![alt text](README_images/fbo_data_upload.png)
 When a user clicks the "FBO Data Upload" tab, they can upload relevant information about the FBO that they want to add to the system. Although FBOs can be added on the summary page, this feature can be used to populate multiple FBOs rapidly with just a CSV file. 
+
+
+## Flight Simulator Page
+![alt text](README_images/flight_sim.png)
+The Flight Simulator Page gives the user a more in depth look at a specific airport. To the left, there is a "All FBOs" table, which displays the planes in all of the FBOs at the airport. The colors next to each plane represent their current status (arriving, departing, parked, or maintenance). In the top right corner, a user can filter this table by FBO, plane size, plane type, or search for specific tail numbers.
 
 ## Recommendation Engine and Simulator Constraints
 Both the Recommendation Engine and the Simulator assume that planes are parked in a non-stacked format with padding between them. It does not account for other ways of organizing planes within an FBO
