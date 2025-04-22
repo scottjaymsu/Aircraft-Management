@@ -43,12 +43,11 @@ exports.addFBO = async (req, res) =>{
 
     const [result] = await db.promise().query(
       `INSERT INTO airport_parking 
-        (Airport_Code, FBO_Name, Parking_Space_Taken, Total_Space, Area_ft2, iata_code, coordinates, Priority)
-      VALUES (?, ?, ?, ?, ?, ?, ST_GeomFromText(?), ?)`,
+        (Airport_Code, FBO_Name, Total_Space, Area_ft2, iata_code, coordinates, Priority)
+      VALUES (?, ?, ?, ?, ?, ST_GeomFromText(?), ?)`,
       [
         Airport_Code,
         FBO_Name,
-        0,
         Total_Space,
         Area_ft2,
         iata_code,
@@ -61,7 +60,6 @@ exports.addFBO = async (req, res) =>{
       id: result.insertId,
       Airport_Code,
       FBO_Name,
-      Parking_Space_Taken: 0,
       Total_Space,
       Area_ft2,
       iata_code,

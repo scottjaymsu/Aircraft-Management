@@ -349,9 +349,11 @@ export default function SummaryPage() {
               <h2 className="title">
                 {airportMetadata.name ? `${airportCode} - ${airportMetadata.name}` : "\u00A0"}
               </h2>
-              <p className={`status-bubble ${getStatusClass(capacity)}`}>
-                {capacity !== null ? `${capacity}%` : "\u00A0"}
-              </p>
+              {capacity !== null ? 
+                <p className={`status-bubble ${getStatusClass(capacity)}`}>
+                  {capacity}% 
+                </p>
+                : "\u00A0"}
             </CardContent>
           </Card>
 

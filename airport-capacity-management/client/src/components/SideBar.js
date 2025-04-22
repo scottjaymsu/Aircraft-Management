@@ -3,6 +3,7 @@ import '../styles/component.css';
 import { getColor } from '../utils/helpers';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import axios from 'axios';
+import Capacities from './Capacities';
 
 const Sidebar = ({
   searchTerm,
@@ -65,7 +66,7 @@ const Sidebar = ({
               className="status-icon"
               style={{ backgroundColor: getColor(capacities[loc.title]) }}
             >
-              {capacities[loc.title] != null ? `${capacities[loc.title]}%` : "\u00A0"}
+              {capacities[loc.title] != null && !isNaN(capacities[loc.title]) ? `${capacities[loc.title]}%` : "----"}
             </div>
           </li>
         ))}

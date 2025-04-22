@@ -6,6 +6,7 @@ CREATE TABLE flight_plans (
   etd datetime DEFAULT NULL,
   eta datetime DEFAULT NULL,
   status enum('SCHEDULED','FLYING','ARRIVED','MAINTENANCE') DEFAULT NULL,
+  fbo_id int DEFAULT NULL,
   PRIMARY KEY (flightRef),
   KEY parked_idx (arrival_airport)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -16,12 +17,6 @@ CREATE TABLE netjets_fleet (
   flightRef varchar(10) NOT NULL,
   PRIMARY KEY (acid),
   UNIQUE KEY flightRef (flightRef)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-CREATE TABLE parked_at (
-  acid varchar(8) NOT NULL,
-  fbo_id int DEFAULT NULL,
-  PRIMARY KEY (acid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE airport_parking (

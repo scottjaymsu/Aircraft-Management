@@ -8,6 +8,7 @@ import time
 
 from flightDataProcessor import FlightDataProcessor
 import flight_plans_api
+from fbo_assigner import Fbo_assigner
 
 if __name__ == "__main__":
 
@@ -26,6 +27,9 @@ if __name__ == "__main__":
 
     # Object that processes the flight data message into a flight plan dictionary based on the context of the message
     flightDataProcessor = FlightDataProcessor()
+
+    # Object that assigns flight plans to mock FBOs as a placeholder until the real FBO assignment data is incorporated
+    fboAssigner = Fbo_assigner()
 
     # Start Flask app in a separate thread so it can run concurrently with the while loop below
     flask_thread = threading.Thread(target=flight_plans_api.run_app, daemon=True)
@@ -48,8 +52,12 @@ if __name__ == "__main__":
             # Parses the message and returns a flight_plan dictionary
             flight_plan = flightDataProcessor.process_message(message_json.get('fltdMessage'))
 
-            # Expose the objects to an api endpoint so it can be used by a database managing microservice
-            flight_plans_api.add_flight_plan(flight_plan)
+            if flight_plan is not None:
+                # Assign the flight plan a mock FBO (this function is a placeholder until the real FBO assignment data is incorporated)
+                flight_plan = fboAssigner.assign_fbo(flight_plan)
+
+                # Expose the objects to an api endpoint so it can be used by a database managing microservice
+                flight_plans_api.add_flight_plan(flight_plan)
         
         # Sleep for a short period to avoid overwhelming the API
         time.sleep(0.2)

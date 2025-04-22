@@ -24,9 +24,9 @@ export const getStatusColor = (parking_taken_or_status, total_parking) => {
 };
 
 export const getColor = (capacity) => {
-  if (capacity >= 100) {
+  if (capacity >= 80) {
     return "#c76666"; // red
-  } else if (capacity >= 80) {
+  } else if (capacity >= 50) {
     return "#ecac57"; // orange
   } else {
     return "#b9be80"; // green
@@ -35,9 +35,9 @@ export const getColor = (capacity) => {
 
 // Get CSS styling class for the status bubble
 export const getStatusClass = (capacity) => {
-  if (capacity >= 100) {
+  if (capacity >= 80) {
     return "status-bubble full";
-  } else if (capacity >= 80) {
+  } else if (capacity >= 50) {
     return "status-bubble approaching";
   } else {
     return "status-bubble open";

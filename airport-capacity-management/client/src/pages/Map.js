@@ -17,10 +17,10 @@ const createNotifications = (markers) => {
   const notifications = [];
   [...markers].forEach((marker) => {
     const { title, capacity_percentage } = marker;
-    if (capacity_percentage >= 0.8) {
+    if (capacity_percentage >= 0.50) {
       notifications.push({
         title: marker.title,
-        message: `${title} is at ${Math.round(capacity_percentage * 100)}% redirect incoming flights.`,
+        message: `${title} is at ${Math.round(capacity_percentage * 100)}%. Redirect incoming flights.`
       });
     }
   });

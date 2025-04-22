@@ -135,7 +135,7 @@ export default function FBOSection({id}) {
             const fboData = data.map((lot) =>({
               id: lot.id,
               name: lot.FBO_Name,
-              parking_taken: Math.min(lot.Parking_Space_Taken, lot.Total_Space),
+              parking_taken: lot.Total_Space,
               total_parking: lot.Total_Space,
               status: "Open",
               priority: lot.Priority,
@@ -191,9 +191,11 @@ export default function FBOSection({id}) {
                 <tr key={index}>
                   <td>{fbo.name}</td>
                   <td>
-                    <span className={getStatusClass(fboCapacities[fbo.name])}>
-                      {fboCapacities[fbo.name] != null ? `${fboCapacities[fbo.name]}%` : "\u00A0"}
-                    </span>
+                    {fboCapacities[fbo.name] != null && !isNaN(fboCapacities[fbo.name])?
+                      <span className={getStatusClass(fboCapacities[fbo.name])}>
+                        {fboCapacities[fbo.name]}%
+                      </span>
+                      : "\u00A0"}
                   </td>
                   <td>
                     {isEditingFBO ? (
