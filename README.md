@@ -74,13 +74,30 @@ The notification center is accessed through the icon in the top right corner. He
 
 Airport icons are displayed two ways. When they do not yet have FBOs set up, they display as the navy dot. When FBO data is added for an airport, it will display as the downward facing arrow, which changes color based on the capacity of the airport. Above the arrow, the current capacity is displayed through a fill bar for quick reference. To see the actual percentage, a user can look for the airport in the menu in the top left corner.  
 
+To access the Summary Page, click on either the icon associated with the desired airport, or click on the name of the airport in the dropdown menu. 
+
+To access the Batch File Upload page, click on the "Add Data" button. 
+
+## Summary Page
+The summary page gives the user a closer look into a specific airport. At the top, there is a percentage that represents the status of the capacity filled of the entire airport. To the right, the page displays a satellite photo of the airport selected with the FBOs labeled and outlined in the color associated with their current capacity. 
+![alt text](README_images/summary_page.png)
+The Traffic Overview gives a hourly look into the projected and historical population of the airport. It displays the count of planes that are arriving, departing, or parked. A legend is provided for ease of use. 
+![alt text](README_images/arriving_departing_tables.png)
+The Arriving Flights and Departing Flights table allow the user to see any incoming or departing flights in the upcoming hours from the currently selected airport. It gives information like the plane footprint and size to assist in planning. 
+![alt text](README_images/FBO_table_open_parking.png)
+The FBOs table shows the user the FBOs at the current airport. Their current capacity status is shown with a percentage, and the color correlates with the outline of the FBO shown on the map. The priority shown determines the order in which they will be filled, and can be edited by selecting the "Edit FBO" button. 
+
+The Open Parking by Aircraft Type table tells the user how many of each type of aircraft can fit in the remaining space of the selected FBO once a user selects one by clicking the "Select FBO" button.
+
+The Recommendation page can be accessed by clicking the "See more" button at the bottom of the page. 
+
 ## Recommendation Engine and Simulator Constraints
-- Both the Recommendation Engine and the Simulator assume that planes are parked in a non-stacked format with padding between them. It does not account for other ways of organizing planes within an FBO
+Both the Recommendation Engine and the Simulator assume that planes are parked in a non-stacked format with padding between them. It does not account for other ways of organizing planes within an FBO
 ![alt text](README_images/parking_visual.png)
 
-- A current work around is to create different parking areas of the rows of aircraft with the "Edit FBO" feature on the Summary Page
+A current work around is to create different parking areas of the rows of aircraft with the "Edit FBO" feature on the Summary Page
 
-- Feeder airports have not been implemented due to that not being the current mode of operations for NetJets, but it can be added at a later date once that occupational model is implemented. 
+Feeder airports have not been implemented due to that not being the current mode of operations for NetJets, but it can be added at a later date once that occupational model is implemented. 
 
 
 ## SWIM Data
