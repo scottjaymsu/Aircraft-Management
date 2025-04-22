@@ -27,7 +27,7 @@ def get_last_updated(type):
 #Use panda datafframe to insert directly into the table (it will make a new table)
 def insert_aircraft_data(df):
     engine = get_engine()
-    df.to_sql('aircraft_data', engine, if_exists='replace', index=False)
+    df.to_sql('aircraft_types', engine, if_exists='replace', index=False)
     
 #Update the date in the last_updated table so that it will be reflected as changed
 def update_date(date):

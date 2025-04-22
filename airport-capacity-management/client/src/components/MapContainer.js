@@ -43,7 +43,7 @@ const MapContainer = ({ markers, smallMarkers, onMarkerClick, setMapInstance }) 
 
     /* If the capacity percentage is not generated, that means it's capacity is 0 and will be set accordingly.
     This SVG is for the hover bars, and is generated based on the percentage of capacity of each specific airport*/
-    const capacityPercentage = markerData.capacity_percentage || 100;
+    const capacityPercentage = markerData.capacity_percentage || 0;
     const createSVG = (percentage) => {
       const width = 30;
       const height = 10;
