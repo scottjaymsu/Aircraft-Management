@@ -91,6 +91,10 @@ The Open Parking by Aircraft Type table tells the user how many of each type of 
 
 The Recommendation page can be accessed by clicking the "See more" button at the bottom of the page. 
 
+## Edit FBO page
+![alt text](README_images/edit_fbo.png)
+The Edit FBO page allows a user to either create a new FBO or edit an existing FBO. Once a user draws out the outline of the new FBO, the system automatically calculates the amount of planes that can fit in the area. The user can then either increase or decrease the plane footprint to make a more accurate capacity calculation, depending on what the parking area will be used for. 
+
 ## Batch File Upload Page
 The Batch File Upload page allows a user to upload a batch file of either airport data or specific FBO data. 
 
