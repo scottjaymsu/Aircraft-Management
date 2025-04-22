@@ -118,10 +118,7 @@ export default function SummaryPage() {
   const airportCode = useParams().location;
   const [map, setMap] = React.useState(null);
   const [parkingLots, setParkingLots] = useState([]);
-  const [airportCoordinates, setAirportCoordinates] = useState({
-    lat: 40.84,
-    lng: -74.07,
-  });
+  const [airportCoordinates, setAirportCoordinates] = useState({});
 
   const [airportMetadata, setAirportMetadata] = useState([]);
   // airport capacity as percentage
