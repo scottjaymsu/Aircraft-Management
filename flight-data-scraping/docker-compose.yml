@@ -17,7 +17,7 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://flight-plan-tracking:5000/flight-plan"]
       interval: 1s
-      timeout: 10s
+      timeout: 20s
       retries: 10
       start_period: 1s
 
@@ -37,6 +37,11 @@ services:
     profiles:
       - local
       - test
+    environment:
+      DB_HOST: test-db
+      DB_NAME: netjets
+      DB_USER: user
+      DB_PASSWORD: password
     depends_on:
       message-consumer-local:
         condition: service_healthy
@@ -48,6 +53,10 @@ services:
     profiles:
       - debug
     environment:
+      DB_HOST: test-db
+      DB_NAME: netjets
+      DB_USER: user
+      DB_PASSWORD: password
       DEBUG: "True"
       PYTHONUNBUFFERED: 1
 
