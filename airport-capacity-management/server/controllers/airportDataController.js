@@ -113,7 +113,7 @@ exports.getCurrentTime = (req, res) => {
             return res.status(500).json({ error: 'Error querying airport data.' });
         }
         if (!results.length || results[0].latitude_deg == null || results[0].longitude_deg == null) {
-            return res.status(400).json({ error: 'Invalid or missing latitude/longitude data for the airport.' });
+            return res.status(400).json({ error: 'Invalid lat/log for the airport.' });
         }
 
         const { latitude_deg, longitude_deg } = results[0];

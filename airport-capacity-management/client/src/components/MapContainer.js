@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import '../styles/component.css';
-import { getStatusColor } from "../utils/helpers";
+import { getColor } from "../utils/helpers";
 
 // Center of the U.S. Position
 const ORIGINAL_CENTER = { lat: 39.8283, lng: -98.5795 };
@@ -30,7 +30,7 @@ const MapContainer = ({ markers, smallMarkers, onMarkerClick, setMapInstance }) 
       title: markerData.title,
       icon: {
         path: window.google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
-        fillColor: getStatusColor(markerData.status),
+        fillColor: getColor(markerData.capacity_percentage*100),
         fillOpacity: 1,
         strokeColor: "rgb(33,48,71)",
         strokeWeight: 1,
@@ -46,7 +46,7 @@ const MapContainer = ({ markers, smallMarkers, onMarkerClick, setMapInstance }) 
       const filledWidth = width * (percentage);
       return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
                 <rect width="${width}" height="${height}" fill="white" stroke="rgb(33,48,71)" strokeWidth="1"/>
-                <rect width="${filledWidth}" height="${height}" fill="${getStatusColor(markerData.status)}"/>
+                <rect width="${filledWidth}" height="${height}" fill="${getColor(markerData.capacity_percentage*100)}"/>
               </svg>`;
     };
 
