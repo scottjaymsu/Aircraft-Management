@@ -55,9 +55,9 @@ const MapContainer = ({ markers, smallMarkers, onMarkerClick, setMapInstance }) 
           animation: window.google.maps.Animation.DROP,
         });
         
-        /* If the capacity percentage is unknown (this should not happen), it will be generated as 100 to prompt users to look into this anomaly.
+        /* If the capacity percentage is not generated, that means it's capacity is 0 and will be set accordingly.
         This SVG is for the hover bars, and is generated based on the percentage of capacity of each specific airport*/
-        const capacityPercentage = markerData.capacity_percentage || 100;
+        const capacityPercentage = markerData.capacity_percentage || 0;
         const createSVG = (percentage) => {
           const width = 30;
           const height = 10;
