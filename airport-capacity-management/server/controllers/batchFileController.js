@@ -99,7 +99,7 @@ exports.insertFBO = (req, res) => {
         const query = `
           INSERT INTO airport_parking 
             (Airport_Code, FBO_Name, Total_Space, iata_code, priority, coordinates, Area_ft2)
-          VALUES (?, ?, ?, ?, ?, ${coordinatesValue ? 'ST_GeomFromText(?)' : 'NULL'}, ?, ?)
+          VALUES (?, ?, ?, ?, ?, ${coordinatesValue ? 'ST_GeomFromText(?)' : 'NULL'}, ?)
           ON DUPLICATE KEY UPDATE 
             Airport_Code = VALUES(Airport_Code),
             FBO_Name = VALUES(FBO_Name),
