@@ -191,9 +191,11 @@ export default function FBOSection({id}) {
                 <tr key={index}>
                   <td>{fbo.name}</td>
                   <td>
-                    <span className={getStatusClass(fboCapacities[fbo.name])}>
-                      {fboCapacities[fbo.name] != null ? `${fboCapacities[fbo.name]}%` : "\u00A0"}
-                    </span>
+                    {fboCapacities[fbo.name] != null && !isNaN(fboCapacities[fbo.name])?
+                      <span className={getStatusClass(fboCapacities[fbo.name])}>
+                        {fboCapacities[fbo.name]}%
+                      </span>
+                      : "\u00A0"}
                   </td>
                   <td>
                     {isEditingFBO ? (
