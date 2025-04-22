@@ -6,7 +6,7 @@ exports.getAirportParking = (req, res) => {
     // testing
     const airportcode = Airport_Code || 'KTEB';
     console.log(`Fetching parking data for airport ${airportcode}`);
-    const query = 'SELECT Airport_Code, FBO_Name, Parking_Space_Taken, Total_Space FROM airport_parking WHERE Airport_Code = ?';
+    const query = 'SELECT Airport_Code, FBO_Name, Total_Space FROM airport_parking WHERE Airport_Code = ?';
  
     db.query(query, [airportcode], (err, results) => {
         if (err) {

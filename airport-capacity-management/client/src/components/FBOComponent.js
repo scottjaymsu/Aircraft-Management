@@ -135,7 +135,7 @@ export default function FBOSection({id}) {
             const fboData = data.map((lot) =>({
               id: lot.id,
               name: lot.FBO_Name,
-              parking_taken: Math.min(lot.Parking_Space_Taken, lot.Total_Space),
+              parking_taken: lot.Total_Space,
               total_parking: lot.Total_Space,
               status: "Open",
               priority: lot.Priority,

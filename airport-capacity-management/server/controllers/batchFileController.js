@@ -98,8 +98,8 @@ exports.insertFBO = (req, res) => {
 
         const query = `
           INSERT INTO airport_parking 
-            (Airport_Code, FBO_Name, Total_Space, iata_code, priority, coordinates, Parking_Space_Taken, Area_ft2)
-          VALUES (?, ?, ?, ?, ?, ${coordinatesValue ? 'ST_GeomFromText(?)' : 'NULL'}, ?, ?)
+            (Airport_Code, FBO_Name, Total_Space, iata_code, priority, coordinates, Area_ft2)
+          VALUES (?, ?, ?, ?, ?, ${coordinatesValue ? 'ST_GeomFromText(?)' : 'NULL'}, ?)
           ON DUPLICATE KEY UPDATE 
             Airport_Code = VALUES(Airport_Code),
             FBO_Name = VALUES(FBO_Name),
@@ -107,7 +107,6 @@ exports.insertFBO = (req, res) => {
             iata_code = VALUES(iata_code),
             priority = VALUES(priority),
             coordinates = ${coordinatesValue ? 'ST_GeomFromText(VALUES(coordinates))' : 'NULL'},
-            Parking_Space_Taken = VALUES(Parking_Space_Taken),
             Area_ft2 = VALUES(Area_ft2)
         `;
 

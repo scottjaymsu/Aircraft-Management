@@ -61,7 +61,7 @@ exports.getArrivingFlights = (req, res) => {
         }));
 
         // Testing
-        console.log(planesWithSize);
+        //console.log(planesWithSize);
         // Send results back as response
         res.json(planesWithSize);
     });
@@ -110,7 +110,7 @@ exports.getDepartingFlights = (req, res) => {
 
 
         // Testing
-        console.log(planesWithSize); 
+       // console.log(planesWithSize); 
         // Send results back as response
         res.json(planesWithSize);
     });
