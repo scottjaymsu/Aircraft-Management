@@ -64,19 +64,22 @@ exports.insertAirport = (req, res) => {
   })
 }
 
-// Return any airports that match the name
+/* Grab all FBOs at an existing airport */
 exports.getExistingFBOs = (req, res) => {
-  const identArray = req.body.map(airport => airport.ident);
-  const query = "SELECT FBO_Name FROM airport_parking WHERE FBO_Name IN (?)"
+  const identArray = req.body.map(airport => airport.Airport_Code);
+  const query = "SELECT Airport_Code AS ident, FBO_Name FROM airport_parking WHERE Airport_Code IN (?)"
   db.query(query, [identArray], (err, results) => {
     if (err) {
       console.error('Error inserting data into database:', err);
       res.status(500).json({ error: 'Unable to insert data' });
     }
     else {
-      const returnResults = results.map(result => result.FBO_Name);
-      console.log(returnResults);
-      res.json(results);
+      const grouped = {};
+      for (const row of results) {
+        if (!grouped[row.ident]) { grouped[row.ident] = []; }
+        grouped[row.ident].push(row.FBO_Name);
+      }
+      res.json(grouped);
   }});
 }
 
