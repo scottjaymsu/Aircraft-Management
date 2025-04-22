@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { toZonedTime } from 'date-fns-tz';
+import { addHours } from 'date-fns';
 import {
     ReferenceLine,
     AreaChart,
@@ -23,7 +25,7 @@ const roundDownHour = (date) => {
 };
 
 // Add hours to a date
-const addHours = (date, hours) => new Date(date.getTime() + hours * 60 * 60 * 1000);
+//const addHours = (date, hours) => new Date(date.getTime() + hours * 60 * 60 * 1000);
 // Generate a timeline (array of hourly Date objects) between start and end
 const generateTimeline = (start, end) => {
     const timeline = [];
@@ -44,17 +46,20 @@ const filterFlightsByRange = (flights, dateKey, start, end) => {
     });
 };
 
-// Get the effective time (rounded down) for a flight
+// Get the effective time (rounded down) for a flight, put into local timezone
 // For departures, use the logged time; for arrivals, add 1 hour
-const getEffectiveTime = (flight, key, isArrival = false) => {
+const getEffectiveTime = (flight, key, isArrival = false, timeZoneAbbr) => {
+    
     const date = new Date(flight[key]);
-    const effective = isArrival ? addHours(date, 1) : date;
+    const localDate = toZonedTime(date, timeZoneAbbr);
+    const effective = isArrival ? addHours(localDate, 1) : localDate;
     return roundDownHour(effective).toISOString();
 };
 
-const getChartArrivalTime = (flight) => {
+const getChartArrivalTime = (flight, timeZoneAbbr) => {
     const date = new Date(flight.eta);
-    return roundDownHour(date).toISOString();
+    const localDate = toZonedTime(date, timeZoneAbbr);
+    return roundDownHour(localDate).toISOString();
 };
 
 // Add up all planes
@@ -87,7 +92,9 @@ export default function TrafficOverview({ id }) {
     const [error, setError] = useState("");
     const [capacityLimit, setCapacityLimit] = useState(0);
     const [showLegend, setShowLegend] = useState(false);
+    const [timeZoneAbbr, setTimeZoneAbbr] = useState('UTC');
 
+    
 
     // Calculate the currently selected date
     const selectedDate = new Date();
@@ -111,6 +118,20 @@ export default function TrafficOverview({ id }) {
                 setError(err);
                 console.error("Error fetching departing flights:", error);
             });
+    }, [id]);
+
+    useEffect(() => {
+        const fetchTimeZone = async () => {
+            try {
+                const response = await axios.get(`http://localhost:5001/airportData/getCurrentTime/${id}`);
+                if (response.data && response.data.timeZone) {
+                    setTimeZoneAbbr(response.data.timeZone);
+                }
+            } catch (error) {
+                console.error('Error fetching time zone:', error);
+            }
+        };
+        fetchTimeZone();
     }, [id]);
 
     // Fetch arriving flights by faa designator when component mounts
@@ -237,7 +258,7 @@ export default function TrafficOverview({ id }) {
 
     // Group departures and arrivals into our timeline buckets
     simDepartures.forEach((flight) => {
-        const timeStr = getEffectiveTime(flight, "etd", false);
+        const timeStr = getEffectiveTime(flight, "etd", false, timeZoneAbbr);
         if (effectiveDepartures[timeStr] !== undefined) {
             effectiveDepartures[timeStr] += 1;
         }
@@ -245,7 +266,7 @@ export default function TrafficOverview({ id }) {
 
     // FOR PARKED ADJUSTMENTS: Group arrivals into our timeline buckets
     simArrivals.forEach((flight) => {
-        const timeStr = getEffectiveTime(flight, "eta", true);
+        const timeStr = getEffectiveTime(flight, "eta", true, timeZoneAbbr);
         if (effectiveArrivals[timeStr] !== undefined) {
             effectiveArrivals[timeStr] += 1;
         }
@@ -253,7 +274,7 @@ export default function TrafficOverview({ id }) {
 
     // For chart "Arriving" count, use the actual arrival time (no delay)
     simArrivals.forEach((flight) => {
-        const chartTimeStr = getChartArrivalTime(flight);
+        const chartTimeStr = getChartArrivalTime(flight, timeZoneAbbr);
         if (chartArrivals[chartTimeStr] !== undefined) {
             chartArrivals[chartTimeStr] += 1;
         }

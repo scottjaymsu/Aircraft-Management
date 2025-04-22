@@ -65,7 +65,7 @@ const Sidebar = ({
               className="status-icon"
               style={{ backgroundColor: getColor(capacities[loc.title]) }}
             >
-              {capacities[loc.title] != null ? `${capacities[loc.title]}%` : "\u00A0"}
+              {capacities[loc.title] != null ? `${capacities[loc.title]}%` : "----"}
             </div>
           </li>
         ))}
