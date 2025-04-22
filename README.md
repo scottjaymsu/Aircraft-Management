@@ -52,6 +52,30 @@ cd server
 node index.js
 ```
 
+## Recommendation Engine and Simulator Constraints
+- Both the Recommendation Engine and the Simulator assume that planes are parked in a non-stacked format with padding between them. It does not account for other ways of organizing planes within an FBO
+![alt text](parking_visual.png)
+
+- A current work around is to create different parking areas of the rows of aircraft with the "Edit FBO" feature on the Summary Page
+
+- Feeder airports have not been implemented due to that not being the current mode of operations for NetJets, but it can be added at a later date once that occupational model is implemented. 
+
+
+## SWIM Data
+- Reference README in flight-data-scraping
+
+
+## Authors and acknowledgment
+- MSU Capstone Team: Ryan MacDonald, Kendall Korcek, Jay Scott, Emily Telgenhoff, Ben Grycza, Ryann Seymour
+- A special thanks to: Kyle Sims, Amadou Anne, Morgan Schall, Lee Hoxworth
+
+
+
+
+
+
+
+
 
 To make it easy for you to get started with GitLab, here's a list of recommended next steps.
 
