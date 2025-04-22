@@ -142,6 +142,8 @@ margin: 0;
     cursor: pointer;
     width: 100%;
     margin-top: 50px;
+    white-space: nowrap;
+    overflow: hidden;
 }
 .reset-button:hover {
     background-color: #5a6f8a;
@@ -397,6 +399,8 @@ select option {
     border-bottom: 1px solid #444240;
     color: #444240;
     background-color: #d7d5d3;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 /* Change Color of rows when hovered */
