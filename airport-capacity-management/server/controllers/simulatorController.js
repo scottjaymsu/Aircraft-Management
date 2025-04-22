@@ -21,8 +21,7 @@ exports.getAirportFBOs = (req, res) => {
     const query =
     `SELECT 
         ? AS Airport_Code,
-        'All FBOs' AS FBO_Name, 
-        SUM(Parking_Space_Taken) AS Parking_Space_Taken, 
+        'All FBOs' AS FBO_Name,
         SUM(Total_Space) AS Total_Space
     FROM airport_parking
     WHERE Airport_Code = ?
@@ -32,7 +31,6 @@ exports.getAirportFBOs = (req, res) => {
     SELECT 
         Airport_Code,
         FBO_Name, 
-        Parking_Space_Taken, 
         Total_Space
     FROM airport_parking
     WHERE Airport_Code = ?;`;
@@ -440,7 +438,7 @@ const generateRecommendations = (parkedPlanes, sortedAirports) => {
 
     recommendations.push(recommendation);
   }
-  console.log('Recommendations:', recommendations); // Debugging statement
+  //console.log('Recommendations:', recommendations); // Debugging statement
   return recommendations;   
 };
 
