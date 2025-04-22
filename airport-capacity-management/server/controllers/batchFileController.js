@@ -27,22 +27,25 @@ exports.insertAirport = (req, res) => {
   const insertedAirports = [];
   const queries = batchData.map((airport) => {
       return new Promise((resolve, reject) => {
-        const { ident, iata_code, name, latitude_deg, longitude_deg, type } = airport;
+        console.log("airport: ", airport);
+        const { ident, iata_code, name, latitude_deg, longitude_deg, airport_size, iso_country } = airport;
         const lat = parseFloat(latitude_deg);
         const long = parseFloat(longitude_deg);
 
         console.log(lat);
         console.log(long);
-        const query = `INSERT INTO airport_data (ident, iata_code, name, latitude_deg, longitude_deg, type)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        const query = `INSERT INTO airport_data (ident, iata_code, name, latitude_deg, longitude_deg, type, iso_country)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE 
+          ident = VALUES(ident),
           iata_code = VALUES(iata_code),
           name = VALUES(name),
           latitude_deg = VALUES(latitude_deg),
           longitude_deg = VALUES(longitude_deg),
-          type = VALUES(type)`;
+          type = VALUES(type),
+          iso_country = VALUES(iso_country)`;
 
-        db.query(query, [ ident, iata_code, name, lat, long, type], (err, results) => {
+        db.query(query, [ ident, iata_code, name, lat, long, airport_size, iso_country], (err, results) => {
           if (err) {
               console.error("Error fetching arriving planes...", err);
               reject(err);
@@ -61,19 +64,22 @@ exports.insertAirport = (req, res) => {
   })
 }
 
-// Return any airports that match the name
+/* Grab all FBOs at an existing airport */
 exports.getExistingFBOs = (req, res) => {
-  const identArray = req.body.map(airport => airport.ident);
-  const query = "SELECT FBO_Name FROM airport_parking WHERE FBO_Name IN (?)"
+  const identArray = req.body.map(airport => airport.Airport_Code);
+  const query = "SELECT Airport_Code AS ident, FBO_Name FROM airport_parking WHERE Airport_Code IN (?)"
   db.query(query, [identArray], (err, results) => {
     if (err) {
       console.error('Error inserting data into database:', err);
       res.status(500).json({ error: 'Unable to insert data' });
     }
     else {
-      const returnResults = results.map(result => result.FBO_Name);
-      console.log(returnResults);
-      res.json(results);
+      const grouped = {};
+      for (const row of results) {
+        if (!grouped[row.ident]) { grouped[row.ident] = []; }
+        grouped[row.ident].push(row.FBO_Name);
+      }
+      res.json(grouped);
   }});
 }
 

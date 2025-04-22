@@ -10,6 +10,43 @@
             "name": "Launch Chrome against localhost",
             "url": "http://localhost:8080",
             "webRoot": "${workspaceFolder}"
+        },
+        {
+            "name": "flight-data-scraping: Python Debugger",
+            "type": "debugpy",
+            "request": "attach",
+            "connect": {
+              "host": "localhost",
+              "port": 5678
+            },
+            "pathMappings": [
+              {
+                "localRoot": "${workspaceFolder}/flight-data-scraping/flight_plan_tracking",
+                "remoteRoot": "/app" 
+              }
+            ]
+          },
+        {
+          "name": "database-manager: Python Debugger",
+          "type": "debugpy",
+          "request": "attach",
+          "connect": {
+            "host": "localhost",
+            "port": 5679
+          },
+          "pathMappings": [
+            {
+              "localRoot": "${workspaceFolder}/flight-data-scraping/database_manager",
+              "remoteRoot": "/app"
+            }
+          ]
         }
     ]
+    // "compounds": [
+    //   {
+    //     "name": "Python: Attach to Both Containers",
+    //     "configurations": ["flight-data-scraping: Python Debugger", "database-manager: Python Debugger"]
+    //   }
+// ]
+
 }

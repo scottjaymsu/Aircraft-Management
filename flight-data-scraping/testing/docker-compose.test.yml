@@ -1,0 +1,65 @@
+services:
+  test-db:
+    image: test-db:latest
+    build: 
+      context: ./test_db
+      dockerfile: Dockerfile
+    container_name: mysql_container
+    ports:
+      - "3306:3306"
+    networks:
+      - FAA-messages
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--host=localhost"]
+      interval: 5s
+      timeout: 50s
+      retries: 10
+      start_period: 10s
+
+  message-consumer:
+    image: username486/netjets_server:message-consumer
+    build: 
+      context: ../FAA-message-consumer
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - "FAA-messages"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/messages/consume"]
+      interval: 1s
+      timeout: 10s
+      retries: 10
+      start_period: 1s
+
+  flight-plan-tracking:
+    image: flight-plan-tracking:latest
+    build:
+      context: ../flight_plan_tracking
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      test-db:
+        condition: service_healthy
+      message-consumer:
+        condition: service_healthy
+    networks:
+      - FAA-messages
+
+  tester:
+    image: tester:latest
+    build:
+      context: ./tester
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      flight-plan-tracking:
+        condition: service_started
+    networks:
+      - FAA-messages
+
+networks:
+  FAA-messages:
+    driver: bridge

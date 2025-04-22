@@ -1,7 +1,8 @@
-import React from 'react';
-import './component.css';
-import { getStatusColor } from '../utils/helpers';
+import React, { useState, useEffect } from 'react';
+import '../styles/component.css';
+import { getColor } from '../utils/helpers';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import axios from 'axios';
 
 const Sidebar = ({
   searchTerm,
@@ -12,6 +13,32 @@ const Sidebar = ({
   visible,
   toggleVisibility,
 }) => {
+  // Airport capacities 
+  const [capacities, setCapacities] = useState({});
+
+  useEffect(() => {
+    const fetchCapacities = async () => {
+      try {
+        const response = await axios.get("http://localhost:5001/airportData/getAllAirportCapacities");
+        const data = response.data;
+
+        // Convert array to map { airport: percentage_occupied }
+        const capMap = {};
+        data.forEach(entry => {
+            const percentageOccupied = parseFloat(entry.percentage_occupied);
+            capMap[entry.airport] = Math.round(percentageOccupied);
+        });
+
+        setCapacities(capMap);
+        console.log("Capacities:", capMap);
+      } catch (error) {
+        console.error("Failed to fetch airport capacities:", error);
+      }
+    };
+
+    fetchCapacities();
+  }, []);
+
   return (
     <div id="side-bar" className={visible ? 'visible' : ''}>
       <div id="search-container">
@@ -36,10 +63,9 @@ const Sidebar = ({
             {loc.title}
             <div
               className="status-icon"
-              style={{ backgroundColor: getStatusColor(loc.status) }}
+              style={{ backgroundColor: getColor(capacities[loc.title]) }}
             >
-              {loc.total_planes != null && loc.capacity ? 
-              `${((loc.total_planes / loc.capacity) * 100).toFixed(0)}%` : ''}
+              {capacities[loc.title] != null ? `${capacities[loc.title]}%` : "\u00A0"}
             </div>
           </li>
         ))}

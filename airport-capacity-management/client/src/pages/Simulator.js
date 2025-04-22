@@ -150,14 +150,27 @@ const SimulatorComponent = () => {
 
     }, [airportCode, fetchAllPlanes, timeInterval]);
 
-    // Constant Updates time in GMT
-    // Currently just our time but can change individual airport times 
+    /* This sets the local time for the current airport. It makes a request to our backend which is able to generate the timezone of the airport
+    based on it's lat/long coordinates. It will then generate the local time and display it for users looking at the header of the simulation page. */
     useEffect(() => {
+        let timeZoneAbbr = 'UTC';
+    
+        const fetchTimeZone = async () => {
+            try {
+                const response = await axios.get(`http://localhost:5001/airportData/getCurrentTime/${airportCode}`);
+                if (response.data && response.data.timeZoneAbbr) {
+                    timeZoneAbbr = response.data.timeZoneAbbr;
+                }
+            } catch (error) {
+                console.error('Error fetching time zone:', error);
+            }
+        };
+        fetchTimeZone();
+
         const interval = setInterval(() => {
             const now = new Date();
-            // Month/Day/YEAR Hour:Minute:Second GMT
             const formattedDate = now.toLocaleString('en-US', {
-                timeZone: 'GMT',
+                timeZone: timeZoneAbbr,
                 month: 'numeric',
                 day: 'numeric',
                 year: 'numeric',
@@ -165,24 +178,26 @@ const SimulatorComponent = () => {
                 minute: '2-digit',
                 second: '2-digit',
                 hour12: false
-            }) + ' GMT';
+            })
+    
             setLocalTime(formattedDate);
         }, 1000);
-
+    
         return () => clearInterval(interval);
-    }, []);
+    }, [airportCode]);
+    
 
     // Switches to selected FBO when selected from the dropdown
     // Planes assigned to that FBO will only be shown when selected
-    const handleFBOChange = (event) => {
-        const selectedFBOName = event.target.value;
+    const handleFBOChange = (selectedFBOName) => {
         if (selectedFBOName === "All FBOs") {
-            setSelectedFBO("All FBOs"); 
+          setSelectedFBO("All FBOs");
         } else {
-            const selectedFBO = fboData.find(fbo => fbo.FBO_Name === selectedFBOName);
-            setSelectedFBO(selectedFBO ? selectedFBO.FBO_Name : "All FBOs"); 
+          const selectedFBO = fboData.find(fbo => fbo.FBO_Name === selectedFBOName);
+          setSelectedFBO(selectedFBO ? selectedFBO.FBO_Name : "All FBOs");
         }
-    };
+      };
+      
 
     // Filter planes based on selected plane type
     const handlePlaneTypeFilterChange = (event) => {
@@ -204,17 +219,39 @@ const SimulatorComponent = () => {
     });
     
 
-    const handleTailNumberChange = (event) => {
-        const selectedTailNumber = event.target.value;
+    const handleTailNumberChange = (selectedTailNumber) => {
         setSearchTerm(selectedTailNumber);
-    
+        setSelectedTailNumber(selectedTailNumber); // this is what controls the filter
+      
+        if (!selectedTailNumber) {
+          // If cleared, also reset plane info state
+          setSelectedPlaneType('');
+          setSelectedPlaneLocation('');
+          setSelectedPlaneSize('');
+          setSelecteedSpots('');
+          return;
+        }
+      
         const selectedPlane = allPlanes.find(plane => plane.acid === selectedTailNumber);
-    
-        setSelectedTailNumber(selectedTailNumber); // for filtering
+      
         setSelectedPlaneType(selectedPlane?.plane_type || 'Unavailable');
         setSelectedPlaneLocation(selectedPlane?.FBO_name || 'N/A');
         setSelectedPlaneSize(selectedPlane?.size || 'Unavailable');
         setSelecteedSpots(selectedPlane?.numberSpots || '1');
+      };
+     
+    // Reset all filters to default values
+    // This is called when the user clicks the "Reset Filters" button
+    const handleResetFilters = () => {
+    setSearchTerm('');
+    setSelectedTailNumber('');
+    setSelectedPlaneTypeFilter('All Types');
+    setSelectedPlaneSizeFilter('All Sizes');
+    setSelectedPlaneType('');
+    setSelectedPlaneLocation('');
+    setSelectedPlaneSize('');
+    setSelecteedSpots('');
+    setSelectedFBO('All FBOs'); // optional, only include if you want to reset FBO too
     };
     
     
@@ -246,6 +283,7 @@ const SimulatorComponent = () => {
                     selectedPlaneSizeFilter={selectedPlaneSizeFilter}
                     handlePlaneSizeFilterChange={handlePlaneSizeFilterChange}
                     tailNumberOptions={filteredTailNumbers}
+                    handleResetFilters={handleResetFilters}
         
 
                 />
@@ -264,8 +302,8 @@ const SimulatorComponent = () => {
                         and Capacity Movement 
                      */}
                      <div>
-                     <button className="swich-alerts" onClick={handleSimulationTabClick} id="simulation-tab-button">
-                        {showSimulationTab ? "Hide Simulation Tab": "Show Simulation Tab"}
+                     <button className="run-simulation-button" onClick={handleSimulationTabClick} id="simulation-tab-button">
+                        {showSimulationTab ? "Show Recommendations": "Open Simulation"}
                     </button>
                     {showSimulationTab ? (
                         <SimulationTab

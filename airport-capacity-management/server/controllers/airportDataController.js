@@ -3,6 +3,8 @@
  * passed to the client
  */
 const airportDB = require('../models/airportDB');
+const tzLookup = require('tz-lookup');
+const { DateTime } = require('luxon');
 
 // Controller to get airport data by FAA Designator - {FAA designator, name}
 exports.getAirportData = (req, res) => {
@@ -98,5 +100,27 @@ exports.getParkedPlanes = (req, res) => {
         console.log(results);
         // Send results back as response
         res.json(results);
+    });
+}
+
+
+exports.getCurrentTime = (req, res) => {
+    const id = req.params.id;
+    const query = 'SELECT latitude_deg, longitude_deg FROM airport_data WHERE ident = ?';
+    airportDB.query(query, [id], (err, results) => {
+        if (err) {
+            console.error("Error querying airport data.", err);
+            return res.status(500).json({ error: 'Error querying airport data.' });
+        }
+        const { latitude_deg, longitude_deg } = results[0];
+        try {
+            const timeZone = tzLookup(latitude_deg, longitude_deg);
+            const localTime = DateTime.now().setZone(timeZone).toISO();
+            const timeZoneAbbr = DateTime.now().setZone(timeZone).toFormat('ZZZ');
+            res.json({ timeZoneAbbr, localTime });
+        } catch (error) {
+            console.error("Error determining time zone.", error);
+            res.status(500).json({ error: 'Failed to determine local time.' });
+        }
     });
 }

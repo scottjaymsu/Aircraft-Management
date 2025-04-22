@@ -13,6 +13,22 @@ function FlightTable({ id, flightType }) {
     const timeInterval = 3000000; // 5 minutes - refresh interval
     const [flights, setFlights] = useState([]);
     const [error, setError] = useState('');
+    const [timeZoneAbbr, setTimeZoneAbbr] = useState('UTC');
+
+    /* We need to fetch the timezone of the airport here so that the arriving and departing times can match the airport timezone */
+    useEffect(() => {
+        const fetchTimeZone = async () => {
+            try {
+                const response = await axios.get(`http://localhost:5001/airportData/getCurrentTime/${id}`);
+                if (response.data && response.data.timeZoneAbbr) {
+                    setTimeZoneAbbr(response.data.timeZoneAbbr);
+                }
+            } catch (error) {
+                console.error('Error fetching time zone:', error);
+            }
+        };
+        fetchTimeZone();
+    }, [id]);
 
     // Fetch arriving or departing flights based on the flightType
     const fetchFlights = useCallback(() => {
@@ -50,13 +66,13 @@ function FlightTable({ id, flightType }) {
     // Format the date to a more readable format
     const formatDate = (dateStr) => {
         const date = new Date(dateStr);
-        return dateStr ? date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit'}) : "N/A";
+        return dateStr ? date.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', timeZone: timeZoneAbbr}) : "N/A";
     };
 
     // Format the time to a more readable format
     const formatTime = (dateStr) => {
         const date = new Date(dateStr);
-        return dateStr ? date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : "";
+        return dateStr ? date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: timeZoneAbbr }) : "";
     };
 
     // Key for the date and time wording based on the flightType

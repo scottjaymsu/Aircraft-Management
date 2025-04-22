@@ -4,19 +4,52 @@
     flex-direction: column;
     background-color: #f6f4f2;
     height: 100vh;
-    padding: 10px;
-    gap: 10px;
     font-family: Arial, Helvetica, sans-serif;
     color: #444240;
 }
 
-/* Header segment of the grid */
+#sub-header {
+    padding: 0 30px 5px 30px; /* reduce vertical spacing */
+    margin-bottom: 0;
+
+}
+/* Wraps both header sections and sub-header underneath */
+#head-dashboard-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin: 0;
+  }
+  
 #head-dashboard {
+display: flex;
+flex-direction: row;
+align-items: flex-start;
+width: 100%;
+margin: 0;
+}
+  
+#left-header-content {
+    flex: 0 0 62%;
     display: flex;
     flex-direction: row;
-    height: 150px;
-    border-radius: 5px;
-    flex: 2;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 10px;
+    height: fit-content;
+  }
+  
+#right-header-content {
+    flex: 0 0 34%; /* Increase width */
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: 10px;
+    row-gap: 10px;
+    align-items: start;
+    padding: 10px;
+    height: fit-content;
+
 }
 
 /* HEADER */
@@ -39,33 +72,81 @@
     flex-direction: column;
     padding: 10px;
     font-weight: bold;
-    /* justify-content: center; */
     gap: 10px;
 }
 .header-segment-right {
-    flex: 1; 
+    flex: .8; 
     border-radius: 5px;
     display: flex;
     flex-direction: column;
     padding: 10px;
     font-weight: bold;
-    /* justify-content: center; */
     gap: 10px;
-    /* margin-left: 50px; */
 }
 
-@media (max-width: 768px) {
-    #head-dashboard {
-        flex-direction: column;
-    }
-    .header-segment-large {
-        flex: 1;
-    }
-    .header-segment-small {
-        flex: 1;
-    }
-    
+.custom-select-wrapper {
+    margin-top: 0;
+    margin-bottom: 10px;
+    width: 100%;
+  }
+  
+  .custom-select-label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: bold;
+    color: #444240;
+  }
+  
+  .custom-select-input {
+    background-color: #3b536c;
+    color: white;
+    font-weight: 600;
+    font-size: 16px;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    width: 100%;
+    height: 40px; /* ✅ This helps it match react-select */
+    box-sizing: border-box;
+  }
+  
+  
+  
+
+  
+
+  #local-datetime {
+    background-color: white;
+    color: #444240;
+    font-weight: 600;
+    font-size: 16px;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 4px;
+
+    border: solid 1px #444240;
+    width: 100%;
+    height: 39px;
+    box-sizing: border-box;
+  }
+  
+
+.reset-button {
+    background-color: #3b536c;
+    color: white;
+    border: none;
+    padding: 6px;
+    font-size: 14px;
+    border-radius: 3px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 50px;
 }
+.reset-button:hover {
+    background-color: #5a6f8a;
+}
+
 /* HEADER BLOCK 1 */
 
 #header1 {
@@ -148,7 +229,6 @@ header div */
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    max-height: 100px;
     background-image: none;
 }
 
@@ -172,9 +252,6 @@ select option {
     padding: 10px; /* Padding for the options */
     font-size: 16px; /* Font size for the options */
 }
-
-
-
 
 #plane-info-wrapper {
     background-color: #D7D5D3;
@@ -360,14 +437,13 @@ select option {
     flex-direction: column;
     align-items: center;
     background-color: #d7d5d3;
-    border-radius: 5px;
-    width: 100%;
-    height: 97%;
+    width: 99%;
+    height: 92%;
     overflow: hidden;
-    border-top: 2px solid #444240;
-    border-left: 2px solid #444240;
-    border-right: 2px solid #444240;
-
+    border-top: 3x solid #444240;
+    border-left: 3px solid #444240;
+    border-right: 3px solid #444240;
+    border-bottom: 3px solid #444240;
 }
 
 /* 
@@ -412,10 +488,17 @@ select option {
     display: flex;
     gap: 10px; /* Space between buttons */
     align-items: center;
+    margin-left: 10%;
 }
 
 #sort-by button {
     width: 125px;
+    margin: 0;
+    white-space: nowrap; /* Prevent text wrapping */ 
+}
+
+#sort-by-text {
+    white-space: nowrap; /* Prevent text wrapping */
 }
 
 .switch-alerts {
@@ -586,15 +669,6 @@ select option {
     color: white;
     font-weight: bold;
 } 
-/* .run-simulation-button:hover {
-    background-color: white; 
-}
-
-.table-container {
-    height: auto;
-    overflow: visible;
-}
-
 
 /* Classes for colors */
 .red-color {

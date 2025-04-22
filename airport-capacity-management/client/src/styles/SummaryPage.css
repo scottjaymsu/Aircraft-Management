@@ -6,6 +6,7 @@
 }
 
 .back-button {
+  z-index: 100;
   position: absolute;
   top: 32px;
   left: 30px;
@@ -29,6 +30,7 @@
   flex-direction: column;
   overflow: scroll;
   justify-content: space-between;
+  
 }
 
 

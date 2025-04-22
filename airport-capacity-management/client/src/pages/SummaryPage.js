@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { GoogleMap, LoadScript, Polygon } from "@react-google-maps/api";
+import { GoogleMap, Polygon } from "@react-google-maps/api";
 import { Card, CardContent } from "../components/card";
-import { getStatusClass, getStatusColor } from "../utils/helpers"
+import { getStatusClass, getColor } from "../utils/helpers"
 
 import "../styles/SummaryPage.css";
 import "../styles/Scrollable.css";
 import FlightTable from "../components/FlightTable";
 import TrafficOverview from "../components/TrafficOverview";
 import FBOComponent from "../components/FBOComponent";
+import axios from "axios";
 import Capacities from "../components/Capacities";
 
 // Map Size
@@ -123,48 +124,60 @@ export default function SummaryPage() {
   });
 
   const [airportMetadata, setAirportMetadata] = useState([]);
-  const [FBOList, setFBOList] = useState([]);
-  const [currentPopulation, setCurrentPopulation] = useState(0);
-  const [overallCapacity, setOverallCapacity] = useState(0);
   // airport capacity as percentage
-  const [capacity, setCapacity] = useState(0);
+  const [capacity, setCapacity] = useState(null);
+  // fbo capacities for airport
+  const [fboCapacities, setFboCapacities] = useState({});
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch current population and overall capacity without using async/await
-    const fetchData = () => {
-      // Fetch number of planes currently at the airport
-      fetch(`http://localhost:5001/airportData/getParkedPlanes/${airportCode}`)
-        .then((currentResponse) => currentResponse.json())
-        .then((currentData) => {
-          const currentPopulation = currentData.length;
-          setCurrentPopulation(currentPopulation);
-          console.log("Current Population:", currentPopulation);
+    const fetchFboCapacities = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5001/airportData/getAllFboCapacities/${airportCode}`);
+        const data = response.data;
 
-          // Fetch overall capacity of the airport
-          fetch(`http://localhost:5001/airportData/getOverallCapacity/${airportCode}`)
-            .then((overallResponse) => overallResponse.json())
-            .then((overallData) => {
-              const overallCapacity = overallData.totalCapacity;
-              setOverallCapacity(overallCapacity);
-              console.log("Overall Capacity:", overallCapacity);
+        // Convert array to map { fbo: percentage_occupied }
+        const fboMap = {};
+        data.forEach(entry => {
+          const percentageOccupied = parseFloat(entry.percentage_occupied);
+          // round to nearest integer
+          fboMap[entry.fbo] = Math.round(percentageOccupied); 
+        });
 
-              // Set capacity as percentage
-              setCapacity((currentPopulation / overallCapacity) * 100);
-            })
-            .catch((error) => {
-              console.error("Error fetching overall capacity data:", error);
-            });
+        setFboCapacities(fboMap);
+        console.log("FBO Capacities:", fboMap);
+      } catch (error) {
+        console.error("Failed to fetch FBO capacities:", error);
+      }
+    };
+
+    fetchFboCapacities();
+  }, [airportCode]);
+
+  // Fetch airport capacity percentage
+  useEffect(() => {
+    // Fetch airport capacity data
+    const fetchCapacityData = () => {
+      fetch(`http://localhost:5001/airportData/getAirportCapacity/${airportCode}`)
+        .then((response) => response.json())
+        .then((data) => {
+          const percentageOccupied = parseFloat(data.percentage_occupied);
+          if (!isNaN(percentageOccupied)) {
+            // Store percentageOccupied in capacity state
+            setCapacity(Math.round(percentageOccupied));
+          } else {
+            console.error("Invalid percentage_occupied value:", data.percentage_occupied);
+            setCapacity(0); // Default to 0 if the value is invalid
+          }
         })
         .catch((error) => {
-          console.error("Error fetching current population data:", error);
+          console.error("Error fetching airport capacity data:", error);
         });
     };
 
-    fetchData();
+    fetchCapacityData();
   }, [airportCode]);
-
 
   useEffect(() => {
     console.log(airportCode);
@@ -179,32 +192,59 @@ export default function SummaryPage() {
         console.log("Parking Coordinates:", data);
        
         // Filter out parking lots with no coordinates and map them to the required format
+        const parseWKTPolygon = (wkt) => {
+          if (!wkt.startsWith("POLYGON(") && !wkt.startsWith("POLYGON (")) {
+            console.error("Invalid WKT format:", wkt);
+            return [];
+          }
+          wkt = wkt.replace("POLYGON (", "POLYGON(");
+          const coordinateStr = wkt.slice(8, -1); // remove POLYGON( and final )
+          const points = coordinateStr.split(",");
+          return points.map((pt) => {
+            const [lat, lng] = pt.trim().split(/\s+/).map(Number);
+            return { lat, lng };
+          });
+        };
+        // TODO: remove after betas keeping in case soemthing breaks
+        // const parkingLots = data
+        //   .filter(lot => lot.coordinates && lot.coordinates.length > 0)
+        //   .map((lot) => {
+        //     const coordinates = lot.coordinates[0].map((coord) => ({
+        //       lat: coord.x,
+        //       lng: coord.y,
+        //     }));
+        //   return {
+        //     name: lot.FBO_Name,
+        //     coordinates: coordinates,
+        //     color: getStatusColor(lot.spots_taken, lot.Total_Space),
+        //     labelPosition: coordinates[0],
+        //   };
+        // });
         const parkingLots = data
-          .filter(lot => lot.coordinates && lot.coordinates.length > 0)
-          .map((lot) => {
-            const coordinates = lot.coordinates[0].map((coord) => ({
+        .filter((lot) => lot.coordinates)
+        .map((lot) => {
+          let coordinates = [];
+
+          if (typeof lot.coordinates === "string") {
+            coordinates = parseWKTPolygon(lot.coordinates);
+          } else if (
+            Array.isArray(lot.coordinates) &&
+            lot.coordinates.length > 0
+          ) {
+            coordinates = lot.coordinates[0].map((coord) => ({
               lat: coord.x,
               lng: coord.y,
             }));
+          }
+
           return {
             name: lot.FBO_Name,
-            coordinates: coordinates,
-            color: getStatusColor(lot.spots_taken, lot.Total_Space),
-            labelPosition: coordinates[0],
+            coordinates,
+            color: getColor(fboCapacities[lot.FBO_Name]),
+            labelPosition: coordinates[0] || { lat: 0, lng: 0 },
           };
         });
         
-        // Create FBO list with parking lot data
-        const FBOs = data.map((lot) => {
-          return {
-            name: lot.FBO_Name,
-            parking_taken: lot.spots_taken,
-            total_parking: lot.Total_Space,
-            priority: lot.priority || 1, // Default priority to 1 if not provided
-          };
-        });
-        setFBOList(FBOs);
-
         setParkingLots(parkingLots);
       } catch (error) {
         console.error("Error fetching parking data:", error);
@@ -233,7 +273,7 @@ export default function SummaryPage() {
     fetchParkingCoordinates();
     fetchAirportData();
 
-  }, [airportCode]);
+  }, [airportCode, fboCapacities]);
 
 
   //
@@ -303,25 +343,25 @@ export default function SummaryPage() {
         {/* Back button to go back to the home page */}
         <img onClick={handleBack} className="back-button" src="/back-arrow.png" alt="Back Button"></img>
 
-        {/* Title and status of airport */}
-        <Card className="card-content">
-          <CardContent className="text-center flex-1">
-            <h2 className="title">{airportCode} - {airportMetadata.name}</h2>
-            <p className={`status-bubble ${getStatusClass(currentPopulation, overallCapacity)}`}>
-              {currentPopulation != null && overallCapacity ? 
-                `${((currentPopulation / overallCapacity) * 100).toFixed(0)}%` : ''}
-            </p>
-          </CardContent>
-        </Card>
 
-        {/* Traffic Overview graph */}
+          <Card className="card-content">
+            <CardContent className="text-center flex-1">
+              <h2 className="title">
+                {airportMetadata.name ? `${airportCode} - ${airportMetadata.name}` : "\u00A0"}
+              </h2>
+              <p className={`status-bubble ${getStatusClass(capacity)}`}>
+                {capacity !== null ? `${capacity}%` : "\u00A0"}
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Traffic Overview graph */}
         <Card className="card-content flex-2">
           <div style={{ textAlign: 'center', top: 0 }}>
             <h2>Traffic Overview</h2>
           </div>
           <TrafficOverview id={airportCode} />
         </Card>
-
         {/* Arriving flight table */}
         <Card className="card-content flex-3">
           <CardContent>
@@ -340,7 +380,7 @@ export default function SummaryPage() {
         <FBOComponent id={airportCode}/>
         <Card className="card-content flex-3">
           <CardContent>
-                <Capacities id={airportCode} spacesLeft={overallCapacity-currentPopulation} />
+                <Capacities id={airportCode} area_left={23} />
           </CardContent>
         </Card>
         <button className="see-more flex-1" onClick={handleSeeMore}>See more</button>

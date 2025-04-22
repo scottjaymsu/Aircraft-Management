@@ -1,0 +1,14 @@
+/* Wrapper for the select */
+.custom-select-wrapper {
+  margin-top: 0;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+/* Label above the select box */
+.custom-select-label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: bold;
+  color: #444240;
+}

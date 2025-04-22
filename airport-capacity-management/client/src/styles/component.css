@@ -1,0 +1,252 @@
+/* 
+    Map container
+*/
+#map {
+  width: 100%;
+  height: 100vh;
+}
+
+/* 
+    Wrapper for notification Center on right 
+*/
+#notification-center {
+  position: absolute;
+  width: 60px;
+  max-height: 50px;
+  border-radius: 5px;
+  background-color: #f6f4f2;
+  padding: 5px;
+  z-index: 6;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  gap: 10px;
+  overflow: hidden;
+  transition: max-height 0.5s ease-in-out, width 0.5s ease-in-out;
+}
+
+/* 
+    Make Notification center right 
+    expand 
+ */
+#notification-center.visible {
+  width: 300px;
+  max-height: 900px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* 
+    Toggle button the notification window 
+ */
+#notif-toggle {
+  background-color: #1c3149;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  margin: 5px;
+  width: 50px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  z-index: 10;
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+/* 
+    For the list of all notifications
+ */
+#notif-list {
+  flex-grow: 1;
+  max-height: 60vh;
+  margin-right: 5px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;
+}
+
+/* 
+    For each individual notification
+ */
+.notif-wrapper {
+  width: 95%;
+  padding: 10px;
+  background-color: #b0aeac;
+  border-radius: 5px;
+  color: white;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: bold;
+  text-align: center;
+}
+
+/*
+    Side bar that holds 
+    airports and current status
+*/
+#side-bar {
+  position: absolute;
+  width: 330px;
+  max-height: 40px;
+  border-radius: 5px;
+  background-color: #f6f4f2;
+  padding: 10px;
+  z-index: 1;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+  transition: max-height 0.5s ease-in-out, width 0.5s ease-in-out;
+}
+
+/*
+    Container for back button 
+    and search bar within sidebar
+*/
+.search-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+/* 
+    Button that toggles side bar window
+ */
+#collapse-button {
+  padding: 10px 15px;
+  background-color: #1c3149;
+  color: #fff;
+  border: none;
+  margin-right: 7px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+/* 
+    Back button Styling for
+    returning to overview
+*/
+#back-button {
+  padding: 10px 15px;
+  background-color: #1c3149;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  margin-right: 7px;
+  cursor: pointer;
+  font-weight: bold;
+  white-space: nowrap;
+  transition: opacity 0.2s ease-in-out;
+}
+/* 
+    Search Box Styling
+*/
+#map-search {
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  width: 100%;
+  min-width: 120px;
+  max-width: 260px;
+  transition: opacity 0.2s ease-in-out;
+}
+
+/* 
+    Full list of all locations 
+    on our side bar
+ */
+#location-list {
+  position: relative;
+  list-style-type: none;
+  font-family: Arial, Helvetica, sans-serif;
+  padding: 1px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+/* 
+    Element in list of airports 
+    Includes title and status icon
+ */
+.list-ele {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-weight: bold;
+  font-size: large;
+  color: #262524;
+}
+
+.list-ele:hover {
+  background-color: #dae2e9;
+  cursor: pointer;
+}
+
+/* 
+    Icon next to airport to give current status 
+ */
+.status-icon {
+  width: 100px;
+  height: 30px;
+  font-size: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #c76666;
+  color: #fff;
+  border-radius: 2px;
+}
+
+/* 
+    Expand the side bar to show current airports 
+ */
+#side-bar.visible {
+  max-height: 84vh;
+}
+
+/* 
+    Make location list on search module 
+    appear after window expanded 
+ */
+#location-list.visible {
+  opacity: 1;
+}
+
+
+/*
+    Summary page graph styling
+*/
+.graph-nav {
+  border-radius: 5px;
+  background-color: #1c3149;
+  color: white;
+  font-weight: bold;
+  padding: 3px 10px;
+  margin: 0px 2px;
+}
+.graph-nav:hover {
+  opacity: 0.5;
+  cursor: pointer;
+}
+.graph-nav:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

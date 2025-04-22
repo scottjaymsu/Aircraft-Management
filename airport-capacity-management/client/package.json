@@ -15,6 +15,7 @@
     "react-icons": "^5.4.0",
     "react-router-dom": "^7.1.5",
     "react-scripts": "^5.0.1",
+    "react-select": "^5.10.1",
     "recharts": "^2.15.1",
     "web-vitals": "^4.2.4"
   },
@@ -45,18 +46,15 @@
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
   },
-
   "jest": {
-  "transform": {
-    "^.+\\.(js|jsx)$": "babel-jest"
-  },
-  "transformIgnorePatterns": [
-    "node_modules/(?!axios)"  
-  ],
-  "moduleNameMapper": {
-    "\\.(css|less|scss|sass)$": "identity-obj-proxy"  
+    "transform": {
+      "^.+\\.(js|jsx)$": "babel-jest"
+    },
+    "transformIgnorePatterns": [
+      "node_modules/(?!axios)"
+    ],
+    "moduleNameMapper": {
+      "\\.(css|less|scss|sass)$": "identity-obj-proxy"
+    }
   }
 }
-}
-
-

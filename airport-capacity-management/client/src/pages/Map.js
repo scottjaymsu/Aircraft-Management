@@ -16,11 +16,11 @@ const ORIGINAL_ZOOM = 5;
 const createNotifications = (markers) => {
   const notifications = [];
   [...markers].forEach((marker) => {
-    const { title, status } = marker;
-    if (status === "Overcapacity" || status === "Reaching Capacity") {
+    const { title, capacity_percentage } = marker;
+    if (capacity_percentage >= 0.8) {
       notifications.push({
         title: marker.title,
-        message: `${title} is at ${status}. Please redirect incoming flights.`,
+        message: `${title} is at ${Math.round(capacity_percentage * 100)}% redirect incoming flights.`,
       });
     }
   });
