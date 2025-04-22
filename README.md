@@ -91,6 +91,18 @@ The Open Parking by Aircraft Type table tells the user how many of each type of 
 
 The Recommendation page can be accessed by clicking the "See more" button at the bottom of the page. 
 
+## Batch File Upload Page
+The Batch File Upload page allows a user to upload a batch file of either airport data or specific FBO data. 
+
+A user can download an example CSV file to get an idea of the required structure by clicking the "Download Example" button. 
+To upload a created file, a user can click the "Choose File" button and select the desired file from their computer. 
+
+![alt text](README_images/airport_data_upload.png)
+A user can select the "Airport Data Upload" tab, upload a CSV file with the correct information about the new airport, and the application will create a new airport to be used to track capacity. An example situation where this feature may be useful is when an owner wants to create their own temporary airport. 
+
+![alt text](README_images/fbo_data_upload.png)
+When a user clicks the "FBO Data Upload" tab, they can upload relevant information about the FBO that they want to add to the system. Although FBOs can be added on the summary page, this feature can be used to populate multiple FBOs rapidly with just a CSV file. 
+
 ## Recommendation Engine and Simulator Constraints
 Both the Recommendation Engine and the Simulator assume that planes are parked in a non-stacked format with padding between them. It does not account for other ways of organizing planes within an FBO
 ![alt text](README_images/parking_visual.png)
