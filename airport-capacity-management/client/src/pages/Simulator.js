@@ -301,7 +301,7 @@ const SimulatorComponent = () => {
                         Our Recommendations for the Aiport 
                         and Capacity Movement 
                      */}
-                    <div> 
+                     <div>
                      <button className="run-simulation-button" onClick={handleSimulationTabClick} id="simulation-tab-button">
                         {showSimulationTab ? "Show Recommendations": "Open Simulation"}
                     </button>
