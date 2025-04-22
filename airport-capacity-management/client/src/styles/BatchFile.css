@@ -7,6 +7,8 @@
   font-family: sans-serif;
   padding: 20px;
   background-color: #f6f4f2;
+  min-width: 600px;
+  overflow-x: auto;
 }
 .airport-table td {
   max-width: 300px;
@@ -61,13 +63,13 @@
   color: #333;
 }
 
-/* Tab Buttons */
+/* selector tab */
 .tabs {
+  position: relative;
   display: flex;
-  justify-content: center;
-  position: fixed;
-  top: 55px;
-  right: 15px;
+  margin: 10px 0 0 45px;
+  z-index: 1;
+  overflow-x: hidden;
 }
 
 .tab-button {
@@ -165,4 +167,64 @@
   border: none;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.upload-button,
+.parse-button,
+.tab-button {
+  white-space: nowrap;
+}
+
+.airport-table th,
+.airport-table td {
+  white-space: nowrap;
+}
+
+.table-container-box {
+  overflow-x: auto;
+}
+
+.airport-table {
+  min-width: 800px;
+}
+
+.airport-table {
+  width: max-content;
+  border-collapse: collapse;
+}
+
+.airport-table th,
+.airport-table td {
+  padding: 1px 2px;
+  white-space: nowrap;
+}
+
+.table-container-box {
+  overflow-x: auto;
+}
+
+.table-container-box {
+  width: 100%;
+  display: block;
+  overflow-x: auto;
+}
+
+.airport-table {
+  table-layout: fixed;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.airport-table th,
+.airport-table td {
+  white-space: normal;
+  word-break: break-word;
+  padding: 4px 8px;
+}
+
+@media screen and (max-width: 1000px) {
+  .tabs {
+    display: flex;
+    overflow-x: auto;
+  }
 }
