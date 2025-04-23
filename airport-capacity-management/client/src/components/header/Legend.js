@@ -1,6 +1,6 @@
 /**
  * Segment for the time and reset button
- * Dispayed as a part of the header for the simulator component
+ * Displayed as a part of the header for the simulator component
  */
 const Legend = () => (
     <div className='header-segment-small'>

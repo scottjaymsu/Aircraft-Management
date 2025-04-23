@@ -1,5 +1,7 @@
 {
     "cSpell.words": [
+        "fbos",
+        "fetchfbodata",
         "Grycza",
         "Hoxworth",
         "KBPI",
@@ -10,6 +12,8 @@
         "Korcek",
         "KSDL",
         "KTEB",
+        "latlong",
+        "papaparse",
         "Schall",
         "Telgenhoff",
         "Undercapacity"
