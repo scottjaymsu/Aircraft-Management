@@ -68,19 +68,19 @@ exports.getAirportMarkers = async (req, res) => {
     /* This query is for an area based calculation based on the total fbo areas (divided by 5 to ensure easy spacing for airplanes), as well as the total footprint of each airplane currently at the airport */
     const query = `SELECT ap.Airport_Code AS ident,a.latitude_deg, a.longitude_deg,
         IFNULL(SUM(at.parkingArea * 1.1), 0) AS total_planes,
-        (SELECT IFNULL(SUM(Area_ft2), 0) / 7.5 FROM airport_parking WHERE Airport_Code = ap.Airport_Code) AS capacity,
+        (SELECT IFNULL(SUM(Area_ft2), 0) / 5 FROM airport_parking WHERE Airport_Code = ap.Airport_Code) AS capacity,
         CASE
-            WHEN (SELECT IFNULL(SUM(Area_ft2), 0) / 7.5 FROM airport_parking WHERE Airport_Code = ap.Airport_Code) = 0 THEN 'Undercapacity'
-            WHEN IFNULL(SUM(at.parkingArea * 1.1), 0) / (SELECT IFNULL(SUM(Area_ft2), 0) / 7.5 FROM airport_parking
+            WHEN (SELECT IFNULL(SUM(Area_ft2), 0) / 5 FROM airport_parking WHERE Airport_Code = ap.Airport_Code) = 0 THEN 'Undercapacity'
+            WHEN IFNULL(SUM(at.parkingArea * 1.1), 0) / (SELECT IFNULL(SUM(Area_ft2), 0) / 5 FROM airport_parking
                 WHERE Airport_Code = ap.Airport_Code) > 0.9 THEN 'Overcapacity'
-            WHEN IFNULL(SUM(at.parkingArea * 1.1), 0) / (SELECT IFNULL(SUM(Area_ft2), 0) / 7.5 FROM airport_parking
+            WHEN IFNULL(SUM(at.parkingArea * 1.1), 0) / (SELECT IFNULL(SUM(Area_ft2), 0) / 5 FROM airport_parking
                 WHERE Airport_Code = ap.Airport_Code) > 0.7 THEN 'Reaching Capacity'
             ELSE 'Undercapacity'
         END AS capacity_status,
         CASE
-            WHEN (SELECT IFNULL(SUM(Area_ft2), 0) / 7.5 FROM airport_parking
+            WHEN (SELECT IFNULL(SUM(Area_ft2), 0) / 5 FROM airport_parking
                 WHERE Airport_Code = ap.Airport_Code) = 0 THEN 0
-            ELSE ROUND(IFNULL(SUM(at.parkingArea * 1.1), 0) / (SELECT IFNULL(SUM(Area_ft2), 0) / 7.5 FROM airport_parking
+            ELSE ROUND(IFNULL(SUM(at.parkingArea * 1.1), 0) / (SELECT IFNULL(SUM(Area_ft2), 0) / 5 FROM airport_parking
                 WHERE Airport_Code = ap.Airport_Code), 2)
         END AS capacity_percentage
         FROM airport_parking ap

@@ -57,7 +57,7 @@ exports.getAirportCapacity = (req, res) => {
             }
 
             // Convert string to float
-            const airportArea = parseFloat(totalArea) / 7.5;
+            const airportArea = parseFloat(totalArea) / 5;
 
             // Calculate percentage
             let occupiedArea = 0;
@@ -132,7 +132,7 @@ exports.getAllAirportCapacities = (req, res) => {
             // Convert results into maps
             const totalMap = {};
             areaResults.forEach(row => {
-                totalMap[row.Airport_Code] = parseFloat(row.total_area) / 7.5;
+                totalMap[row.Airport_Code] = parseFloat(row.total_area) / 5;
             });
 
             const occupiedMap = {};
@@ -226,7 +226,7 @@ exports.getFboCapacity = (req, res) => {
             }
 
             // Convert string to float
-            const fboArea = parseFloat(totalArea) / 7.5;
+            const fboArea = parseFloat(totalArea) / 5;
 
             // Calculate percentage
             let occupiedArea = 0;
@@ -305,7 +305,7 @@ exports.getAllFboCapacities = (req, res) => {
             const totalMap = {};
             areaResults.forEach(row => {
                 // Scale areas
-                totalMap[row.FBO_Name] = parseFloat(row.total_area) / 7.5; 
+                totalMap[row.FBO_Name] = parseFloat(row.total_area) / 5; 
             });
 
             const occupiedMap = {};
