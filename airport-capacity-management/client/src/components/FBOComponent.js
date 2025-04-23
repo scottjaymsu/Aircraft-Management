@@ -5,7 +5,16 @@ import { getStatusClass } from "../utils/helpers";
 import { useNavigate } from "react-router-dom";
 import "../styles/SummaryPage.css";
 
+
+/**
+ * FBO table for a specific airport.
+ * It gets parking details and displays the status of them.
+ * Users can edit the fbos by changing priorities or clicking into the edit fbo page
+ * @param id - ID of the Airport
+ * @returns FBO component
+ */
 export default function FBOSection({id}) {
+  // States to store list of fbos, track editing, store original priorities before the edit
   const [FBOList, setFBOList] = useState([]);
   const [isEditingFBO, setIsEditingFBO] = useState(false);
   const [originalPriorities, setOriginalPriorities] = useState([]);
@@ -45,6 +54,7 @@ export default function FBOSection({id}) {
       .get(`http://localhost:5001/airports/getParkingCoordinates/${id}`)
       .then((response) => {
         const data = response.data;
+        // making the data that is fetched in the format that the UI will need
         const fboData = data.map((lot) =>({
           id: lot.id,
           name: lot.FBO_Name,
@@ -54,6 +64,8 @@ export default function FBOSection({id}) {
           priority: lot.Priority,
         }));
         setFBOList(fboData);
+
+        // if in the editing mode, set the original priorities to compare later
         if (isEditingFBO){
           setOriginalPriorities(fboData.map((fbo) => fbo.priority));
         }
@@ -63,6 +75,7 @@ export default function FBOSection({id}) {
       });
   }, [id, isEditingFBO]);
 
+  // fetching the fbo data when the component is loaded or if fetchfbodata changes
   useEffect(() =>{
     fetchFBOData();
   }, [fetchFBOData]);
@@ -73,18 +86,21 @@ export default function FBOSection({id}) {
    */
   const handleToggleEditFBO = () =>{
     if (isEditingFBO){
+      // validates that the priorities are unique
       const currentPriorities = FBOList.map((fbo) => fbo.priority);
       const uniquePriorities = new Set(currentPriorities);
       if (uniquePriorities.size !== currentPriorities.length){
         alert("There are duplicate priorities. Please ensure each FBO has a unique priority.");
         return;
       }
+      // check for changes in priorities
       const originalPayload = originalPriorities.join(",");
       const currentPayload = currentPriorities.join(",");
       if (originalPayload === currentPayload){
         setIsEditingFBO(false);
         return;
       }
+      // prepare payload for the patch request
       const payload = FBOList.map((fbo) =>({
         id: fbo.id,
         priority: fbo.priority,
@@ -92,12 +108,13 @@ export default function FBOSection({id}) {
 
       console.log("Updating with payload:", payload);
 
+      // sending the updated priorities to the backend
       axios
         .patch("http://localhost:5001/airportsPriority/updateParkingPriorities", payload)
         .then((response) =>{
           console.log("Priorities updated:", response.data.message);
           setIsEditingFBO(false);
-          fetchFBOData();
+          fetchFBOData(); // refresh
         })
         .catch((error) =>{
           if (error.response) {
@@ -107,7 +124,9 @@ export default function FBOSection({id}) {
           }
           alert("Error updating priorities >:(");
         });
-    } else{
+    }
+    // when starting the edit process, save the original priorities
+    else{
       setOriginalPriorities(FBOList.map((fbo) => fbo.priority));
       setIsEditingFBO(true);
     }
@@ -128,18 +147,24 @@ export default function FBOSection({id}) {
     });
   };
 
+  // navigate to the add fbo page
   const handleAddFBO = () =>{
     navigate(`/fboPage/${id}`);
   };
 
+  // handles the remove fbo button
   const handleRemoveFBO = (fboId) =>{
     if (!window.confirm("Are you sure you want to remove this FBO?")){
       return;
     }
+
+    // send delete request to the backend
     axios
       .delete(`http://localhost:5001/airports/fbo/deleteFBO/${fboId}`)
       .then((response) => {
         console.log("FBO deleted:", response.data.message);
+
+        // fetch the updated fbo list after deletion
         axios
           .get(`http://localhost:5001/airports/getParkingCoordinates/${id}`)
           .then((response) => {
@@ -153,6 +178,7 @@ export default function FBOSection({id}) {
               priority: lot.Priority,
             }));
             setFBOList(fboData);
+            // update original priorities if they are in editing mode
             if (isEditingFBO){
               setOriginalPriorities(fboData.map((fbo) => fbo.priority));
             }
@@ -167,6 +193,7 @@ export default function FBOSection({id}) {
       });
   };
 
+  // navigates to the edit fbo page
   const handleEditFBO = (fboId) =>{
     navigate(`/editFBO/${id}/${fboId}`);
   };
@@ -175,6 +202,7 @@ export default function FBOSection({id}) {
     <Card className="card-content flex-3">
       <CardContent>
         <div className="fbo-container">
+          {/* header that has the title and the edit button*/}
           <div
             className="fbo-header"
             style={{
@@ -189,6 +217,7 @@ export default function FBOSection({id}) {
               {isEditingFBO ? "Done" : "Edit"}
             </button>
           </div>
+          {/* table of the fbos */}
           <table className="info-table">
             <thead>
               <tr>
@@ -202,6 +231,7 @@ export default function FBOSection({id}) {
               {FBOList.map((fbo, index) => (
                 <tr key={index}>
                   <td>{fbo.name}</td>
+                  {/* shows capacity of the fbos with % */}
                   <td>
                     {fboCapacities[fbo.name] != null && !isNaN(fboCapacities[fbo.name])?
                       <span className={getStatusClass(fboCapacities[fbo.name])}>
@@ -209,6 +239,7 @@ export default function FBOSection({id}) {
                       </span>
                       : "\u00A0"}
                   </td>
+                  {/* priority column, it will change from text to editable */}
                   <td>
                     {isEditingFBO ? (
                       <select
@@ -225,6 +256,7 @@ export default function FBOSection({id}) {
                       fbo.priority
                     )}
                   </td>
+                  {/* action buttons for editing and removing the fbo */}
                   {isEditingFBO && (
                     <td>
                       <div style={{ display: "flex", flexDirection: "column", gap: "9px" }}>
@@ -249,6 +281,7 @@ export default function FBOSection({id}) {
               ))}
             </tbody>
           </table>
+          {/* add fbo button, it is visible only when editing */}
           {isEditingFBO && (
             <div style={{marginTop: "10px", textAlign: "center"}}>
               <button onClick={handleAddFBO} className="fbo-action-button">

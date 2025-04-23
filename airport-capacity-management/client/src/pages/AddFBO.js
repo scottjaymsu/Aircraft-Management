@@ -4,11 +4,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import FBOComponent from "../components/FBOComponent";
 
+// style for the map
 const containerStyle = {
   width: "100vw",
   height: "100vh",
 };
 
+// map options, used for removing un-needed controls
 const mapOptions = {
   mapTypeId: "satellite",
   zoomControl: true,
@@ -24,29 +26,48 @@ const mapOptions = {
   ],
 };
 
+// This is the buffer distance that a plane should have in between other planes
 const BUFFER_FEET = 25;
+
+// length and wingspan of the plane, it is in meters for further development if you want to add an option to change from meters to feet in the UI
 const defaultPlane = { length: 15.64, wingspan: 15.91 };
+
+// converts to feet
 const lengthFt = defaultPlane.length * 3.28084;
 const wingspanFt = defaultPlane.wingspan * 3.28084;
+
+// computes the plane footprint area
 const defaultPlaneFootprint = (lengthFt + BUFFER_FEET * 2) * (wingspanFt + BUFFER_FEET * 2);
 
+// add fbo page 
 function AddFBOPage() {
+  // read the airport code from the url params, and get the navigation helper
   const {airportCode} = useParams();
   const navigate = useNavigate();
 
+  // ref. to the google map instance
   const [map, setMap] = useState(null);
-  
+
+  // center of the map that the google map will go to
   const [airportCoordinates, setAirportCoordinates] = useState({lat: 40.84, lng: -74.07});
-  const [polygonPath, setPolygonPath] = useState([]);
-  const [polygonArea, setPolygonArea] = useState(0);
-  const [drawingMode, setDrawingMode] = useState(null);
+
+  // polygon drawing state
+  const [polygonPath, setPolygonPath] = useState([]); // array of lat,lng points
+  const [polygonArea, setPolygonArea] = useState(0); // computed area m^2
+  const [drawingMode, setDrawingMode] = useState(null); // polygon or null
+
+  // capacity state
   const [capacity, setCapacity] = useState(0);
   const [capacityInput, setCapacityInput] = useState("");
+
+  // fbo name and list of saved fbos
   const [fboName, setFboName] = useState("");
   const [fboList, setFboList] = useState([]);
-
+  
+  // plane footprint
   const [planeFootprint, setPlaneFootprint] = useState(defaultPlaneFootprint);
 
+  // saves the map instance when the map loads up
   const handleMapLoad = (mapInstance) => {
     setMap(mapInstance);
   };
@@ -93,35 +114,41 @@ function AddFBOPage() {
 
   // When the user completes drawing a polygon
   const onPolygonComplete = (polygon) => {
+    // extract lat and long points from the MVCArray
     const path = polygon
       .getPath()
       .getArray()
       .map((latlng) => ({ lat: latlng.lat(), lng: latlng.lng() }));
     setPolygonPath(path);
 
+    // computes the area in m^2 using the google maps geometry library
     if (window.google?.maps?.geometry) {
       const area = window.google.maps.geometry.spherical.computeArea(polygon.getPath());
       setPolygonArea(area);
       recalcCapacity(area);
     }
+    // removes the drawn shape
     polygon.setMap(null);
     setDrawingMode(null);
   };
 
   // Compute capacity based on polygon area and plane footprint
   const recalcCapacity = (areaInMeters) => {
-    const areaFt2 = areaInMeters * 10.7639;
+    const areaFt2 = areaInMeters * 10.7639; // again it converts to feet squared but can be changed to not in the future
     const computedCapacity = Math.floor(areaFt2 / planeFootprint);
     setCapacity(computedCapacity);
     setCapacityInput(String(computedCapacity));
   };
 
+  // on a right click if the user is on a vertex the vertex will be deleted
   const handlePolygonRightClick = (e) => {
     if (typeof e.vertex !== "undefined") {
+      // remove the clicked vertex
       const index = e.vertex;
       const newPath = polygonPath.filter((_, i) => i !== index);
       setPolygonPath(newPath);
 
+      // compute the area on the updated "path"
       if (window.google?.maps?.geometry) {
         const mvcArray = new window.google.maps.MVCArray(
           newPath.map((point) => new window.google.maps.LatLng(point.lat, point.lng))
@@ -133,6 +160,7 @@ function AddFBOPage() {
     }
   };
 
+  // removes the drawn polygon and resets the capacity
   const removePolygon = () => {
     setPolygonPath([]);
     setPolygonArea(0);
@@ -150,10 +178,13 @@ function AddFBOPage() {
     } else {
       const numValue = parseFloat(value);
       if (!isNaN(numValue)) {
+        // round up the capacity
         const newCapacity = Math.ceil(numValue);
         setCapacity(newCapacity);
         setCapacityInput(String(newCapacity));
-      } else {
+      } 
+      // reset if it has an invalid input
+      else {
         setCapacityInput("");
         setCapacity(0);
       }
@@ -172,6 +203,7 @@ function AddFBOPage() {
       alert("Please draw a parking area.");
       return;
     }
+    // payload
     const newFBOData = {
       Airport_Code: airportCode,
       FBO_Name: fboName,
@@ -184,8 +216,11 @@ function AddFBOPage() {
     try {
       const response = await axios.post("http://localhost:5001/airports/fbo/addFBO", newFBOData);
       const savedFBO = response.data;
+
+      // append the returned fbo to the list
       setFboList((prevList) => [...prevList, savedFBO]);
 
+      // reset page
       setFboName("");
       setPolygonPath([]);
       setPolygonArea(0);
@@ -197,16 +232,19 @@ function AddFBOPage() {
     }
   };
 
+  // handles the submit button
   const handleSubmit = () => {
     console.log("Submit");
   };
 
+  // back to the summary page when done adding
   const handleDone = () => {
     navigate(`/summary/${airportCode}`);
   };
 
   return (
     <div className="map-container" style={{ position: "relative" }}>
+      {/* Google map including drawing manager */}
       <GoogleMap
         onLoad={handleMapLoad}
         mapContainerStyle={containerStyle}
@@ -214,6 +252,7 @@ function AddFBOPage() {
         zoom={15}
         options={mapOptions}
       >
+        {/* drawing tools, only apears when there is no shape */}
         {polygonPath.length === 0 && (
           <DrawingManager
             drawingMode={drawingMode}
@@ -231,6 +270,7 @@ function AddFBOPage() {
             }}
           />
         )}
+        {/* display the polygon when it is drawn */}
         {polygonPath.length > 0 && (
           <Polygon
             path={polygonPath}
@@ -247,6 +287,7 @@ function AddFBOPage() {
         )}
       </GoogleMap>
 
+      {/* side tab with all of the controls to draw and manage the fbo */}
       <div
         className="info-card"
         style={{
@@ -265,11 +306,13 @@ function AddFBOPage() {
           overflow: "visible",
         }}
       >
+        {/* Back arrow */}
         <img onClick={handleDone} className="back-button" src="/back-arrow.png" alt="Back Button" style={{ cursor: "pointer", marginBottom: "16px" }}/>
         <div>
           <h2 className="title" style={{ textAlign: "center", marginBottom: "16px", marginTop: "20px", marginLeft: "-10px" }}>
             Add FBO
           </h2>
+          {/* fbo name input */}
           <div style={{ marginBottom: "16px" }}>
             <label style={{ width: "100%" }}>
               Name:{" "}
@@ -282,7 +325,8 @@ function AddFBOPage() {
               />
             </label>
           </div>
-
+          
+          {/* draw and remove the parking area */}
           {polygonPath.length === 0 ? (
             <button
               className="fbo-action-button"
@@ -301,17 +345,19 @@ function AddFBOPage() {
             </button>
           )}
 
+          {/* show the area the user drew */}
           {polygonArea > 0 && (
             <p style={{ fontSize: "1rem", textAlign: "center" }}>
               Parking Area: {(polygonArea * 10.7639).toFixed(2)} ft<sup>2</sup>
             </p>
           )}
 
+          {/* plane footprint adjustment */}
           {polygonArea > 0 && (
             <>
               <div style={{ marginBottom: "16px" }}>
                 <label style={{width: "90%"}}>
-                  Adjust Plane Footprint (ft²):
+                  Adjust Jet Footprint (ft²):
                   <input
                     type="range"
                     min="5000"
@@ -340,6 +386,7 @@ function AddFBOPage() {
               </div>
             </>
           )}
+          {/* save and done buttons */}
           <button
             onClick={handleSaveFBO}
             className="fbo-action-button"
@@ -360,6 +407,7 @@ function AddFBOPage() {
         </p>
       </div>
 
+      {/* submit the fbo */}
       {fboList.length > 0 && (
         <div style={{ marginTop: "20px", padding: "20px" }}>
           <FBOComponent fboList={fboList} />

@@ -5,16 +5,20 @@ function convertToPolygonWKT(coordinates){
   if (!coordinates || coordinates.length < 3){
     return null;
   }
+
+  // copy of coordinates, get first and last vertex of the polygon, and then append the first point to end
   const coords = [...coordinates];
   const firstPoint = coords[0];
   const lastPoint = coords[coords.length - 1];
   if (firstPoint.lat !== lastPoint.lat || firstPoint.lng !== lastPoint.lng){
     coords.push(firstPoint);
   }
+  // map each point to lat and long string, then join with commas
   const pointsStr = coords.map(point => `${point.lat} ${point.lng}`).join(', ');
   return `POLYGON((${pointsStr}))`;
 }
 
+// adds the fbo to the database
 exports.addFBO = async (req, res) =>{
   try{
     const{
@@ -26,11 +30,13 @@ exports.addFBO = async (req, res) =>{
       coordinates,
     } = req.body;
 
+    // query the database for the highest priority for the airport
     const [rows] = await db.promise().query(
       "SELECT MAX(Priority) as maxPriority FROM airport_parking WHERE Airport_Code = ?",
       [Airport_Code]
     );
 
+    // default to 1 for priority, then if there is a existing priority then go to the next priority after the max
     let nextPriority = 1;
     if (rows && rows[0] && rows[0].maxPriority){
       nextPriority = rows[0].maxPriority + 1;
@@ -41,6 +47,7 @@ exports.addFBO = async (req, res) =>{
       return res.status(400).json({ error: "Invalid polygon coordinates >:(" });
     }
 
+    // insert the new fbo
     const [result] = await db.promise().query(
       `INSERT INTO airport_parking 
         (Airport_Code, FBO_Name, Total_Space, Area_ft2, iata_code, coordinates, Priority)
@@ -72,9 +79,13 @@ exports.addFBO = async (req, res) =>{
   }
 };
 
+// deletes the fbo in the database
 exports.deleteFBO = async (req, res) =>{
   try{
+    // extract fbo
     const fboId = req.params.id;
+
+    // delete the query in the airport_parking table
     const [result] = await db.promise().query("DELETE FROM airport_parking WHERE id = ?",[fboId]);
 
     if (result.affectedRows === 0) {
@@ -88,10 +99,19 @@ exports.deleteFBO = async (req, res) =>{
   }
 };
 
+// updates the fbo with its new information
 exports.updateFBO = async (req, res) => {
   try {
-    const { id, FBO_Name, Total_Space, Area_ft2, coordinates, polygonWKT } = req.body;
+    const { 
+      id, 
+      FBO_Name, 
+      Total_Space, 
+      Area_ft2, 
+      coordinates, 
+      polygonWKT 
+    } = req.body;
 
+    // decides which polygon representation to use, either the WKT string the user inputed, or array of coords to WKT
     let polygon;
     if (polygonWKT){
       polygon = polygonWKT;
@@ -104,6 +124,7 @@ exports.updateFBO = async (req, res) => {
       return res.status(400).json({ error: "Wrong polygon coordinates >:(" });
     }
 
+    // update query
     const [result] = await db.promise().query(
       `UPDATE airport_parking
        SET FBO_Name = ?,
