@@ -16,6 +16,33 @@ const SimulatorAlerts = ({ fbo, id }) => {
     const [fboData, setFboData] = useState([]);
     const [expandedRows, setExpandedRows] = useState({}); 
     const [nearestAirport, setNearestAirport] = useState(null);
+    // fbo capacities for airport
+    const [fboCapacities, setFboCapacities] = useState({});
+
+
+    useEffect(() => {
+        const fetchFboCapacities = async () => {
+        try {
+            const response = await axios.get(`http://localhost:5001/airportData/getAllFboCapacities/${id}`);
+            const data = response.data;
+
+            // Convert array to map { fbo: area_remaining }
+            const fboMap = {};
+            data.forEach(entry => {
+            const area_remaining = parseFloat(entry.area_remaining);
+            // round to nearest integer
+            fboMap[entry.fbo] = area_remaining; 
+            });
+
+            setFboCapacities(fboMap);
+            console.log("FBO Capacities:", fboMap);
+        } catch (error) {
+            console.error("Failed to fetch FBO capacities:", error);
+        }
+        };
+
+        fetchFboCapacities();
+    }, [id]);
 
     useEffect(() => {
         setAlerts([]);
@@ -23,9 +50,14 @@ const SimulatorAlerts = ({ fbo, id }) => {
         axios
             .get(`http://localhost:5001/alerts/getAlert/${id}/${fbo}`)
             .then((response) => {
-                const filteredAlerts = response.data.filter(
-                    (alert) => alert.status !== "SCHEDULED" && alert.status !== "MAINTENANCE"
-                );
+                const filteredAlerts = response.data
+                    .filter(
+                        (alert) => alert.status !== "SCHEDULED" && alert.status !== "MAINTENANCE"
+                    )
+                    .map((alert) => ({
+                        ...alert,
+                        rec: null, // add 'rec' with null value
+                    }));
                 setAlerts(filteredAlerts);
             })
             .catch((err) => {
@@ -33,6 +65,7 @@ const SimulatorAlerts = ({ fbo, id }) => {
                 console.error("Error fetching alert information:", err);
             });
     }, [id, fbo]);
+
 
     useEffect(() => {
         axios
@@ -63,17 +96,21 @@ const SimulatorAlerts = ({ fbo, id }) => {
 
     const fboPriority = fboData.find((fboItem) => fboItem.FBO_Name === fbo)?.Priority;
 
-    let rec = null;
-    for (const fboItem of fboData) {
-        if (fboItem.parked_planes_count < fboItem.Total_Space && fboItem.Priority > fboPriority) {
+    alerts.forEach((alert) => {
+       let rec = null;
+        for (const fboItem of fboData) {
             rec = fboItem.FBO_Name;
-            break;
+            if (fboCapacities[fboItem.FBO_Name] >= alert.parkingArea && fboItem.Priority > fboPriority) {
+                rec = fboItem.FBO_Name;
+                alert.rec = rec; // Add recommendation to the alert object
+                break;
+            }
         }
-    }
 
-    if (rec === null) {
-        rec = nearestAirport;
-    }    
+        if (alert.rec === null) {
+            alert.rec = nearestAirport;
+        }   
+    });
 
     const toggleRow = (acid) => {
         setExpandedRows((prev) => ({
@@ -128,7 +165,7 @@ const SimulatorAlerts = ({ fbo, id }) => {
                                                     <td colSpan="3">
                                                         <div>
                                                             <strong>Recommendation:</strong>
-                                                            <p>{rec ? `Move to ${rec}` : "No recommendation available"}</p>
+                                                            <p>{alert.rec ? `Move to ${alert.rec}` : "No recommendation available"}</p>
                                                         </div>
                                                     </td>
                                                 </tr>
