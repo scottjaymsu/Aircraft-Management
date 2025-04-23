@@ -9,7 +9,7 @@
 }
 
 #sub-header {
-    padding: 0 30px 5px 30px; /* reduce vertical spacing */
+    padding: 0 30px 5px 30px; 
     margin-bottom: 0;
 
 }
@@ -21,6 +21,7 @@
     margin: 0;
   }
   
+/* Header segment of dashboard main wrapper */
 #head-dashboard {
     display: flex;
     flex-direction: row;
@@ -49,7 +50,7 @@
   }
   
 #right-header-content {
-    flex: 0 0 34%; /* Increase width */
+    flex: 0 0 34%;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     column-gap: 10px;
@@ -59,8 +60,6 @@
     height: fit-content;
 
 }
-
-/* HEADER */
 
 /* For both ends of header */
 .header-segment-large {
@@ -99,14 +98,14 @@
     width: 100%;
   }
   
-  .custom-select-label {
+.custom-select-label {
     display: block;
     margin-bottom: 4px;
     font-weight: bold;
     color: #444240;
-  }
+}
   
-  .custom-select-input {
+.custom-select-input {
     background-color: #3b536c;
     color: white;
     font-weight: 600;
@@ -115,16 +114,13 @@
     border: none;
     border-radius: 5px;
     width: 100%;
-    height: 40px; /* This helps it match react-select */
+    height: 40px; 
     box-sizing: border-box;
-  }
-  
-  
-
-
+}
   
 
-  #local-datetime {
+  
+#local-datetime {
     background-color: white;
     color: #444240;
     font-weight: 600;
@@ -132,12 +128,11 @@
     padding: 10px 12px;
     border: none;
     border-radius: 4px;
-
     border: solid 1px #444240;
     width: 100%;
     height: 39px;
     box-sizing: border-box;
-  }
+}
   
 
 .reset-button {
@@ -152,11 +147,10 @@
     width: 100%;
     margin-top: 50px;
 }
+
 .reset-button:hover {
     background-color: #5a6f8a;
 }
-
-/* HEADER BLOCK 1 */
 
 #header1 {
     display: flex;
@@ -165,6 +159,7 @@
     flex: 1;
     gap: 40px;
 }
+
 /* Wrapper for top of first
 header div */
 #title-wrapper {
@@ -174,6 +169,7 @@ header div */
     gap: 30px;
 
 }
+
 /* Return to Map button */
 #back-button-sim {
     border: none;
@@ -181,6 +177,7 @@ header div */
     cursor: pointer;
     padding: 10px;
 }
+
 /* Back Button Image */
 #back-button-sim img {
     width: 30px;
@@ -249,19 +246,17 @@ header div */
 
 select::after {
     position: absolute;
-    right: 10px; /* Position the arrow on the right */
-    top: 50%; /* Center the arrow vertically */
-    transform: translateY(-50%); /* Adjust to center the arrow */
-    font-size: 14px; /* Adjust size of the arrow */
-    color: #444240; /* Color of the arrow */
+    right: 10px; 
+    top: 50%; 
+    transform: translateY(-50%); 
+    font-size: 14px; 
+    color: #444240; 
     pointer-events: none; 
-    
-
 }
 
 select option {
-    padding: 10px; /* Padding for the options */
-    font-size: 16px; /* Font size for the options */
+    padding: 10px; 
+    font-size: 16px; 
 }
 
 #plane-info-wrapper {
@@ -270,18 +265,18 @@ select option {
     height: 100%;
     width: 90%;
     align-self: flex-end;
-    display: grid; /* Enable grid layout */
-    grid-template-columns: repeat(2, 1fr); /* 2 equal-width columns */
+    display: grid; 
+    grid-template-columns: repeat(2, 1fr); 
     grid-template-rows: repeat(2, 1fr);
 }
 
 .plane-info-section {
-    border-radius: 5px; /* Rounded corners */
-    padding: 20px; /* Inner padding */
+    border-radius: 5px; 
+    padding: 20px; 
     display: flex;
     flex-direction: column;
-    justify-content: center; /* Centers the status text */
-    align-items: center; /* Centers horizontally */
+    justify-content: center; 
+    align-items: center; 
     text-align: center;
     position: relative;
     overflow: hidden;
@@ -316,7 +311,7 @@ select option {
     padding-left: 10px;
     padding-right: 10px;
     padding-bottom: 20px;
-    height: 100%;  /* Ensure it fills available space, without scrolling */
+    height: 100%;  /* Fill available space, without scrolling */
 
     overflow: hidden;
     flex: 8;
@@ -325,19 +320,16 @@ select option {
 
 /* SimulatorAllPlanes width*/
 #main-wrapper > div:first-child {
-    flex: 0 0 62%; /* Take 65% of the width */
+    flex: 0 0 62%; 
 }
 
 /* Alerts width */
 #main-wrapper > div:last-child {
-    flex: 0 0 36%; /* Take 35% of the width */
+    flex: 0 0 36%; 
 }
-
-/* Table Window */
 
 /* Wrapper for whole table */
 #planes-table {
-    /* flex: 7; */
     border-collapse: collapse;
     display: flex;
     flex-direction: column;
@@ -419,10 +411,8 @@ select option {
     background-color: #c76666;
     border-radius: 2px;
 }
-
-
 /* 
-    REC ENGINE SECTION
+    END REC ENGINE SECTION
  */
 
 
@@ -488,7 +478,7 @@ select option {
 
 #sort-by {
     display: flex;
-    gap: 10px; /* Space between buttons */
+    gap: 10px; 
     align-items: center;
     margin-left: 10%;
 }
@@ -496,11 +486,11 @@ select option {
 #sort-by button {
     width: 125px;
     margin: 0;
-    white-space: nowrap; /* Prevent text wrapping */ 
+    white-space: nowrap; 
 }
 
 #sort-by-text {
-    white-space: nowrap; /* Prevent text wrapping */
+    white-space: nowrap; 
 }
 
 .switch-alerts {
@@ -532,7 +522,7 @@ select option {
     flex-grow: 1;
     overflow-y: auto;
     width: 100%;
-    height: 100%; /* Takes up all the space of the container*/
+    height: 100%;
     position: relative;
 }
 
@@ -542,7 +532,7 @@ select option {
     border-collapse: collapse;
     background-color: transparent;
     table-layout: fixed;
-    height: 100%; /* table fills container */
+    height: 100%; 
 }
 
 /* Sticky header */
@@ -565,9 +555,9 @@ select option {
 #rec-table tbody {
     display: block;
     overflow-y: auto;
-    flex-grow: 1; /* fill available height */
+    flex-grow: 1; 
     width: 100%;
-    height: 100%; /* grow to fill*/
+    height: 100%; 
 }
 
 /* Rows */
@@ -662,6 +652,7 @@ select option {
     
 }
 
+/* Button for transitioning to simulator */
 .run-simulation-button {
     background-color: #3b536c;
     border: none;

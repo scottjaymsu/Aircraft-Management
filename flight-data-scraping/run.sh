@@ -66,6 +66,7 @@ if [ "$PUSH" = true ]; then
         docker-compose --profile production pull && \
         echo "RUN PRODUCTION DOCKER IMAGES" && \
         docker-compose --profile production down && \
+        sleep 2 && \
         docker-compose --profile production up -d && \
         exit'
 fi

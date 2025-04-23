@@ -1,8 +1,8 @@
 /* Styles for the arriving/departing flight table components */
 
 .table-container {
-    overflow-x: auto; /* horizonal scrolling */
-    max-width: 100%; /* stays within container width */
+    overflow-x: auto; 
+    max-width: 100%; 
 }
 
 table {
@@ -16,13 +16,12 @@ table {
 
 
 .center-content {
-    text-align: center; /* Aligns text */
+    text-align: center; 
 }
 
 
 thead {
-    border-radius: 4px 4px 0 0; /* Rounded corners for the header */
-    overflow: hidden;
+    border-radius: 4px 4px 0 0; 
 }
 
 caption {
@@ -34,12 +33,12 @@ caption {
 th, td {
     padding: 8px;
     text-align: left;
-    border-right: 1px solid #ddd; /* Divider line between columns */
+    border-right: 1px solid #ddd; 
     border: transparent;
 }
 
 th:last-child, td:last-child {
-    border-right: none; /* Remove right border from the last column */
+    border-right: none; 
 }
 
 th {
@@ -49,7 +48,7 @@ th {
 
 /* Hover effect for table rows */
 tbody tr:hover {
-    background-color: #f5f5f5; /* Light gray background on hover */
+    background-color: #f5f5f5; 
 }
 
 .flight-table-container {

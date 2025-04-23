@@ -129,6 +129,20 @@ When a user clicks the "FBO Data Upload" tab, they can upload relevant informati
 ![alt text](README_images/flight_sim.png)
 The Flight Simulator Page gives the user a more in depth look at a specific airport. To the left, there is a "All FBOs" table, which displays the planes in all of the FBOs at the airport. The colors next to each plane represent their current status (arriving, departing, parked, or maintenance). In the top right corner, a user can filter this table by FBO, plane size, plane type, or search for specific tail numbers.
 
+## Operational Recommendations Tab (on Flight Simulator page)
+![alt text](README_images/operational_recs.png)
+
+On the right of the simulator page, there is the Operational Recommendations. When a user selects an FBO from the top dropdown box, this provides recommendations on where to move planes that are in the FBO. The recommendations are made by searching for room in lower priority FBOs in order to conserve space in higher priority FBOs for incoming planes. If no remaining FBOs have space to accommodate the selected plane, the recommendation engine will show the closest airport that can accommodate the plane. 
+
+A user can sort the airplanes by time grounded and plane size, as well as view the recommendation for the plane by clicking on the plane's row. 
+
+
+## Simulation Tab (on Flight Simulator page)
+![alt text](README_images/simulation.png)
+
+The Simulation Tab helps the user plan where to park future incoming planes. To do this, the user can select as many tail numbers as they wish from the menu, and then set the desired arrival time. The simulation engine will then look at a snapshot of the projected airport capacity at that time, and if there is space projected at that time, place the airplane at the highest priority FBO. If there is no space at that FBO, it will cycle through all of the FBOs at the airport until a space is found. If all of the FBOs are full, then the simulation will notify the user if that. 
+
+
 ## Recommendation Engine and Simulator Constraints
 Both the Recommendation Engine and the Simulator assume that planes are parked in a non-stacked format with padding between them. It does not account for other ways of organizing planes within an FBO
 ![alt text](README_images/parking_visual.png)

@@ -114,7 +114,7 @@ caption.subtitle {
 }
 
 .info-table thead {
-  border-radius: 4px 4px 0 0; /* Rounded corners for the header */
+  border-radius: 4px 4px 0 0; 
   overflow: hidden;
 }
 

@@ -3,11 +3,13 @@ import { GoogleMap, Polygon, DrawingManager } from "@react-google-maps/api";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
+// style for the map
 const containerStyle = {
   width: "100vw",
   height: "100vh",
 };
 
+// map options, used for removing un-needed controls
 const mapOptions = {
   mapTypeId: "satellite",
   zoomControl: true,
@@ -29,6 +31,8 @@ const parseWKTPolygon = (wkt) =>{
     console.error("Invalid WKT format noooooooooo >:(", wkt);
     return [];
   }
+
+  // creates a default spacing, removing the polygon( and the ) at the end
   wkt = wkt.replace("POLYGON (", "POLYGON(");
   const coordinateStr = wkt.slice(8, -1);
   const points = coordinateStr.split(",");
@@ -41,9 +45,12 @@ const parseWKTPolygon = (wkt) =>{
 function EditFBO() {
   const {airportCode, fboId} = useParams();
   const navigate = useNavigate();
+
+  // refs to hold the google map and polygon instances for future api calls
   const polygonRef = useRef(null);
   const mapRef = useRef(null);
 
+  // original state
   const [polygonPath, setPolygonPath] = useState([]);
   const [polygonArea, setPolygonArea] = useState(0);
   const [capacity, setCapacity] = useState(0);
@@ -84,7 +91,7 @@ function EditFBO() {
     }
   }, [airportCode]);
 
-  //Calculating and seting the default plane footprint
+  //Calculating and seting the default plane footprint, originally used meters but transfered to ft
   useEffect(() =>{
     const defaultPlane = {length: 15.64, wingspan: 15.91};
     const lengthFt = defaultPlane.length * 3.28084;
@@ -99,6 +106,8 @@ function EditFBO() {
       .get(`http://localhost:5001/airports/getParkingCoordinates/${airportCode}`)
       .then((response) => {
         const data = response.data;
+
+        // finding the matching fbo by the ID
         const fbo = data.find((item) => String(item.id) === String(fboId));
         if (!fbo){
           alert("FBO not found");
@@ -112,6 +121,7 @@ function EditFBO() {
           setMapCenter(fbo.airportCoordinates);
         }
 
+        // determine the coordinates of the wkt string vs the nested json array
         let coords = [];
         if (typeof fbo.coordinates === "string"){
           coords = parseWKTPolygon(fbo.coordinates);
@@ -124,10 +134,9 @@ function EditFBO() {
         }
         setPolygonPath(coords);
 
+        // computing the area if the coordinates exist
         if (coords.length > 0 && window.google && window.google.maps && window.google.maps.geometry){
-          const mvcArray = new window.google.maps.MVCArray(
-            coords.map((point) => new window.google.maps.LatLng(point.lat, point.lng))
-          );
+          const mvcArray = new window.google.maps.MVCArray(coords.map((point) => new window.google.maps.LatLng(point.lat, point.lng)));
           const area = window.google.maps.geometry.spherical.computeArea(mvcArray);
           setPolygonArea(area);
         }
@@ -180,6 +189,7 @@ function EditFBO() {
       lng: latlng.lng(),
     }));
     setPolygonPath(path);
+    // getting the area and capacity if the map api and its geometry library have finished loading 
     if (window.google?.maps?.geometry){
       const area = window.google.maps.geometry.spherical.computeArea(polygon.getPath());
       setPolygonArea(area);
@@ -190,6 +200,7 @@ function EditFBO() {
     setDrawingMode(null);
   };
 
+  // removes the polygon and goes into draw mode
   const handleRemovePolygon = () =>{
     setPolygonPath([]);
     setPolygonArea(0);
@@ -197,10 +208,12 @@ function EditFBO() {
     setDrawingMode(window.google.maps.drawing.OverlayType.POLYGON);
   };
 
+  // switching into draw mode
   const handleDrawPolygon = () =>{
     setDrawingMode(window.google.maps.drawing.OverlayType.POLYGON);
   };
 
+  // capacity override to change it in the UI
   const handleCapacityChange = (e) =>{
     const value = e.target.value;
     if (value === ""){
@@ -214,6 +227,7 @@ function EditFBO() {
     }
   };
 
+  // footprint slider 
   const handlePlaneFootprintChange = (e) =>{
     const newFootprint = Number(e.target.value);
     setPlaneFootprint(newFootprint);
@@ -236,6 +250,7 @@ function EditFBO() {
     return `POLYGON((${pointsStr}))`;
   };
 
+  // saves the changes of the fbo to the backend using a payload
   const handleSaveChanges = () =>{
     if (!fboName){
       alert("Please enter an FBO name");
@@ -278,6 +293,7 @@ function EditFBO() {
 
   return (
     <div className="map-container" style={{position: "relative"}}>
+      {/* google map including drawing manager */}
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={mapCenter}
@@ -285,6 +301,7 @@ function EditFBO() {
         options={mapOptions}
         onLoad={onMapLoad}
       >
+        {/* drawing tools, only apears when there is no shape */}
         {polygonPath.length === 0 && drawingMode && (
           <DrawingManager
             drawingMode={drawingMode}
@@ -302,6 +319,7 @@ function EditFBO() {
             }}
           />
         )}
+        {/* show the editable polygon when the path is set */}
         {polygonPath.length > 0 && (
           <Polygon
             path={polygonPath}
@@ -317,6 +335,8 @@ function EditFBO() {
           />
         )}
       </GoogleMap>
+
+      {/* side tab with different actions */}
       <div
         className="info-card"
         style={{
@@ -334,11 +354,14 @@ function EditFBO() {
           justifyContent: "space-between",
         }}
       >
+        {/* back arrow */}
         <img onClick={handleCancel} className="back-button" src="/back-arrow.png" alt="Back Button" style={{ cursor: "pointer", marginBottom: "16px" }}/>
         <div>
           <h2 className="title" style={{textAlign: "center", marginBottom: "16px", marginTop: "20px", marginLeft: "-10px"}}>
             Edit FBO
           </h2>
+
+          {/* fbo name and input */}
           <div style={{marginBottom: "16px"}}>
             <label style={{width: "100%"}}>
               Name:{" "}
@@ -351,6 +374,8 @@ function EditFBO() {
               />
             </label>
           </div>
+
+          {/* drawing and removing the polygon */}
           {polygonPath.length === 0 ? (
             <>
               <p>Parking area removed.</p>
@@ -371,11 +396,13 @@ function EditFBO() {
               Remove Parking Area
             </button>
           )}
+          {/* displays the area */}
           {polygonArea > 0 && (
             <p style={{fontSize: "1rem", textAlign: "center"}}>
               Parking Area: {(polygonArea * 10.7639).toFixed(2)} ft<sup>2</sup>
             </p>
           )}
+          {/* footprint slider and the capacity */}
           {polygonArea > 0 && (
             <>
               <div style={{marginBottom: "16px"}}>
@@ -408,6 +435,7 @@ function EditFBO() {
               </div>
             </>
           )}
+          {/* save and cancle buttons */}
           <button
             onClick={handleSaveChanges}
             className="fbo-action-button"
@@ -423,6 +451,7 @@ function EditFBO() {
             Cancel
           </button>
         </div>
+        {/* telling the user what to do with the adjustment of the drawing */}
         <p style={{fontSize: "0.9em", textAlign: "center", marginTop: "16px"}}>
           Drag polygon vertices to adjust the parking area.
         </p>

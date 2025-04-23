@@ -48,7 +48,6 @@ tbody {
     width: 100%;
 }
 
-/* TODO Apparently border-bottom doesn't work if border-collapse is set to separate? No clue why, but apparently giving the box-shadow attribute fixes it*/
 tbody tr {
     box-shadow: 0px 0px 0px 1px #010F31;
     display: table;
@@ -66,5 +65,4 @@ td, th {
   }
   
   td {
-    /* font-weight: lighter; */
   }
