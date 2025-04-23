@@ -32,7 +32,7 @@
     expand 
  */
 #notification-center.visible {
-  width: 300px;
+  width: fit-content;
   max-height: 900px;
   height: auto;
   display: flex;
