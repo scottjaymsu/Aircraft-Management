@@ -127,7 +127,6 @@ When a user clicks the "FBO Data Upload" tab, they can upload relevant informati
 
 ## Flight Simulator Page
 ![alt text](README_images/flight_sim.png)
-
 The Flight Simulator Page gives the user a more in depth look at a specific airport. To the left, there is a "All FBOs" table, which displays the planes in all of the FBOs at the airport. The colors next to each plane represent their current status (arriving, departing, parked, or maintenance). In the top right corner, a user can filter this table by FBO, plane size, plane type, or search for specific tail numbers.
 
 ## Operational Recommendations Tab (on Flight Simulator page)
@@ -140,6 +139,7 @@ A user can sort the airplanes by time grounded and plane size, as well as view t
 
 ## Simulation Tab (on Flight Simulator page)
 ![alt text](README_images/simulation.png)
+
 The Simulation Tab helps the user plan where to park future incoming planes. To do this, the user can select as many tail numbers as they wish from the menu, and then set the desired arrival time. The simulation engine will then look at a snapshot of the projected airport capacity at that time, and if there is space projected at that time, place the airplane at the highest priority FBO. If there is no space at that FBO, it will cycle through all of the FBOs at the airport until a space is found. If all of the FBOs are full, then the simulation will notify the user if that. 
 
 
