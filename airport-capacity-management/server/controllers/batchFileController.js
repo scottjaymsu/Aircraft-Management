@@ -63,8 +63,10 @@ exports.insertAirport = (req, res) => {
     res.status(500).json({ error: "error"});
   })
 }
-
-/* Grab all FBOs at an existing airport */
+/**
+ * Grab all FBOs at an existing airport 
+ * For checking if the FBOs already exist in the database before inserting them 
+ */
 exports.getExistingFBOs = (req, res) => {
   const identArray = req.body.map(airport => airport.Airport_Code);
   const query = "SELECT Airport_Code AS ident, FBO_Name FROM airport_parking WHERE Airport_Code IN (?)"
@@ -83,6 +85,11 @@ exports.getExistingFBOs = (req, res) => {
   }});
 }
 
+/**
+ * Insert an FBO into the database
+ * Defaults are set for Parking_Space_Taken and Area_ft2
+ * If the FBO already exists, it will update the existing entry
+ */
 exports.insertFBO = (req, res) => {
   const batchData = req.body;
   const insertedFBOs = [];
@@ -115,8 +122,6 @@ exports.insertFBO = (req, res) => {
         ? [Airport_Code, FBO_Name, Total_Space, iata_code, priority, coordinatesValue, Parking_Space_Taken, Area_ft2]
         : [Airport_Code, FBO_Name, Total_Space, iata_code, priority, Parking_Space_Taken, Area_ft2];
       
-
-
       db.query(query, values, (err, results) => {
         if (err) {
           console.error("Error inserting FBO:", err);

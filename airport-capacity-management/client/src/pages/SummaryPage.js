@@ -118,10 +118,7 @@ export default function SummaryPage() {
   const airportCode = useParams().location;
   const [map, setMap] = React.useState(null);
   const [parkingLots, setParkingLots] = useState([]);
-  const [airportCoordinates, setAirportCoordinates] = useState({
-    lat: 40.84,
-    lng: -74.07,
-  });
+  const [airportCoordinates, setAirportCoordinates] = useState({});
 
   const [airportMetadata, setAirportMetadata] = useState([]);
   // airport capacity as percentage
@@ -205,21 +202,7 @@ export default function SummaryPage() {
             return { lat, lng };
           });
         };
-        // TODO: remove after betas keeping in case soemthing breaks
-        // const parkingLots = data
-        //   .filter(lot => lot.coordinates && lot.coordinates.length > 0)
-        //   .map((lot) => {
-        //     const coordinates = lot.coordinates[0].map((coord) => ({
-        //       lat: coord.x,
-        //       lng: coord.y,
-        //     }));
-        //   return {
-        //     name: lot.FBO_Name,
-        //     coordinates: coordinates,
-        //     color: getStatusColor(lot.spots_taken, lot.Total_Space),
-        //     labelPosition: coordinates[0],
-        //   };
-        // });
+
         const parkingLots = data
         .filter((lot) => lot.coordinates)
         .map((lot) => {
@@ -289,19 +272,6 @@ export default function SummaryPage() {
   const handleBack = () => {
     navigate("/");
   }
-
-
-  // const handlePriorityChange = (index, newPriority) => {
-  //   setFBOList((prevFBOs) => {
-  //     // copy of the FBO list
-  //     const updatedFBOs = [...prevFBOs];
-  //     updatedFBOs[index] = {
-  //       ...updatedFBOs[index],
-  //       priority: newPriority,
-  //     };
-  //     return updatedFBOs;
-  //   });
-  // };
 
   return (
     <div className="map-container">

@@ -22,6 +22,8 @@ def get_last_updated(type):
     cursor = conn.cursor()
     cursor.execute("SELECT date FROM last_updated WHERE type = %s;", (type,))
     row = cursor.fetchone()
+    cursor.close()
+    conn.close()
     return row[0]
 
 #Use panda datafframe to insert directly into the table (it will make a new table)
@@ -36,4 +38,5 @@ def update_date(date):
     print(date)
     cursor.execute("UPDATE last_updated SET date=%s WHERE type='AircraftData';", (date,))
     conn.commit()
+    cursor.close()
     conn.close()

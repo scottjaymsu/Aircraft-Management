@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
-from src.database import get_last_updated, insert_aircraft_data, update_date
+from database import get_last_updated, insert_aircraft_data, update_date
 from io import BytesIO
 import pandas as pd
 

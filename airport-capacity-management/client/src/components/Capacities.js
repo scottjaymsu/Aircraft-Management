@@ -45,20 +45,20 @@ const Capacities = ({ id }) => {
         fetchFboData();
     }, [id]);
 
-
+    // 
     const toggleDropdown = () => {
         setShowDropdown((prev) => !prev);
     };
 
     
-    // get selected fbo area
+    // Get selected fbo area
     useEffect(() => {
         if (selectedFBO) {
             setArea(fboAreas[selectedFBO]);
         }
     }, [selectedFBO, fboAreas]);
 
-    // get aircraft averages
+    // Get aircraft averages
     useEffect(() => {
         const fetchAircraftAverages = async () => {
             try {

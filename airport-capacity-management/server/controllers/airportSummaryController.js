@@ -26,7 +26,7 @@ exports.getParkingCoordinates = (req, res) => {
     });
 }
 
-//Gets all the metadata related to a single airport in the database
+// Gets all the metadata related to a single airport in the database
 exports.getAirportData = (req, res) => {
     const {airport_code} = req.params;
 
