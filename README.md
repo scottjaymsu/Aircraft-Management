@@ -58,7 +58,7 @@ cd airport-capacity-management/server
 node index.js
 ```
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The AWS RDS database is not publically accesssible, it must be accessed via a ssh tunnel through an AWS EC2 bastion server, so set that up in a third terminal session:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The AWS RDS database is not publicly accessible, it must be accessed via a ssh tunnel through an AWS EC2 bastion server, so set that up in a third terminal session:
 
 ```
 ssh -i {local path to ec2 .pem key file} -L 50173:{RDS database endpoint}:3306 {EC2 endpoint}
