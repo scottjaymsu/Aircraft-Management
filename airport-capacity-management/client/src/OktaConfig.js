@@ -7,6 +7,9 @@ const oktaAuth = new OktaAuth({
   redirectUri: window.location.origin + "/login/callback", 
   scopes: ["openid", "profile", "email"],
   pkce: true,
+  tokenManager: {
+    storage: "localStorage"
+  }
 });
 
 export default oktaAuth;
