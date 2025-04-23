@@ -14,6 +14,8 @@ class Fbo_assigner():
         # Get the databse conneciton info from the .env file that was mounted to this docker image
         load_dotenv()
 
+        self.connection = None
+
         # Establish MySQL connection
         try:
             self.connection = mysql.connector.connect(
@@ -48,8 +50,8 @@ class Fbo_assigner():
             # If the flight plan has no FBO assigned, then assign it to one
             if fbo_assignment is None:
                 # Get only the FBOs with open space and order it by the stored priority
-                sql = "SELECT id FROM airport_parking WHERE Airport_Code = %s AND (SELECT COUNT(*) FROM netjets_fleet JOIN flight_plans ON netjets_fleet.flightRef = flight_plans.flightRef WHERE flight_plans.fbo_id = airport_parking.id) < Total_Space ORDER BY Priority;"
-                params = [flight_plan['arrival_airport']]
+                sql = "SELECT id FROM airport_parking WHERE Airport_Code = %s AND (SELECT COUNT(*) FROM netjets_fleet JOIN flight_plans ON netjets_fleet.flightRef = flight_plans.flightRef WHERE flight_plans.fbo_id = airport_parking.id) < Total_Space ORDER BY Priority LIMIT 1;"
+                params = [flight_plan['arr_arpt']]
 
                 try:
                     cursor = self.connection.cursor()
@@ -66,7 +68,7 @@ class Fbo_assigner():
                     flight_plan['fbo_id'] = fbo_assignment[0]
 
         except Exception as e:
-            print("Error inserting into flight_plans:", e)
+            print("Error grabbing parking data from database:", e)
 
-        # Send the modified flight plan back to the database manager
+        # Send the modified flight plan back to the flight plan tracker
         return flight_plan

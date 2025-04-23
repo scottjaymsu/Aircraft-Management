@@ -17,8 +17,8 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://flight-plan-tracking:5000/flight-plan"]
       interval: 1s
-      timeout: 20s
-      retries: 10
+      timeout: 30s
+      retries: 30
       start_period: 1s
 
   flight-plan-tracking-production:
@@ -26,6 +26,7 @@ services:
     image: ${DOCKER_USERNAME}/${DOCKER_REPO}:flight-plan-tracking
     profiles:
       - production
+    restart: unless-stopped
     platform: linux/amd64
     depends_on:
       message-consumer-production:
@@ -78,8 +79,8 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/messages/consume"]
       interval: 1s
-      timeout: 10s
-      retries: 10
+      timeout: 30s
+      retries: 30
       start_period: 1s
 
   message-consumer-production:
@@ -88,6 +89,7 @@ services:
     profiles:
       - production
     platform: linux/amd64
+    restart: unless-stopped
 
 
 
@@ -139,12 +141,27 @@ services:
     image: ${DOCKER_USERNAME}/${DOCKER_REPO}:database-manager
     profiles:
       - production
+    restart: unless-stopped
     environment:
       DUMMY : "True"
     platform: linux/amd64
     depends_on:
       flight-plan-tracking-production:
         condition: service_healthy
+
+
+  aircraft_metadata_scraper-production:
+    image: ${DOCKER_USERNAME}/${DOCKER_REPO}:aircraft-metadata-scraper
+    profiles:
+      - production
+    container_name: aircraft-metadata-scraper
+    build:
+      context: ./aircraft_metadata_scraper
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    platform: linux/amd64
 
 
   

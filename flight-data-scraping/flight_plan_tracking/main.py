@@ -9,6 +9,7 @@ import time
 from flightDataProcessor import FlightDataProcessor
 import flight_plans_api
 from fbo_assigner import Fbo_assigner
+from airport_code_normalizer import Airport_code_normalizer
 
 if __name__ == "__main__":
 
@@ -30,6 +31,9 @@ if __name__ == "__main__":
 
     # Object that assigns flight plans to mock FBOs as a placeholder until the real FBO assignment data is incorporated
     fboAssigner = Fbo_assigner()
+
+    # Object that tries to turn all 3 letter airport codes (IATA) into 4 letter airport codes (ICAO), for continuity
+    airport_code_normalizer = Airport_code_normalizer()
 
     # Start Flask app in a separate thread so it can run concurrently with the while loop below
     flask_thread = threading.Thread(target=flight_plans_api.run_app, daemon=True)
@@ -53,6 +57,10 @@ if __name__ == "__main__":
             flight_plan = flightDataProcessor.process_message(message_json.get('fltdMessage'))
 
             if flight_plan is not None:
+                # Sometimes, the airport code comes in as a 3 letter code (IATA), and sometimes it comes in as a 4 letter code (ICAO)
+                # So, attempt to convert all 3 letter codes to thier 4 letter equivalent, if it exists
+                flight_plan = airport_code_normalizer.IATA_codes_to_ICAO_codes(flight_plan)
+
                 # Assign the flight plan a mock FBO (this function is a placeholder until the real FBO assignment data is incorporated)
                 flight_plan = fboAssigner.assign_fbo(flight_plan)
 
