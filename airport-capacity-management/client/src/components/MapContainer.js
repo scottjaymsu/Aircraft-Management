@@ -53,7 +53,11 @@ const MapContainer = ({ markers, smallMarkers, onMarkerClick, setMapInstance }) 
                 <rect width="${filledWidth}" height="${height}" fill="${getColor(markerData.capacity_percentage*100)}"/>
               </svg>`;
     };
-
+    
+    /**
+     * Health bar that displays above airport makers that currently
+     * have airport dat input for them
+     */
     const healthBar = new window.google.maps.Marker({
       position: markerData.position,
       map,

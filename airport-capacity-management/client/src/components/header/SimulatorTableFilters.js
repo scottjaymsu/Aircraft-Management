@@ -17,6 +17,9 @@ const SimulatorTableFilters = ({
   label = "",
 }) => {
 
+  /**
+   * Custom styles for the react-select component
+   *  */
   const customStyles = {
     control: (provided) => ({
       ...provided,

@@ -36,6 +36,10 @@ export default function FBOSection({id}) {
     fetchFboCapacities();
   }, [id]);
 
+  /**
+   * Fetches FBO data from the server and updates the state
+   * The data includes FBO name, parking taken, total parking, status, and priority
+   */
   const fetchFBOData = useCallback(() =>{
     axios
       .get(`http://localhost:5001/airports/getParkingCoordinates/${id}`)
@@ -63,6 +67,10 @@ export default function FBOSection({id}) {
     fetchFBOData();
   }, [fetchFBOData]);
 
+  /**
+   * Handles the toggle between edit and done mode for FBO priorities
+   * In edit mode, the user can change the priority of each FBO
+   */
   const handleToggleEditFBO = () =>{
     if (isEditingFBO){
       const currentPriorities = FBOList.map((fbo) => fbo.priority);
@@ -105,6 +113,10 @@ export default function FBOSection({id}) {
     }
   };
 
+  /**
+   * Handles the change in priority for a specific FBO
+   * Updates the state with the new priority value
+   */
   const handlePriorityChange = (index, newPriority) =>{
     setFBOList((prevFBOs) =>{
       const updatedFBOs = [...prevFBOs];

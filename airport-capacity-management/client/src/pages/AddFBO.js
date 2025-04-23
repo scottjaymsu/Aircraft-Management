@@ -51,12 +51,14 @@ function AddFBOPage() {
     setMap(mapInstance);
   };
 
+  // Set the map center to the airport coordinates when the map is loaded
   useEffect(() => {
     if (map) {
       map.panTo(airportCoordinates);
     }
   }, [map, airportCoordinates]);
 
+  // Fetch airport data when the component mounts or when the airportCode changes
   useEffect(() => {
     async function fetchAirportData() {
       try {
@@ -158,6 +160,9 @@ function AddFBOPage() {
     }
   };
 
+  /**
+   * Handles saving the FBO data to the server
+   */
   const handleSaveFBO = async () => {
     if (!fboName) {
       alert("Please enter an FBO name.");
