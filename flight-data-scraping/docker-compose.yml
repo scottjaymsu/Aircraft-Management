@@ -79,9 +79,9 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/messages/consume"]
       interval: 1s
-      timeout: 30s
-      retries: 30
-      start_period: 1s
+      timeout: 60s
+      retries: 60
+      start_period: 5s
 
   message-consumer-production:
     <<: *message-consumer-local

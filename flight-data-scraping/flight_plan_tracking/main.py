@@ -11,6 +11,7 @@ import flight_plans_api
 from fbo_assigner import Fbo_assigner
 from airport_code_normalizer import Airport_code_normalizer
 
+
 if __name__ == "__main__":
 
     # Get the api url used to grab flight messages for each NetJets flight from the .env file that was mounted to this docker image
@@ -58,7 +59,7 @@ if __name__ == "__main__":
 
             if flight_plan is not None:
                 # Sometimes, the airport code comes in as a 3 letter code (IATA), and sometimes it comes in as a 4 letter code (ICAO)
-                # So, attempt to convert all 3 letter codes to thier 4 letter equivalent, if it exists
+                # So, attempt to convert all 3 letter codes to their 4 letter equivalent, if it exists
                 flight_plan = airport_code_normalizer.IATA_codes_to_ICAO_codes(flight_plan)
 
                 # Assign the flight plan a mock FBO (this function is a placeholder until the real FBO assignment data is incorporated)

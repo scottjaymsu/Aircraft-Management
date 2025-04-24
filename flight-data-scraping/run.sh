@@ -68,5 +68,11 @@ if [ "$PUSH" = true ]; then
         docker-compose --profile production down && \
         sleep 2 && \
         docker-compose --profile production up -d && \
+        docker ps -a && \
+        echo "CHECKING AGAIN IN 2 MIN TO SEE IF CONTAINERS ARE UP..." && \
+        sleep 120 && \
+        docker-compose --profile production up -d && \
+        sleep 5 && \
+        docker ps -a && \
         exit'
 fi
