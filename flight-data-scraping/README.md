@@ -35,3 +35,4 @@ The entry point in `main.py`. This code runs once a day at midnight UTC. It simp
 * At times, the `message-consumer` is not powerful enough to consume all FAA SWIM messages in time and some will expire. One could orchestrate that another instance of `message-consumer` be spun up on demand. It would be recommended that a message service like Kafka be used to ensure two docker instances can be reached by a single API.
 * The `testing` directly contains a micro-service that initalizes a local database for local testing purposes. There, once can expand upon it and impelment automatic testing my sending simulated messages.
 * Make sure the database uses `mysql_native_password` instead of `caching_sha2_password` as the `mysql-connector-python` package does not support it.
+* The `.gitignore` has temporarly commented out `.env` and `.conf` ingores, in order to share the example `.env` and `.conf` files. Make sure to undo this.
